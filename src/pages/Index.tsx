@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Clock, Users } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Clock, Users, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { FormEvent } from "react";
 import { useCollections } from "../hooks/data/useCollections";
@@ -151,6 +151,14 @@ const Index = () => {
               ))
             )}
           </div>
+          <div className="mt-12 text-center">
+            <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
+              <Link to="/collections">
+                Xem tất cả bộ sưu tập
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </section>
 
         {/* New Places Section */}
@@ -215,6 +223,14 @@ const Index = () => {
                 ))
               )}
             </div>
+            <div className="mt-12 text-center">
+              <Button asChild variant="outline" className="text-vietnam-blue-600 border-vietnam-blue-600 hover:bg-vietnam-blue-100 hover:text-vietnam-blue-700">
+                <Link to="/search">
+                  Xem tất cả địa điểm
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -257,13 +273,21 @@ const Index = () => {
                       <Clock className="h-4 w-4 mr-1" />
                       {post.readTime}
                     </div>
-                    <Button variant="link" className="p-0 text-vietnam-red-600 hover:text-vietnam-red-700 font-semibold">
-                      Đọc thêm →
+                    <Button variant="link" asChild className="p-0 text-vietnam-red-600 hover:text-vietnam-red-700 font-semibold">
+                      <Link to="/blog">Đọc thêm →</Link>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Button asChild variant="outline" className="text-vietnam-gold-600 border-vietnam-gold-600 hover:bg-vietnam-gold-50 hover:text-vietnam-gold-700">
+              <Link to="/blog">
+                Xem tất cả bài viết
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </section>
       </main>

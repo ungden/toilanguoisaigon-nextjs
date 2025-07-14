@@ -14,6 +14,7 @@ import CollectionDetailPage from "./pages/CollectionDetail";
 import LoginPage from "./pages/Login";
 import ProfilePage from "./pages/Profile";
 import MyNotebookPage from "./pages/MyNotebook";
+import BlogPage from "./pages/Blog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/collections" element={<CollectionsPage />} />
             <Route path="/collection/:slug" element={<CollectionDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/blog" element={<BlogPage />} />
             
             <Route 
               path="/profile" 
