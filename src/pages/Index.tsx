@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles, Coffee, Utensils, Heart, Clock, Phone } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useEffect } from "react";
 import { useCollections } from "../hooks/data/useCollections";
@@ -51,7 +51,6 @@ const Index = () => {
       <main className="flex-grow">
         {/* Compact Hero Section with Saigon Image */}
         <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
-          {/* Saigon Background Image */}
           <div className="absolute inset-0">
             <img 
               src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=2070&auto=format&fit=crop" 
@@ -60,8 +59,6 @@ const Index = () => {
             />
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
-          
-          {/* Content */}
           <div className="relative z-10 container mx-auto px-4 text-center text-white">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
@@ -72,8 +69,6 @@ const Index = () => {
               <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
                 Tìm kiếm những địa điểm ẩm thực độc đáo nhất thành phố
               </p>
-
-              {/* Search Form */}
               <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
                 <div className="relative">
                   <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl">
@@ -97,8 +92,6 @@ const Index = () => {
                   </div>
                 </div>
               </form>
-
-              {/* Quick Stats */}
               <div className="flex justify-center gap-8 mt-8 text-sm">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-vietnam-gold-300">500+</div>
@@ -113,6 +106,78 @@ const Index = () => {
                   <div className="text-white/80">Bộ sưu tập</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Collections Section */}
+        <section className="bg-vietnam-blue-50 py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-vietnam-blue-100 text-vietnam-blue-700 hover:bg-vietnam-blue-200">
+                <Star className="h-4 w-4 mr-1" />
+                Bộ sưu tập
+              </Badge>
+              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Danh sách chọn lọc</h2>
+              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
+                Những bộ sưu tập được tuyển chọn theo chủ đề và phong cách
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {isLoadingCollections ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="aspect-[4/3] w-full" />
+                    <CardHeader>
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-full" />
+                    </CardHeader>
+                  </Card>
+                ))
+              ) : collections && collections.length > 0 ? (
+                collections.map((collection, index) => (
+                  <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
+                    <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
+                      <div className="relative overflow-hidden">
+                        <img 
+                          src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                          alt={collection.title} 
+                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        />
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        {index < 2 && (
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg">
+                              <Sparkles className="h-3 w-3 mr-1.5" />
+                              Đặc biệt
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <CardHeader className="bg-white flex-grow">
+                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
+                          {collection.title}
+                        </CardTitle>
+                        <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
+                          {collection.description}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-4 text-center py-8">
+                  <p className="text-vietnam-blue-600">Chưa có bộ sưu tập nào. Hãy quay lại sau!</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-8 text-center">
+              <Button asChild variant="outline" className="text-vietnam-blue-600 border-vietnam-blue-600 hover:bg-vietnam-blue-100 hover:text-vietnam-blue-700">
+                <Link to="/collections">
+                  Xem tất cả bộ sưu tập
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
@@ -207,70 +272,6 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-          </div>
-        </section>
-
-        {/* Collections Section */}
-        <section className="bg-vietnam-blue-50 py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-vietnam-blue-100 text-vietnam-blue-700 hover:bg-vietnam-blue-200">
-                <Star className="h-4 w-4 mr-1" />
-                Bộ sưu tập
-              </Badge>
-              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Danh sách chọn lọc</h2>
-              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-                Những bộ sưu tập được tuyển chọn theo chủ đề và phong cách
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {isLoadingCollections ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <Skeleton className="aspect-[4/3] w-full" />
-                    <CardHeader>
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-full" />
-                    </CardHeader>
-                  </Card>
-                ))
-              ) : collections && collections.length > 0 ? (
-                collections.map((collection) => (
-                  <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
-                    <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
-                      <div className="relative overflow-hidden">
-                        <img 
-                          src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
-                          alt={collection.title} 
-                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                        />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      <CardHeader className="bg-white flex-grow">
-                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
-                          {collection.title}
-                        </CardTitle>
-                        <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
-                          {collection.description}
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                ))
-              ) : (
-                <div className="col-span-4 text-center py-8">
-                  <p className="text-vietnam-blue-600">Chưa có bộ sưu tập nào. Hãy quay lại sau!</p>
-                </div>
-              )}
-            </div>
-            <div className="mt-8 text-center">
-              <Button asChild variant="outline" className="text-vietnam-blue-600 border-vietnam-blue-600 hover:bg-vietnam-blue-100 hover:text-vietnam-blue-700">
-                <Link to="/collections">
-                  Xem tất cả bộ sưu tập
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
           </div>
         </section>
 
