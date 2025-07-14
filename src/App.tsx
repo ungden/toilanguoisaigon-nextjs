@@ -3,25 +3,27 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from "@/components/auth/AdminRoute";
 
-import Index from "./pages/Index";
-import SearchPage from "./pages/Search";
-import PlaceDetailPage from "./pages/PlaceDetail";
-import CollectionsPage from "./pages/Collections";
-import CollectionDetailPage from "./pages/CollectionDetail";
-import LoginPage from "./pages/Login";
-import ProfilePage from "./pages/Profile";
-import MyNotebookPage from "./pages/MyNotebook";
-import BlogPage from "./pages/Blog";
-import PostDetailPage from "./pages/PostDetail";
-import NotFound from "./pages/NotFound";
-import AboutPage from "./pages/About";
-import ContactPage from "./pages/Contact";
-import TermsPage from "./pages/Terms";
-import PrivacyPage from "./pages/Privacy";
-import FaqPage from "./pages/Faq";
+import Index from "@/pages/Index";
+import SearchPage from "@/pages/Search";
+import PlaceDetailPage from "@/pages/PlaceDetail";
+import CollectionsPage from "@/pages/Collections";
+import CollectionDetailPage from "@/pages/CollectionDetail";
+import LoginPage from "@/pages/Login";
+import ProfilePage from "@/pages/Profile";
+import MyNotebookPage from "@/pages/MyNotebook";
+import BlogPage from "@/pages/Blog";
+import PostDetailPage from "@/pages/PostDetail";
+import NotFound from "@/pages/NotFound";
+import AboutPage from "@/pages/About";
+import ContactPage from "@/pages/Contact";
+import TermsPage from "@/pages/Terms";
+import PrivacyPage from "@/pages/Privacy";
+import FaqPage from "@/pages/Faq";
+import AdminDashboardPage from "@/pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +64,15 @@ const App = () => (
                 <ProtectedRoute>
                   <MyNotebookPage />
                 </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/admin" 
+              element={
+                <AdminRoute>
+                  <AdminDashboardPage />
+                </AdminRoute>
               } 
             />
 

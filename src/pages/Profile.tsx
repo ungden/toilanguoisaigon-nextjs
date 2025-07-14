@@ -4,13 +4,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Pencil, ShieldCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
 import { useState } from "react";
 
 const ProfilePage = () => {
-    const { user, profile } = useAuth();
+    const { user, profile, role } = useAuth();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     const getInitials = (name: string | undefined | null) => {
@@ -34,7 +35,15 @@ const ProfilePage = () => {
                                     <AvatarFallback>{getInitials(profile?.full_name)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <CardTitle className="text-2xl">{profile?.full_name || 'Người dùng mới'}</CardTitle>
+                                    <div className="flex items-center gap-2">
+                                        <CardTitle className="text-2xl">{profile?.full_name || 'Người dùng mới'}</CardTitle>
+                                        {role === 'admin' && (
+                                            <Badge variant="destructive" className="flex items-center gap-1">
+                                                <ShieldCheck className="h-3 w-3" />
+                                                Admin
+                                            </Badge>
+                                        )}
+                                    </div>
                                     <p className="text-muted-foreground">{user?.email}</p>
                                 </div>
                             </div>
