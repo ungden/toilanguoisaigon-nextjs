@@ -10,6 +10,11 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { 
   Star, 
   MapPin, 
   Clock, 
@@ -28,10 +33,10 @@ import {
   Baby,
   Dog,
   Utensils,
-  Calendar,
   ThumbsUp,
   Flag,
-  Info
+  Info,
+  ChevronsUpDown
 } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -303,6 +308,10 @@ const PlaceDetailPage = () => {
     { key: 'saturday', label: 'Thứ 7' },
     { key: 'sunday', label: 'Chủ nhật' }
   ];
+  const todayJsIndex = new Date().getDay(); // Sunday: 0, Monday: 1...
+  const todayIndex = todayJsIndex === 0 ? 6 : todayJsIndex - 1; // Monday: 0... Sunday: 6
+  const todayInfo = daysOfWeek[todayIndex];
+  const todayHours = openingHoursData?.[todayInfo.key] || 'Chưa cập nhật';
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -473,14 +482,42 @@ const PlaceDetailPage = () => {
                     <span className="text-vietnam-blue-700">{place.address}</span>
                   </div>
                   <div className="flex items-center">
-                    <Clock className="h-5 w-5 mr-3 flex-shrink-0 text-vietnam-red-600" /> 
-                    <span className="text-vietnam-blue-700">{formatOpeningHours(place.opening_hours)}</span>
-                  </div>
-                  <div className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-3 flex-shrink-0 text-vietnam-red-600" /> 
                     <span className="text-vietnam-blue-700">{formatPriceRange(place.price_range)}</span>
                   </div>
                 </div>
+
+                <Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <div className="flex justify-between items-center p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                      <div className="flex items-center">
+                        <Clock className="h-5 w-5 mr-3 text-vietnam-red-600" />
+                        <div>
+                          <span className="font-semibold text-vietnam-blue-800">{todayInfo.label} (Hôm nay):</span>
+                          <span className="ml-2 text-vietnam-blue-700 font-medium">{todayHours}</span>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" className="p-1">
+                        <ChevronsUpDown className="h-4 w-4" />
+                        <span className="sr-only">Xem thêm</span>
+                      </Button>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="mt-2 p-4 border rounded-lg space-y-3">
+                      {daysOfWeek.map(({ key, label }, index) => {
+                        const hours = openingHoursData?.[key] || 'Đóng cửa';
+                        const isToday = todayIndex === index;
+                        return (
+                          <div key={key} className={`flex justify-between items-center`}>
+                            <span className={`font-medium ${isToday ? 'text-vietnam-red-700' : 'text-vietnam-blue-800'}`}>{label}</span>
+                            <span className={`${isToday ? 'text-vietnam-red-600 font-semibold' : 'text-vietnam-blue-600'}`}>{hours}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 <Alert className="border-vietnam-blue-200 bg-vietnam-blue-50">
                   <Info className="h-4 w-4 text-vietnam-blue-600" />
@@ -510,24 +547,6 @@ const PlaceDetailPage = () => {
                     <div className="flex items-center text-vietnam-blue-700"><Dog className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>Cho phép thú cưng</span></div>
                   </div>
                 </div>
-
-                <Card className="border-vietnam-red-200">
-                  <CardHeader><CardTitle className="text-vietnam-red-600 flex items-center"><Calendar className="h-5 w-5 mr-2" />Chi tiết giờ mở cửa</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {daysOfWeek.map(({ key, label }) => {
-                        const hours = openingHoursData?.[key] || 'Đóng cửa';
-                        const isToday = new Date().getDay() === (key === 'sunday' ? 0 : daysOfWeek.findIndex(d => d.key === key) + 1);
-                        return (
-                          <div key={key} className={`flex justify-between items-center py-2 px-3 rounded ${isToday ? 'bg-vietnam-red-50 border border-vietnam-red-200' : ''}`}>
-                            <span className={`font-medium ${isToday ? 'text-vietnam-red-700' : 'text-vietnam-blue-800'}`}>{label}{isToday && <span className="ml-2 text-xs">(Hôm nay)</span>}</span>
-                            <span className={`${isToday ? 'text-vietnam-red-600 font-semibold' : 'text-vietnam-blue-600'}`}>{hours}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
 
                 <Card className="border-vietnam-red-200">
                   <CardHeader><CardTitle className="text-vietnam-red-600 flex items-center"><MapPin className="h-5 w-5 mr-2" />Vị trí trên bản đồ</CardTitle></CardHeader>

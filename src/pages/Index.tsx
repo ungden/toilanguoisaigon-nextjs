@@ -5,36 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Clock, Users, ArrowRight } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Users, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useEffect } from "react";
 import { useCollections } from "../hooks/data/useCollections";
 import { useLocations } from "../hooks/data/useLocations";
 import { showError } from "@/utils/toast";
-
-const blogPosts = [
-    { 
-      title: "Một ngày ăn sập Quận 5", 
-      excerpt: "Hành trình khám phá thiên đường ẩm thực của người Hoa với những món ăn đậm đà hương vị truyền thống...", 
-      image: "https://images.unsplash.com/photo-1585907279394-90a3d3d49fc7?q=80&w=1974&auto=format&fit=crop",
-      readTime: "5 phút đọc",
-      category: "Khám phá"
-    },
-    { 
-      title: "Top 10 quán Phở ngon nhất Sài Gòn", 
-      excerpt: "Danh sách những tô phở khiến bạn phải xuýt xoa, từ phở truyền thống đến phở fusion hiện đại.", 
-      image: "https://images.unsplash.com/photo-1569562211093-429d3758a41c?q=80&w=2070&auto=format&fit=crop",
-      readTime: "8 phút đọc",
-      category: "Top List"
-    },
-    { 
-      title: "Những quán cà phê ẩn mình trong hẻm Sài Gòn", 
-      excerpt: "Khám phá những không gian yên tĩnh và đầy chất thơ, nơi bạn có thể tìm thấy sự bình yên giữa lòng thành phố.", 
-      image: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2070&auto=format&fit=crop",
-      readTime: "6 phút đọc",
-      category: "Lifestyle"
-    },
-];
 
 const Index = () => {
   const navigate = useNavigate();
@@ -266,48 +242,19 @@ const Index = () => {
               Đọc những câu chuyện và khám phá Sài Gòn qua từng góc nhìn của cộng đồng yêu ẩm thực.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {blogPosts.map((post, index) => (
-              <Card key={post.title} className={`overflow-hidden card-hover border-vietnam-red-200 group ${index === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}>
-                <div className="relative overflow-hidden">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className={`w-full object-cover group-hover:scale-110 transition-transform duration-500 ${index === 0 ? 'h-64 md:h-80' : 'h-48'}`}
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-vietnam-blue-600 text-white">
-                      {post.category}
-                    </Badge>
-                  </div>
-                </div>
-                <CardHeader className="bg-white">
-                  <CardTitle className={`text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors ${index === 0 ? 'text-2xl' : 'text-lg'}`}>
-                    {post.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="bg-white flex-grow">
-                  <p className="text-vietnam-blue-600 mb-4">{post.excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-vietnam-blue-500">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {post.readTime}
-                    </div>
-                    <Button variant="link" asChild className="p-0 text-vietnam-red-600 hover:text-vietnam-red-700 font-semibold">
-                      <Link to="/blog">Đọc thêm →</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="mt-12 text-center">
-            <Button asChild variant="outline" className="text-vietnam-gold-600 border-vietnam-gold-600 hover:bg-vietnam-gold-50 hover:text-vietnam-gold-700">
-              <Link to="/blog">
-                Xem tất cả bài viết
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+          <div className="relative bg-vietnam-blue-50 rounded-2xl p-8 md:p-12 text-center overflow-hidden">
+              <div className="relative z-10">
+                  <h3 className="text-3xl font-bold text-vietnam-blue-800 mb-4">Chuyên mục Blog sắp ra mắt!</h3>
+                  <p className="text-vietnam-blue-600 max-w-xl mx-auto mb-8">
+                      Hãy sẵn sàng cho những bài viết độc quyền, những câu chuyện hậu trường thú vị và những bài đánh giá chi tiết nhất về văn hóa ẩm thực Sài Gòn.
+                  </p>
+                  <Button asChild size="lg" className="btn-vietnam">
+                      <Link to="/blog">
+                          Tìm hiểu thêm & Đăng ký nhận tin
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                  </Button>
+              </div>
           </div>
         </section>
       </main>
