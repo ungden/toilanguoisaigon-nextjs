@@ -85,7 +85,7 @@ const CollectionDetailPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
+                <Skeleton className="aspect-[4/3] w-full" />
                 <CardContent className="p-4">
                   <Skeleton className="h-6 w-3/4 mb-2" />
                   <Skeleton className="h-4 w-1/2 mb-2" />
@@ -159,7 +159,7 @@ const CollectionDetailPage = () => {
                     <img 
                       src={location.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} 
                       alt={location.name} 
-                      className="h-56 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
                     />
                     <div className="absolute top-4 right-4">
                       <Badge className="bg-vietnam-red-600 text-white">

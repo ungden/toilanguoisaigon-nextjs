@@ -95,7 +95,7 @@ const CollectionsPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {Array.from({ length: 6 }).map((_, i) => (
                       <Card key={i} className="overflow-hidden">
-                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="aspect-[4/3] w-full" />
                         <CardHeader>
                           <Skeleton className="h-6 w-3/4 mb-2" />
                           <Skeleton className="h-4 w-full" />
@@ -127,7 +127,7 @@ const CollectionsPage = () => {
                               <img 
                                 src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
                                 alt={collection.title} 
-                                className="h-56 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
                               />
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                               <div className="absolute top-4 left-4">

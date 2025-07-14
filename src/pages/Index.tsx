@@ -119,7 +119,7 @@ const Index = () => {
             {isLoadingCollections ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden">
-                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="aspect-[4/3] w-full" />
                   <CardHeader>
                     <Skeleton className="h-6 w-3/4 mb-2" />
                     <Skeleton className="h-4 w-full" />
@@ -134,7 +134,7 @@ const Index = () => {
                       <img 
                         src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
                         alt={collection.title} 
-                        className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
@@ -170,7 +170,7 @@ const Index = () => {
               {isLoadingNewPlaces ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
-                    <Skeleton className="h-56 w-full" />
+                    <Skeleton className="aspect-[4/3] w-full" />
                     <CardContent className="p-4">
                       <Skeleton className="h-6 w-3/4 mb-2" />
                       <Skeleton className="h-4 w-1/2" />
@@ -185,7 +185,7 @@ const Index = () => {
                         <img 
                           src={place.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} 
                           alt={place.name} 
-                          className="h-56 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         />
                         <div className="absolute top-4 right-4">
                           <Badge className="bg-vietnam-red-600 text-white">
