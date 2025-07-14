@@ -49,7 +49,7 @@ export function Header() {
           </Link>
           <nav className="flex items-center space-x-8 text-sm font-medium">
             <Link
-              to="/"
+              to="/collections"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Bộ sưu tập
@@ -86,7 +86,7 @@ export function Header() {
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-4">
-                 <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
+                 <Link to="/collections" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
                  <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
                  <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
               </div>
