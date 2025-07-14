@@ -48,14 +48,13 @@ const Index = () => {
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <main className="flex-grow">
-        {/* Enhanced Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-br from-vietnam-red-600 via-vietnam-red-500 to-vietnam-blue-600 text-white">
-          {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] bg-repeat"></div>
+            <div className="absolute inset-0 bg-repeat" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}></div>
           </div>
           
-          {/* Floating Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-20 left-10 animate-bounce delay-1000">
               <Coffee className="h-8 w-8 text-vietnam-gold-300 opacity-60" />
@@ -73,13 +72,11 @@ const Index = () => {
 
           <div className="relative container mx-auto px-4 py-20 md:py-32">
             <div className="max-w-5xl mx-auto text-center">
-              {/* Badge */}
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-8 animate-fade-in">
                 <Sparkles className="h-4 w-4 mr-2 text-vietnam-gold-300" />
                 <span className="text-sm font-medium">Khám phá Sài Gòn cùng chúng tôi</span>
               </div>
 
-              {/* Main Heading */}
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight animate-fade-in">
                 Tìm{" "}
                 <span className="relative inline-block">
@@ -92,7 +89,6 @@ const Index = () => {
                 </span>
               </h1>
 
-              {/* Subtitle */}
               <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-4 leading-relaxed font-light animate-fade-in">
                 Khám phá những địa điểm ẩm thực và văn hóa
               </p>
@@ -100,7 +96,6 @@ const Index = () => {
                 độc đáo nhất của thành phố Hồ Chí Minh
               </p>
 
-              {/* Search Form */}
               <form onSubmit={handleSearch} className="max-w-4xl mx-auto mb-16 animate-fade-in">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-vietnam-gold-400 to-vietnam-gold-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
@@ -126,7 +121,6 @@ const Index = () => {
                 </div>
               </form>
               
-              {/* Statistics */}
               <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto animate-fade-in">
                 <div className="text-center group">
                   <div className="relative">
@@ -151,7 +145,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12 animate-fade-in">
                 <Button asChild size="lg" className="bg-white text-vietnam-red-600 hover:bg-vietnam-gold-50 font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                   <Link to="/collections">
@@ -169,7 +162,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Bottom Wave */}
           <div className="absolute bottom-0 left-0 right-0">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16 fill-white">
               <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25"></path>
@@ -179,7 +171,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Collections Section */}
         <section className="container mx-auto py-20 px-4">
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-vietnam-red-100 text-vietnam-red-700 hover:bg-vietnam-red-200">
@@ -241,7 +232,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* New Places Section */}
         <section className="bg-vietnam-blue-50 py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -318,7 +308,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Blog Section */}
         <section className="container mx-auto py-20 px-4">
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-vietnam-gold-100 text-vietnam-gold-700 hover:bg-vietnam-gold-200">
@@ -380,11 +369,6 @@ const Index = () => {
             ) : (
               <div className="col-span-3 text-center py-8">
                 <p className="text-vietnam-blue-600">Chưa có bài viết nào. Hãy quay lại sau!</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Debug: Loading: {isLoadingPosts ? 'true' : 'false'}, 
-                  Data: {posts ? `${posts.length} posts` : 'null'}, 
-                  Error: {postsError ? 'yes' : 'no'}
-                </p>
               </div>
             )}
           </div>
