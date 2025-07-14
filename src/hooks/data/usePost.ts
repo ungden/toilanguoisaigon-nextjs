@@ -3,30 +3,44 @@ import { supabase } from '../../integrations/supabase/client';
 import { Post } from '../../types/database';
 
 const fetchPost = async (slug: string): Promise<Post | null> => {
+  console.log('Fetching post with slug:', slug);
+  
   const { data, error } = await supabase
     .from('posts')
-    .select(`
-      *,
-      profiles (
-        full_name,
-        avatar_url
-      )
-    `)
+    .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
     .single();
 
   if (error) {
-    // PostgREST error code for "exact one row not found"
+    console.error('Error fetching post:', error);
     if (error.code === 'PGRST116') {
       console.warn(`Post with slug "${slug}" not found.`);
       return null;
     }
-    console.error(`Error fetching post with slug ${slug}:`, error);
     throw new Error(error.message);
   }
 
-  return data;
+  console.log('Post found:', data);
+
+  // Thêm profile nếu có author_id
+  if (data && data.author_id) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url')
+      .eq('id', data.author_id)
+      .single();
+    
+    return {
+      ...data,
+      profiles: profile
+    };
+  }
+
+  return {
+    ...data,
+    profiles: null
+  };
 };
 
 export const usePost = (slug: string) => {
@@ -34,5 +48,6 @@ export const usePost = (slug: string) => {
     queryKey: ['post', slug],
     queryFn: () => fetchPost(slug),
     enabled: !!slug,
+    retry: 2,
   });
 };

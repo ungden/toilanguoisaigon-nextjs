@@ -12,6 +12,8 @@ const PostDetailPage = () => {
   const navigate = useNavigate();
   const { data: post, isLoading, error } = usePost(slug!);
 
+  console.log('PostDetail - slug:', slug, 'post:', post, 'loading:', isLoading, 'error:', error);
+
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
@@ -33,14 +35,16 @@ const PostDetailPage = () => {
   }
 
   if (error || !post) {
+    console.error('Error or no post found:', error, post);
     return (
       <div className="flex flex-col min-h-screen bg-white">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-8">
           <div className="text-center py-16">
             <h1 className="text-2xl font-bold text-vietnam-red-600 mb-4">Không tìm thấy bài viết</h1>
-            <p className="text-vietnam-blue-600">Bài viết bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
-            <Button asChild variant="outline" className="mt-8 text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
+            <p className="text-vietnam-blue-600 mb-4">Bài viết bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
+            <p className="text-sm text-muted-foreground mb-8">Debug: slug = "{slug}", error = {error?.message || 'null'}</p>
+            <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
               <Link to="/blog">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Quay lại trang Blog
