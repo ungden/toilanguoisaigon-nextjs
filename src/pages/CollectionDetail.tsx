@@ -34,7 +34,7 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
         locations (*)
       )
     `)
-    .eq('slug', slug)
+    .ilike('slug', slug)
     .single();
 
   if (error) {
@@ -118,7 +118,7 @@ const CollectionDetailPage = () => {
     );
   }
 
-  const locations = collection.collection_locations.map(cl => cl.locations);
+  const locations = collection.collection_locations.map(cl => cl.locations).filter(Boolean);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">

@@ -28,7 +28,7 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
         )
       )
     `)
-    .eq('slug', slug)
+    .ilike('slug', slug)
     .eq('status', 'published')
     .single();
 
@@ -110,7 +110,7 @@ const PlaceDetailPage = () => {
     );
   }
 
-  const images = place.gallery_urls || [place.main_image_url].filter(Boolean);
+  const images = [place.main_image_url, ...(place.gallery_urls || [])].filter(Boolean) as string[];
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
