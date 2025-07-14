@@ -61,6 +61,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useSaveLocation } from "@/hooks/data/useSaveLocation";
+import { useUnsaveLocation } from "@/hooks/data/useUnsaveLocation";
 
 interface LocationWithReviews extends Location {
   reviews: ReviewWithProfile[];
@@ -80,7 +82,7 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
     return null;
   }
 
-  const [reviewsResult, categoriesResult, tagsResult] = await Promise.all([
+  const [reviewsResult, categoriesResult, tagsResult, savedStatusResult] = await Promise.all([
     supabase
       .from('reviews')
       .select('*, profiles(full_name, avatar_url)')
@@ -93,7 +95,13 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
     supabase
       .from('location_tags')
       .select('tags(name, slug)')
+      .eq('location_id', locationData.id),
+    supabase
+      .from('saved_locations')
+      .select('user_id')
       .eq('location_id', locationData.id)
+      .eq('user_id', (await supabase.auth.getUser()).data.user?.id || '') // Check if current user saved it
+      .single()
   ]);
 
   if (reviewsResult.error) console.error('Error fetching reviews:', reviewsResult.error.message);
@@ -105,6 +113,7 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
     reviews: (reviewsResult.data as ReviewWithProfile[]) || [],
     location_categories: (categoriesResult.data as any[]) || [],
     location_tags: (tagsResult.data as any[]) || [],
+    isSaved: !!savedStatusResult.data // Add isSaved property
   };
 
   return combinedData;
@@ -139,7 +148,7 @@ const PlaceDetailPage = () => {
   const [reviewSort, setReviewSort] = useState('newest');
   
   const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
-    queryKey: ['location-detail', slug],
+    queryKey: ['location-detail', slug, user?.id], // Add user.id to queryKey for re-fetching saved status
     queryFn: () => fetchLocationDetail(slug!),
     enabled: !!slug,
     retry: 1,
@@ -150,6 +159,9 @@ const PlaceDetailPage = () => {
     queryFn: () => fetchSimilarLocations(place!.district, place!.id),
     enabled: !!place?.district && !!place?.id,
   });
+
+  const saveLocationMutation = useSaveLocation();
+  const unsaveLocationMutation = useUnsaveLocation();
 
   const submitReviewMutation = useMutation({
     mutationFn: async ({ rating, comment }: { rating: number; comment: string }) => {
@@ -219,6 +231,19 @@ const PlaceDetailPage = () => {
     } else {
       navigator.clipboard.writeText(window.location.href);
       showSuccess('Đã sao chép liên kết!');
+    }
+  };
+
+  const handleToggleSave = () => {
+    if (!user || !place) {
+      showError('Vui lòng đăng nhập để lưu địa điểm.');
+      return;
+    }
+
+    if (place.isSaved) {
+      unsaveLocationMutation.mutate({ userId: user.id, locationId: place.id });
+    } else {
+      saveLocationMutation.mutate({ userId: user.id, locationId: place.id });
     }
   };
 
@@ -442,9 +467,14 @@ const PlaceDetailPage = () => {
                   <Share2 className="h-4 w-4 mr-2" />
                   Chia sẻ
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Bookmark className="h-4 w-4 mr-2" />
-                  Lưu
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleToggleSave}
+                  disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}
+                >
+                  <Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />
+                  {place.isSaved ? 'Đã lưu' : 'Lưu'}
                 </Button>
               </div>
             </div>
@@ -655,7 +685,15 @@ const PlaceDetailPage = () => {
                   ) : (
                     <Button asChild className="w-full btn-vietnam"><Link to="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>
                   )}
-                  <Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50"><Bookmark className="h-4 w-4 mr-2" />Lưu vào sổ tay</Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50"
+                    onClick={handleToggleSave}
+                    disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}
+                  >
+                    <Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />
+                    {place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}
+                  </Button>
                   <Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button>
                 </CardContent>
               </Card>

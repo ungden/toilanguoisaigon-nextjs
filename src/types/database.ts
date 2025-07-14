@@ -38,6 +38,7 @@ export interface Location {
   status: LocationStatus;
   average_rating: number;
   review_count: number;
+  isSaved?: boolean; // Added for client-side tracking
 }
 
 export interface Review {
