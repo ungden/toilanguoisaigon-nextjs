@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Users, ArrowRight } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useEffect } from "react";
 import { useCollections } from "../hooks/data/useCollections";
@@ -29,7 +29,7 @@ const Index = () => {
   useEffect(() => {
     if (postsError) {
       console.error("Error loading posts:", postsError);
-      showError("Không thể tải danh sách bài viết. Vui lòng thử lại sau.");
+      console.log("Posts error details:", postsError.message);
     }
   }, [postsError]);
 
@@ -258,6 +258,19 @@ const Index = () => {
                   </CardHeader>
                 </Card>
               ))
+            ) : postsError ? (
+              <div className="col-span-3 text-center py-8">
+                <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+                <p className="text-red-600 font-semibold mb-2">Có lỗi khi tải bài viết</p>
+                <p className="text-sm text-muted-foreground">{postsError.message}</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => window.location.reload()}
+                >
+                  Thử lại
+                </Button>
+              </div>
             ) : posts && posts.length > 0 ? (
               posts.slice(0, 3).map((post) => (
                 <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
@@ -283,7 +296,11 @@ const Index = () => {
             ) : (
               <div className="col-span-3 text-center py-8">
                 <p className="text-vietnam-blue-600">Chưa có bài viết nào. Hãy quay lại sau!</p>
-                <p className="text-sm text-muted-foreground mt-2">Debug: Posts loading: {isLoadingPosts ? 'true' : 'false'}, Posts data: {posts ? posts.length : 'null'}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Debug: Loading: {isLoadingPosts ? 'true' : 'false'}, 
+                  Data: {posts ? `${posts.length} posts` : 'null'}, 
+                  Error: {postsError ? 'yes' : 'no'}
+                </p>
               </div>
             )}
           </div>
