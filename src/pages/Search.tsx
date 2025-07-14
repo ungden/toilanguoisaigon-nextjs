@@ -8,12 +8,12 @@ import { Search as SearchIcon, List, Map } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
 const mockResults: SearchResult[] = [
-  { name: "Phở Haru", district: "Quận 1", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2070&auto=format&fit=crop", rating: 4.8, reviewCount: 120, cuisine: "Món Việt", priceRange: "100k - 200k" },
-  { name: "The Running Bean", district: "Quận 3", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1974&auto=format&fit=crop", rating: 4.5, reviewCount: 350, cuisine: "Café", priceRange: "50k - 150k" },
-  { name: "Bún Chả Quán", district: "Phú Nhuận", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=1964&auto=format&fit=crop", rating: 4.7, reviewCount: 215, cuisine: "Món Việt", priceRange: "50k - 100k" },
-  { name: "Cơm Tấm Ba Ghiền", district: "Bình Thạnh", image: "https://images.unsplash.com/photo-1598515599465-f36719464717?q=80&w=2070&auto=format&fit=crop", rating: 4.9, reviewCount: 890, cuisine: "Món Việt", priceRange: "50k - 100k" },
-  { name: "Sushi Tei", district: "Quận 1", image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070&auto=format&fit=crop", rating: 4.6, reviewCount: 430, cuisine: "Món Nhật", priceRange: "300k - 500k" },
-  { name: "El Gaucho Argentinian Steakhouse", district: "Quận 1", image: "https://images.unsplash.com/photo-1546824294-1671459746b9?q=80&w=2070&auto=format&fit=crop", rating: 4.8, reviewCount: 600, cuisine: "Món Âu", priceRange: "> 500k" },
+  { name: "Phở Haru", slug: "pho-haru", district: "Quận 1", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2070&auto=format&fit=crop", rating: 4.8, reviewCount: 120, cuisine: "Món Việt", priceRange: "100k - 200k" },
+  { name: "The Running Bean", slug: "the-running-bean", district: "Quận 3", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1974&auto=format&fit=crop", rating: 4.5, reviewCount: 350, cuisine: "Café", priceRange: "50k - 150k" },
+  { name: "Bún Chả Quán", slug: "bun-cha-quan", district: "Phú Nhuận", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=1964&auto=format&fit=crop", rating: 4.7, reviewCount: 215, cuisine: "Món Việt", priceRange: "50k - 100k" },
+  { name: "Cơm Tấm Ba Ghiền", slug: "com-tam-ba-ghien", district: "Bình Thạnh", image: "https://images.unsplash.com/photo-1598515599465-f36719464717?q=80&w=2070&auto=format&fit=crop", rating: 4.9, reviewCount: 890, cuisine: "Món Việt", priceRange: "50k - 100k" },
+  { name: "Sushi Tei", slug: "sushi-tei", district: "Quận 1", image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070&auto=format&fit=crop", rating: 4.6, reviewCount: 430, cuisine: "Món Nhật", priceRange: "300k - 500k" },
+  { name: "El Gaucho Argentinian Steakhouse", slug: "el-gaucho", district: "Quận 1", image: "https://images.unsplash.com/photo-1546824294-1671459746b9?q=80&w=2070&auto=format&fit=crop", rating: 4.8, reviewCount: 600, cuisine: "Món Âu", priceRange: "> 500k" },
 ];
 
 const SearchPage = () => {
