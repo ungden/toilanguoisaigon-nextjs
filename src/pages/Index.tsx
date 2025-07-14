@@ -203,7 +203,7 @@ const Index = () => {
                 ))
               ) : newPlaces && newPlaces.length > 0 ? (
                 newPlaces.map((place) => (
-                  <Link to={`/place/${place.id}`} key={place.id} className="block group">
+                  <Link to={`/place/${place.slug}`} key={place.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full bg-white">
                       <div className="relative overflow-hidden">
                         <img 

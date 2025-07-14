@@ -10,7 +10,7 @@ interface SearchResultCardProps {
 
 export function SearchResultCard({ place }: SearchResultCardProps) {
   return (
-    <Link to={`/place/${place.id}`} className="block">
+    <Link to={`/place/${place.slug}`} className="block">
       <Card className="flex flex-col sm:flex-row overflow-hidden hover:shadow-lg transition-shadow w-full">
         <img
           src={place.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'}

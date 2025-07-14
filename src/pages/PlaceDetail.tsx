@@ -9,45 +9,41 @@ import { Star, MapPin, Clock, Phone, DollarSign, MessageSquare, UserCircle, Arro
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Location, Review } from '@/types/database'; // Removed ReviewWithProfile
+import { Location, Review } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { useEffect } from "react";
 import { showError } from "@/utils/toast";
 
-// Simplified type for debugging
 interface LocationWithSimpleReviews extends Location {
   reviews: Review[];
 }
 
-const fetchLocationDetail = async (id: string): Promise<LocationWithSimpleReviews | null> => {
-  console.log('Fetching location detail for ID (simplified query):', id);
-  
+const fetchLocationDetail = async (slug: string): Promise<LocationWithSimpleReviews | null> => {
   const { data, error } = await supabase
     .from('locations')
     .select(`
       *,
       reviews (*)
-    `) // Simplified query, removed nested profiles
-    .eq('id', id)
+    `)
+    .eq('slug', slug)
     .single();
 
   if (error) {
-    console.error('Error fetching location detail (simplified query):', error);
+    console.error('Error fetching location detail by slug:', error);
     throw new Error(error.message);
   }
 
-  console.log('Fetched location detail (simplified query):', data);
   return data;
 };
 
 const PlaceDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
   const { data: place, isLoading, error } = useQuery<LocationWithSimpleReviews | null, Error>({
-    queryKey: ['location-detail', id],
-    queryFn: () => fetchLocationDetail(id!),
-    enabled: !!id,
+    queryKey: ['location-detail', slug],
+    queryFn: () => fetchLocationDetail(slug!),
+    enabled: !!slug,
     retry: 1,
   });
 

@@ -134,7 +134,7 @@ const CollectionDetailPage = () => {
         <section className="container mx-auto py-16 px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {locations.map((location) => (
-              <Link to={`/place/${location.id}`} key={location.id} className="block group">
+              <Link to={`/place/${location.slug}`} key={location.id} className="block group">
                 <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
                   <div className="relative overflow-hidden">
                     <img 
