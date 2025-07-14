@@ -15,6 +15,7 @@ import LoginPage from "./pages/Login";
 import ProfilePage from "./pages/Profile";
 import MyNotebookPage from "./pages/MyNotebook";
 import BlogPage from "./pages/Blog";
+import PostDetailPage from "./pages/PostDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/collection/:slug" element={<CollectionDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<PostDetailPage />} />
             
             <Route 
               path="/profile" 

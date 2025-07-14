@@ -76,3 +76,17 @@ export interface Tag {
   slug: string;
   created_at: string;
 }
+
+export interface Post {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  slug: string;
+  content: string | null;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  author_id: string | null;
+  status: string;
+  profiles: Pick<Profile, 'full_name' | 'avatar_url'> | null;
+}

@@ -10,12 +10,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useEffect } from "react";
 import { useCollections } from "../hooks/data/useCollections";
 import { useLocations } from "../hooks/data/useLocations";
+import { usePosts } from "@/hooks/data/usePosts";
 import { showError } from "@/utils/toast";
 
 const Index = () => {
   const navigate = useNavigate();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 4 });
+  const { data: posts, isLoading: isLoadingPosts } = usePosts();
 
   useEffect(() => {
     if (locationsError) {
@@ -23,10 +25,6 @@ const Index = () => {
       showError("Không thể tải danh sách địa điểm. Vui lòng thử lại sau.");
     }
   }, [locationsError]);
-
-  useEffect(() => {
-    console.log("New places loaded:", newPlaces);
-  }, [newPlaces]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -72,7 +70,6 @@ const Index = () => {
                 </div>
               </form>
               
-              {/* Stats */}
               <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
                 <div className="text-center">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2">500+</div>
@@ -242,19 +239,42 @@ const Index = () => {
               Đọc những câu chuyện và khám phá Sài Gòn qua từng góc nhìn của cộng đồng yêu ẩm thực.
             </p>
           </div>
-          <div className="relative bg-vietnam-blue-50 rounded-2xl p-8 md:p-12 text-center overflow-hidden">
-              <div className="relative z-10">
-                  <h3 className="text-3xl font-bold text-vietnam-blue-800 mb-4">Chuyên mục Blog sắp ra mắt!</h3>
-                  <p className="text-vietnam-blue-600 max-w-xl mx-auto mb-8">
-                      Hãy sẵn sàng cho những bài viết độc quyền, những câu chuyện hậu trường thú vị và những bài đánh giá chi tiết nhất về văn hóa ẩm thực Sài Gòn.
-                  </p>
-                  <Button asChild size="lg" className="btn-vietnam">
-                      <Link to="/blog">
-                          Tìm hiểu thêm & Đăng ký nhận tin
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                  </Button>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {isLoadingPosts ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}><Skeleton className="h-64 w-full" /></Card>
+              ))
+            ) : (
+              posts?.slice(0, 3).map((post) => (
+                <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
+                  <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col">
+                    <div className="relative overflow-hidden">
+                      <img 
+                        src={post.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                        alt={post.title} 
+                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
+                    </div>
+                    <CardHeader className="bg-white flex-grow">
+                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
+                        {post.title}
+                      </CardTitle>
+                      <CardDescription className="text-vietnam-blue-600 text-sm line-clamp-2">
+                        {post.excerpt}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))
+            )}
+          </div>
+          <div className="mt-12 text-center">
+            <Button asChild size="lg" className="btn-vietnam">
+              <Link to="/blog">
+                Xem tất cả bài viết
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </section>
       </main>

@@ -1,46 +1,89 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Rss, Send } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePosts } from "@/hooks/data/usePosts";
+import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar } from "lucide-react";
 
 const BlogPage = () => {
-    return (
-        <div className="flex flex-col min-h-screen bg-vietnam-blue-50">
-            <Header />
-            <main className="flex-grow">
-                <div className="container mx-auto px-4 py-16 md:py-24 text-center">
-                    <div className="inline-block p-4 bg-vietnam-red-100 rounded-full mb-6">
-                        <Rss className="h-12 w-12 text-vietnam-red-600" />
+  const { data: posts, isLoading } = usePosts();
+
+  return (
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header />
+      <main className="flex-grow">
+        <section className="bg-vietnam-blue-600 text-white py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              Blog & Review
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
+              Khám phá Sài Gòn qua những câu chuyện, góc nhìn và bài đánh giá chuyên sâu từ cộng đồng.
+            </p>
+          </div>
+        </section>
+
+        <section className="container mx-auto py-16 px-4">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="aspect-[16/9] w-full" />
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {posts?.map((post) => (
+                <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
+                  <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full flex flex-col">
+                    <div className="relative overflow-hidden">
+                      <img 
+                        src={post.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                        alt={post.title} 
+                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-bold text-vietnam-blue-800 mb-4">
-                        Blog sắp ra mắt!
-                    </h1>
-                    <p className="text-lg md:text-xl text-vietnam-blue-600 max-w-3xl mx-auto mb-12">
-                        Chúng tôi đang chuẩn bị những bài viết hấp dẫn, những câu chuyện ẩm thực độc đáo và những bài đánh giá chuyên sâu về Sài Gòn. Hãy là người đầu tiên nhận được thông báo khi blog ra mắt!
-                    </p>
-                    <div className="max-w-lg mx-auto">
-                        <div className="flex flex-col sm:flex-row gap-3 p-2 bg-white/50 backdrop-blur-sm rounded-2xl border border-vietnam-blue-200">
-                            <Input
-                                type="email"
-                                name="email"
-                                placeholder="Nhập email của bạn..."
-                                className="h-12 text-base bg-white border-vietnam-blue-300 focus:border-vietnam-red-500"
-                            />
-                            <Button type="submit" size="lg" className="h-12 px-6 btn-vietnam">
-                                <Send className="h-5 w-5 mr-2" />
-                                Đăng ký
-                            </Button>
+                    <CardHeader className="bg-white flex-grow">
+                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-xl leading-tight">
+                        {post.title}
+                      </CardTitle>
+                      <CardDescription className="text-vietnam-blue-600 text-sm leading-relaxed mt-2">
+                        {post.excerpt}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={post.profiles?.avatar_url || ''} />
+                            <AvatarFallback>{post.profiles?.full_name?.[0] || 'A'}</AvatarFallback>
+                          </Avatar>
+                          <span>{post.profiles?.full_name || 'Admin'}</span>
                         </div>
-                        <p className="text-xs text-vietnam-blue-500 mt-3">
-                            Chúng tôi tôn trọng quyền riêng tư của bạn và sẽ không gửi thư rác.
-                        </p>
-                    </div>
-                </div>
-            </main>
-            <Footer />
-        </div>
-    );
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{new Date(post.created_at).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 export default BlogPage;
