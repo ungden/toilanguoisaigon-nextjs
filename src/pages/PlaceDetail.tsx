@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Star, 
   MapPin, 
@@ -15,7 +16,6 @@ import {
   Phone, 
   DollarSign, 
   MessageSquare, 
-  UserCircle, 
   ArrowLeft,
   Share2,
   Bookmark,
@@ -28,12 +28,10 @@ import {
   Baby,
   Dog,
   Utensils,
-  Coffee,
-  Wine,
   Calendar,
   ThumbsUp,
   Flag,
-  ExternalLink
+  Info
 } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -66,20 +64,17 @@ interface LocationWithReviews extends Location {
 }
 
 const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | null> => {
-  // Step 1: Fetch the core location data. This is the most critical part.
   const { data: locationData, error: locationError } = await supabase
     .from('locations')
     .select('*')
     .eq('slug', slug)
     .single();
 
-  // If the location itself is not found, it's a genuine 404. Stop here.
   if (locationError || !locationData) {
     console.error(`Error fetching location by slug '${slug}':`, locationError?.message);
     return null;
   }
 
-  // Step 2: Now that we have a location, fetch all its related data in parallel.
   const [reviewsResult, categoriesResult, tagsResult] = await Promise.all([
     supabase
       .from('reviews')
@@ -96,13 +91,10 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
       .eq('location_id', locationData.id)
   ]);
 
-  // Log errors for debugging, but don't let them crash the page.
-  // The UI will gracefully handle empty arrays.
   if (reviewsResult.error) console.error('Error fetching reviews:', reviewsResult.error.message);
   if (categoriesResult.error) console.error('Error fetching categories:', categoriesResult.error.message);
   if (tagsResult.error) console.error('Error fetching tags:', tagsResult.error.message);
 
-  // Step 3: Combine everything. Use the fetched data or default to an empty array.
   const combinedData: LocationWithReviews = {
     ...locationData,
     reviews: (reviewsResult.data as ReviewWithProfile[]) || [],
@@ -282,14 +274,12 @@ const PlaceDetailPage = () => {
   const reviews = place.reviews || [];
   const totalReviews = reviews.length;
 
-  // Calculate rating distribution
   const ratingDistribution = [5, 4, 3, 2, 1].map(rating => {
     const count = reviews.filter(r => r.rating === rating).length;
     const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
     return { rating, count, percentage };
   });
 
-  // Sort reviews
   const sortedReviews = [...reviews].sort((a, b) => {
     if (reviewSort === 'newest') {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -318,7 +308,6 @@ const PlaceDetailPage = () => {
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
-        {/* Back button */}
         <Button 
           variant="ghost" 
           className="mb-4 text-vietnam-blue-600 hover:text-vietnam-red-600 hover:bg-vietnam-red-50 -ml-2"
@@ -328,7 +317,6 @@ const PlaceDetailPage = () => {
           Quay lại
         </Button>
 
-        {/* Image Gallery */}
         <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 h-64 md:h-96 mb-8">
           <div className="col-span-1 md:col-span-2 row-span-2">
             <Dialog>
@@ -422,9 +410,7 @@ const PlaceDetailPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
               <div className="flex-grow">
                 <h1 className="text-4xl font-bold text-vietnam-blue-800 mb-2">{place.name}</h1>
@@ -454,7 +440,6 @@ const PlaceDetailPage = () => {
               </div>
             </div>
 
-            {/* Categories and Tags */}
             {(categories.length > 0 || tags.length > 0) && (
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
@@ -475,78 +460,36 @@ const PlaceDetailPage = () => {
             
             <Separator className="my-6" />
 
-            {/* Tabs */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="overview">Tổng quan</TabsTrigger>
                 <TabsTrigger value="reviews">Đánh giá ({totalReviews})</TabsTrigger>
-                <TabsTrigger value="hours">Giờ mở cửa</TabsTrigger>
-                <TabsTrigger value="location">Vị trí</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview" className="space-y-6">
-                {/* Core Info */}
+              <TabsContent value="overview" className="space-y-6 pt-6">
                 <div className="space-y-4 text-lg">
                   <div className="flex items-center">
                     <MapPin className="h-5 w-5 mr-3 flex-shrink-0 text-vietnam-red-600" /> 
                     <span className="text-vietnam-blue-700">{place.address}</span>
-                    <Button variant="ghost" size="sm" className="ml-2 text-vietnam-blue-600 hover:text-vietnam-red-600">
-                      <Navigation className="h-4 w-4 mr-1" />
-                      Chỉ đường
-                    </Button>
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-5 w-5 mr-3 flex-shrink-0 text-vietnam-red-600" /> 
                     <span className="text-vietnam-blue-700">{formatOpeningHours(place.opening_hours)}</span>
                   </div>
-                  {place.phone_number && (
-                    <div className="flex items-center">
-                      <Phone className="h-5 w-5 mr-3 flex-shrink-0 text-vietnam-red-600" /> 
-                      <span className="text-vietnam-blue-700">{place.phone_number}</span>
-                      <Button variant="ghost" size="sm" className="ml-2 text-vietnam-blue-600 hover:text-vietnam-red-600">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Gọi
-                      </Button>
-                    </div>
-                  )}
                   <div className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-3 flex-shrink-0 text-vietnam-red-600" /> 
                     <span className="text-vietnam-blue-700">{formatPriceRange(place.price_range)}</span>
                   </div>
                 </div>
 
-                {/* Amenities */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Tiện ích</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="flex items-center text-vietnam-blue-700">
-                      <Wifi className="h-4 w-4 mr-2 text-vietnam-red-600" />
-                      <span>WiFi miễn phí</span>
-                    </div>
-                    <div className="flex items-center text-vietnam-blue-700">
-                      <Car className="h-4 w-4 mr-2 text-vietnam-red-600" />
-                      <span>Chỗ đậu xe</span>
-                    </div>
-                    <div className="flex items-center text-vietnam-blue-700">
-                      <CreditCard className="h-4 w-4 mr-2 text-vietnam-red-600" />
-                      <span>Thanh toán thẻ</span>
-                    </div>
-                    <div className="flex items-center text-vietnam-blue-700">
-                      <Users className="h-4 w-4 mr-2 text-vietnam-red-600" />
-                      <span>Phù hợp nhóm</span>
-                    </div>
-                    <div className="flex items-center text-vietnam-blue-700">
-                      <Baby className="h-4 w-4 mr-2 text-vietnam-red-600" />
-                      <span>Thân thiện trẻ em</span>
-                    </div>
-                    <div className="flex items-center text-vietnam-blue-700">
-                      <Dog className="h-4 w-4 mr-2 text-vietnam-red-600" />
-                      <span>Cho phép thú cưng</span>
-                    </div>
-                  </div>
-                </div>
+                <Alert className="border-vietnam-blue-200 bg-vietnam-blue-50">
+                  <Info className="h-4 w-4 text-vietnam-blue-600" />
+                  <AlertTitle className="font-semibold text-vietnam-blue-800">Dành cho chủ sở hữu</AlertTitle>
+                  <AlertDescription className="text-vietnam-blue-700">
+                    Chủ quán / chủ cơ sở liên hệ chúng tôi để <strong>xác nhận</strong> địa điểm và update số điện thoại.
+                  </AlertDescription>
+                </Alert>
 
-                {/* Description */}
                 {place.description && (
                   <div>
                     <h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Về địa điểm này</h3>
@@ -555,106 +498,85 @@ const PlaceDetailPage = () => {
                     </div>
                   </div>
                 )}
+
+                <div>
+                  <h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Tiện ích</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="flex items-center text-vietnam-blue-700"><Wifi className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>WiFi miễn phí</span></div>
+                    <div className="flex items-center text-vietnam-blue-700"><Car className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>Chỗ đậu xe</span></div>
+                    <div className="flex items-center text-vietnam-blue-700"><CreditCard className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>Thanh toán thẻ</span></div>
+                    <div className="flex items-center text-vietnam-blue-700"><Users className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>Phù hợp nhóm</span></div>
+                    <div className="flex items-center text-vietnam-blue-700"><Baby className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>Thân thiện trẻ em</span></div>
+                    <div className="flex items-center text-vietnam-blue-700"><Dog className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>Cho phép thú cưng</span></div>
+                  </div>
+                </div>
+
+                <Card className="border-vietnam-red-200">
+                  <CardHeader><CardTitle className="text-vietnam-red-600 flex items-center"><Calendar className="h-5 w-5 mr-2" />Chi tiết giờ mở cửa</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {daysOfWeek.map(({ key, label }) => {
+                        const hours = openingHoursData?.[key] || 'Đóng cửa';
+                        const isToday = new Date().getDay() === (key === 'sunday' ? 0 : daysOfWeek.findIndex(d => d.key === key) + 1);
+                        return (
+                          <div key={key} className={`flex justify-between items-center py-2 px-3 rounded ${isToday ? 'bg-vietnam-red-50 border border-vietnam-red-200' : ''}`}>
+                            <span className={`font-medium ${isToday ? 'text-vietnam-red-700' : 'text-vietnam-blue-800'}`}>{label}{isToday && <span className="ml-2 text-xs">(Hôm nay)</span>}</span>
+                            <span className={`${isToday ? 'text-vietnam-red-600 font-semibold' : 'text-vietnam-blue-600'}`}>{hours}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-vietnam-red-200">
+                  <CardHeader><CardTitle className="text-vietnam-red-600 flex items-center"><MapPin className="h-5 w-5 mr-2" />Vị trí trên bản đồ</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center"><p className="text-gray-500">Bản đồ sẽ được tích hợp ở đây</p></div>
+                    <Button className="btn-vietnam"><Navigation className="h-4 w-4 mr-2" />Chỉ đường</Button>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
-              <TabsContent value="reviews" className="space-y-6">
-                {/* Rating Overview */}
+              <TabsContent value="reviews" className="space-y-6 pt-6">
                 {totalReviews > 0 && (
                   <Card className="border-vietnam-red-200">
-                    <CardHeader>
-                      <CardTitle className="text-vietnam-red-600">Tổng quan đánh giá</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-vietnam-red-600">Tổng quan đánh giá</CardTitle></CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="text-center">
-                          <div className="text-4xl font-bold text-vietnam-blue-800 mb-2">
-                            {place.average_rating.toFixed(1)}
-                          </div>
-                          <div className="flex justify-center mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`h-5 w-5 ${
-                                  i < Math.round(place.average_rating) 
-                                    ? 'fill-vietnam-gold-500 text-vietnam-gold-500' 
-                                    : 'fill-gray-200 text-gray-200'
-                                }`} 
-                              />
-                            ))}
-                          </div>
+                          <div className="text-4xl font-bold text-vietnam-blue-800 mb-2">{place.average_rating.toFixed(1)}</div>
+                          <div className="flex justify-center mb-2">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-5 w-5 ${i < Math.round(place.average_rating) ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div>
                           <p className="text-vietnam-blue-600">{totalReviews} đánh giá</p>
                         </div>
-                        <div className="space-y-2">
-                          {ratingDistribution.map(({ rating, count, percentage }) => (
-                            <div key={rating} className="flex items-center gap-2">
-                              <span className="text-sm w-8">{rating} ⭐</span>
-                              <Progress value={percentage} className="flex-1 h-2" />
-                              <span className="text-sm text-vietnam-blue-600 w-8">{count}</span>
-                            </div>
-                          ))}
-                        </div>
+                        <div className="space-y-2">{ratingDistribution.map(({ rating, count, percentage }) => (<div key={rating} className="flex items-center gap-2"><span className="text-sm w-8">{rating} ⭐</span><Progress value={percentage} className="flex-1 h-2" /><span className="text-sm text-vietnam-blue-600 w-8">{count}</span></div>))}</div>
                       </div>
                     </CardContent>
                   </Card>
                 )}
 
-                {/* Write Review */}
                 {user && (
                   <Card className="border-vietnam-red-200">
-                    <CardHeader>
-                      <CardTitle className="text-vietnam-red-600">Viết đánh giá</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-vietnam-red-600">Viết đánh giá</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">
-                          Đánh giá của bạn
-                        </label>
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-6 w-6 cursor-pointer transition-colors ${
-                                star <= reviewRating
-                                  ? 'fill-vietnam-gold-500 text-vietnam-gold-500'
-                                  : 'fill-gray-200 text-gray-200 hover:fill-vietnam-gold-300 hover:text-vietnam-gold-300'
-                              }`}
-                              onClick={() => setReviewRating(star)}
-                            />
-                          ))}
-                        </div>
+                        <label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Đánh giá của bạn</label>
+                        <div className="flex gap-1">{[1, 2, 3, 4, 5].map((star) => (<Star key={star} className={`h-6 w-6 cursor-pointer transition-colors ${star <= reviewRating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200 hover:fill-vietnam-gold-300 hover:text-vietnam-gold-300'}`} onClick={() => setReviewRating(star)} />))}</div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">
-                          Chia sẻ trải nghiệm của bạn
-                        </label>
-                        <Textarea
-                          placeholder="Hãy chia sẻ những gì bạn thích về địa điểm này..."
-                          value={reviewText}
-                          onChange={(e) => setReviewText(e.target.value)}
-                          className="min-h-[100px]"
-                        />
+                        <label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Chia sẻ trải nghiệm của bạn</label>
+                        <Textarea placeholder="Hãy chia sẻ những gì bạn thích về địa điểm này..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} className="min-h-[100px]" />
                       </div>
-                      <Button 
-                        onClick={handleSubmitReview}
-                        disabled={submitReviewMutation.isPending || reviewText.trim().length < 10}
-                        className="btn-vietnam"
-                      >
-                        {submitReviewMutation.isPending ? 'Đang gửi...' : 'Gửi đánh giá'}
-                      </Button>
+                      <Button onClick={handleSubmitReview} disabled={submitReviewMutation.isPending || reviewText.trim().length < 10} className="btn-vietnam">{submitReviewMutation.isPending ? 'Đang gửi...' : 'Gửi đánh giá'}</Button>
                     </CardContent>
                   </Card>
                 )}
 
-                {/* Reviews List */}
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-vietnam-red-600">
-                      Đánh giá từ cộng đồng
-                    </h3>
+                    <h3 className="text-xl font-semibold text-vietnam-red-600">Đánh giá từ cộng đồng</h3>
                     <Select value={reviewSort} onValueChange={setReviewSort}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="newest">Mới nhất</SelectItem>
                         <SelectItem value="oldest">Cũ nhất</SelectItem>
@@ -670,47 +592,23 @@ const PlaceDetailPage = () => {
                         <Card key={review.id} className="border-vietnam-red-100">
                           <CardContent className="p-6">
                             <div className="flex items-start gap-4">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage src={review.profiles?.avatar_url} />
-                                <AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700">
-                                  {review.profiles?.full_name?.[0] || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
+                              <Avatar className="h-10 w-10"><AvatarImage src={review.profiles?.avatar_url} /><AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700">{review.profiles?.full_name?.[0] || 'U'}</AvatarFallback></Avatar>
                               <div className="flex-grow">
                                 <div className="flex items-center justify-between mb-2">
                                   <div>
-                                    <p className="font-semibold text-vietnam-blue-800">
-                                      {review.profiles?.full_name || 'Người dùng ẩn danh'}
-                                    </p>
+                                    <p className="font-semibold text-vietnam-blue-800">{review.profiles?.full_name || 'Người dùng ẩn danh'}</p>
                                     <div className="flex items-center gap-2 text-sm text-vietnam-blue-600">
-                                      <div className="flex">
-                                        {[...Array(5)].map((_, i) => (
-                                          <Star 
-                                            key={i} 
-                                            className={`h-4 w-4 ${
-                                              i < review.rating 
-                                                ? 'fill-vietnam-gold-500 text-vietnam-gold-500' 
-                                                : 'fill-gray-200 text-gray-200'
-                                            }`} 
-                                          />
-                                        ))}
-                                      </div>
+                                      <div className="flex">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div>
                                       <span>·</span>
                                       <span>{new Date(review.created_at).toLocaleDateString('vi-VN')}</span>
                                     </div>
                                   </div>
                                   <div className="flex gap-1">
-                                    <Button variant="ghost" size="sm">
-                                      <ThumbsUp className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm">
-                                      <Flag className="h-4 w-4" />
-                                    </Button>
+                                    <Button variant="ghost" size="sm"><ThumbsUp className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="sm"><Flag className="h-4 w-4" /></Button>
                                   </div>
                                 </div>
-                                {review.comment && (
-                                  <p className="text-vietnam-blue-700 leading-relaxed">{review.comment}</p>
-                                )}
+                                {review.comment && (<p className="text-vietnam-blue-700 leading-relaxed">{review.comment}</p>)}
                               </div>
                             </div>
                           </CardContent>
@@ -725,148 +623,36 @@ const PlaceDetailPage = () => {
                   )}
                 </div>
               </TabsContent>
-
-              <TabsContent value="hours" className="space-y-4">
-                <Card className="border-vietnam-red-200">
-                  <CardHeader>
-                    <CardTitle className="text-vietnam-red-600 flex items-center">
-                      <Clock className="h-5 w-5 mr-2" />
-                      Giờ mở cửa
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {daysOfWeek.map(({ key, label }) => {
-                        const hours = openingHoursData?.[key] || 'Đóng cửa';
-                        const isToday = new Date().getDay() === (key === 'sunday' ? 0 : daysOfWeek.findIndex(d => d.key === key) + 1);
-                        
-                        return (
-                          <div key={key} className={`flex justify-between items-center py-2 px-3 rounded ${
-                            isToday ? 'bg-vietnam-red-50 border border-vietnam-red-200' : ''
-                          }`}>
-                            <span className={`font-medium ${
-                              isToday ? 'text-vietnam-red-700' : 'text-vietnam-blue-800'
-                            }`}>
-                              {label}
-                              {isToday && <span className="ml-2 text-xs">(Hôm nay)</span>}
-                            </span>
-                            <span className={`${
-                              isToday ? 'text-vietnam-red-600 font-semibold' : 'text-vietnam-blue-600'
-                            }`}>
-                              {hours}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="location" className="space-y-4">
-                <Card className="border-vietnam-red-200">
-                  <CardHeader>
-                    <CardTitle className="text-vietnam-red-600 flex items-center">
-                      <MapPin className="h-5 w-5 mr-2" />
-                      Vị trí và liên hệ
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center">
-                      <p className="text-gray-500">Bản đồ sẽ được tích hợp ở đây</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-vietnam-blue-700">
-                        <strong>Địa chỉ:</strong> {place.address}
-                      </p>
-                      <p className="text-vietnam-blue-700">
-                        <strong>Quận/Huyện:</strong> {place.district}
-                      </p>
-                      {place.phone_number && (
-                        <p className="text-vietnam-blue-700">
-                          <strong>Điện thoại:</strong> {place.phone_number}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button className="btn-vietnam">
-                        <Navigation className="h-4 w-4 mr-2" />
-                        Chỉ đường
-                      </Button>
-                      <Button variant="outline" className="border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50">
-                        <Phone className="h-4 w-4 mr-2" />
-                        Gọi điện
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-20 space-y-6">
-              {/* Quick Actions */}
               <Card className="border-vietnam-red-200">
-                <CardHeader>
-                  <CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
                   {user ? (
-                    <Button className="w-full btn-vietnam">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Viết đánh giá
-                    </Button>
+                    <Button className="w-full btn-vietnam"><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>
                   ) : (
-                    <Button asChild className="w-full btn-vietnam">
-                      <Link to="/login">
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Đăng nhập để đánh giá
-                      </Link>
-                    </Button>
+                    <Button asChild className="w-full btn-vietnam"><Link to="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>
                   )}
-                  <Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50">
-                    <Bookmark className="h-4 w-4 mr-2" />
-                    Lưu vào sổ tay
-                  </Button>
-                  <Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Chia sẻ
-                  </Button>
+                  <Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50"><Bookmark className="h-4 w-4 mr-2" />Lưu vào sổ tay</Button>
+                  <Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button>
                 </CardContent>
               </Card>
 
-              {/* Similar Places */}
               {similarPlaces && similarPlaces.length > 0 && (
                 <Card className="border-vietnam-red-200">
-                  <CardHeader>
-                    <CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     {similarPlaces.map((similarPlace) => (
-                      <Link 
-                        key={similarPlace.id} 
-                        to={`/place/${similarPlace.slug}`}
-                        className="block group"
-                      >
+                      <Link key={similarPlace.id} to={`/place/${similarPlace.slug}`} className="block group">
                         <div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors">
-                          <img 
-                            src={similarPlace.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} 
-                            alt={similarPlace.name}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
+                          <img src={similarPlace.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" />
                           <div className="flex-grow min-w-0">
-                            <h4 className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">
-                              {similarPlace.name}
-                            </h4>
+                            <h4 className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</h4>
                             <p className="text-sm text-vietnam-blue-600 truncate">{similarPlace.district}</p>
-                            {similarPlace.average_rating > 0 && (
-                              <div className="flex items-center text-xs text-vietnam-blue-600">
-                                <Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />
-                                {similarPlace.average_rating.toFixed(1)}
-                              </div>
-                            )}
+                            {similarPlace.average_rating > 0 && (<div className="flex items-center text-xs text-vietnam-blue-600"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}
                           </div>
                         </div>
                       </Link>
