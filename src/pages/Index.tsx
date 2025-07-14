@@ -3,39 +3,12 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FormEvent } from "react";
-
-const collections = [
-  {
-    title: "Quán Mới Đang Hot",
-    description: "Những địa điểm vừa xuất hiện đã gây bão.",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop",
-  },
-  {
-    title: "Quán Lâu Đời Ký Ức",
-    description: "Tìm lại hương vị Sài Gòn xưa.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    title: "Cafe 'Deep Work'",
-    description: "Không gian yên tĩnh cho dân freelancer.",
-    image: "https://images.unsplash.com/photo-1497515114629-48446e82d0ac?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    title: "Rooftop View Triệu Đô",
-    description: "Ngắm Sài Gòn từ trên cao.",
-    image: "https://images.unsplash.com/photo-1590152398939-e33e6134b2b3?q=80&w=1974&auto=format&fit=crop",
-  },
-];
-
-const newPlaces = [
-    { name: "Phở Haru", district: "Quận 1", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2070&auto=format&fit=crop" },
-    { name: "The Running Bean", district: "Quận 3", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1974&auto=format&fit=crop" },
-    { name: "Bún Chả Quán", district: "Phú Nhuận", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=1964&auto=format&fit=crop" },
-    { name: "Cơm Tấm Ba Ghiền", district: "Bình Thạnh", image: "https://images.unsplash.com/photo-1598515599465-f36719464717?q=80&w=2070&auto=format&fit=crop" },
-];
+import { useCollections } from "../hooks/data/useCollections";
+import { useLocations } from "../hooks/data/useLocations";
 
 const blogPosts = [
     { title: "Một ngày ăn sập Quận 5", excerpt: "Hành trình khám phá thiên đường ẩm thực của người Hoa...", image: "https://images.unsplash.com/photo-1585907279394-90a3d3d49fc7?q=80&w=1974&auto=format&fit=crop" },
@@ -45,6 +18,8 @@ const blogPosts = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const { data: collections, isLoading: isLoadingCollections } = useCollections();
+  const { data: newPlaces, isLoading: isLoadingNewPlaces } = useLocations({ limit: 4 });
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,15 +60,27 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-center mb-2">Bộ sưu tập nổi bật</h2>
           <p className="text-muted-foreground text-center mb-8">Những danh sách chọn lọc theo "gu" và "tâm trạng" của bạn.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {collections.map((collection) => (
-              <Card key={collection.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <img src={collection.image} alt={collection.title} className="h-40 w-full object-cover" />
-                <CardHeader>
-                  <CardTitle>{collection.title}</CardTitle>
-                  <CardDescription>{collection.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+            {isLoadingCollections ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i}>
+                  <Skeleton className="h-40 w-full" />
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full" />
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              collections?.map((collection) => (
+                <Card key={collection.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <img src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} alt={collection.title} className="h-40 w-full object-cover" />
+                  <CardHeader>
+                    <CardTitle>{collection.title}</CardTitle>
+                    <CardDescription>{collection.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))
+            )}
           </div>
         </section>
 
@@ -102,18 +89,32 @@ const Index = () => {
             <h2 className="text-3xl font-bold text-center mb-2">Địa điểm mới cập nhật</h2>
             <p className="text-muted-foreground text-center mb-8">Những quán hay ho vừa được thêm vào hệ thống.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {newPlaces.map((place) => (
-                <Card key={place.name} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <img src={place.image} alt={place.name} className="h-48 w-full object-cover" />
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg">{place.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {place.district}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+              {isLoadingNewPlaces ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="h-48 w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                newPlaces?.map((place) => (
+                  <Link to={`/place/${place.slug}`} key={place.id} className="block">
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                      <img src={place.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} alt={place.name} className="h-48 w-full object-cover" />
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-lg">{place.name}</h3>
+                        <p className="text-sm text-muted-foreground flex items-center mt-1">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {place.district}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
         </section>
