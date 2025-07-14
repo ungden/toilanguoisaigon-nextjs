@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { FormEvent } from "react";
 
 const collections = [
   {
@@ -42,6 +44,19 @@ const blogPosts = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const query = formData.get("query") as string;
+    if (query) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    } else {
+      navigate('/search');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
@@ -51,17 +66,18 @@ const Index = () => {
           <div className="relative container mx-auto px-4">
             <h1 className="text-4xl md:text-6xl font-bold text-white">Tìm "chất" Sài Gòn</h1>
             <p className="mt-4 text-lg md:text-xl text-white/90">Khám phá những địa điểm ẩm thực và văn hóa độc đáo của Sài Gòn.</p>
-            <div className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row gap-2">
+            <form onSubmit={handleSearch} className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row gap-2">
               <Input
                 type="text"
+                name="query"
                 placeholder="Tìm kiếm tên quán, món ăn, địa chỉ..."
                 className="h-12 text-base"
               />
-              <Button size="lg" className="h-12">
+              <Button type="submit" size="lg" className="h-12">
                 <Search className="h-5 w-5 mr-2" />
                 Tìm kiếm
               </Button>
-            </div>
+            </form>
           </div>
         </section>
 
