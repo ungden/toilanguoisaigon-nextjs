@@ -7,9 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, TrendingUp, Clock, Users, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 import { useCollections } from "../hooks/data/useCollections";
 import { useLocations } from "../hooks/data/useLocations";
+import { showError } from "@/utils/toast";
 
 const blogPosts = [
     { 
@@ -38,7 +39,18 @@ const blogPosts = [
 const Index = () => {
   const navigate = useNavigate();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
-  const { data: newPlaces, isLoading: isLoadingNewPlaces } = useLocations({ limit: 4 });
+  const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 4 });
+
+  useEffect(() => {
+    if (locationsError) {
+      console.error("Error loading locations:", locationsError);
+      showError("Không thể tải danh sách địa điểm. Vui lòng thử lại sau.");
+    }
+  }, [locationsError]);
+
+  useEffect(() => {
+    console.log("New places loaded:", newPlaces);
+  }, [newPlaces]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -126,8 +138,8 @@ const Index = () => {
                   </CardHeader>
                 </Card>
               ))
-            ) : (
-              collections?.map((collection) => (
+            ) : collections && collections.length > 0 ? (
+              collections.map((collection) => (
                 <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full flex flex-col">
                     <div className="relative overflow-hidden">
@@ -149,6 +161,10 @@ const Index = () => {
                   </Card>
                 </Link>
               ))
+            ) : (
+              <div className="col-span-4 text-center py-8">
+                <p className="text-vietnam-blue-600">Chưa có bộ sưu tập nào. Hãy quay lại sau!</p>
+              </div>
             )}
           </div>
           <div className="mt-12 text-center">
@@ -185,8 +201,8 @@ const Index = () => {
                     </CardContent>
                   </Card>
                 ))
-              ) : (
-                newPlaces?.map((place) => (
+              ) : newPlaces && newPlaces.length > 0 ? (
+                newPlaces.map((place) => (
                   <Link to={`/place/${place.id}`} key={place.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full bg-white">
                       <div className="relative overflow-hidden">
@@ -221,6 +237,10 @@ const Index = () => {
                     </Card>
                   </Link>
                 ))
+              ) : (
+                <div className="col-span-4 text-center py-8">
+                  <p className="text-vietnam-blue-600">Chưa có địa điểm nào. Hãy quay lại sau!</p>
+                </div>
               )}
             </div>
             <div className="mt-12 text-center">

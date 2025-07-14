@@ -5,18 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, MapPin, Clock, Phone, DollarSign, MessageSquare, UserCircle } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { Star, MapPin, Clock, Phone, DollarSign, MessageSquare, UserCircle, ArrowLeft } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Location, ReviewWithProfile } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
+import { useEffect } from "react";
+import { showError } from "@/utils/toast";
 
 interface LocationWithReviews extends Location {
   reviews: ReviewWithProfile[];
 }
 
 const fetchLocationDetail = async (id: string): Promise<LocationWithReviews | null> => {
+  console.log('Fetching location detail for ID:', id);
+  
   const { data, error } = await supabase
     .from('locations')
     .select(`
@@ -30,7 +34,6 @@ const fetchLocationDetail = async (id: string): Promise<LocationWithReviews | nu
       )
     `)
     .eq('id', id)
-    .eq('status', 'published')
     .single();
 
   if (error) {
@@ -38,17 +41,27 @@ const fetchLocationDetail = async (id: string): Promise<LocationWithReviews | nu
     throw new Error(error.message);
   }
 
+  console.log('Fetched location detail:', data);
   return data;
 };
 
 const PlaceDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   
   const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
     queryKey: ['location-detail', id],
     queryFn: () => fetchLocationDetail(id!),
     enabled: !!id,
+    retry: 1,
   });
+
+  useEffect(() => {
+    if (error) {
+      console.error('Error loading location detail:', error);
+      showError('Không thể tải thông tin địa điểm. Vui lòng thử lại sau.');
+    }
+  }, [error]);
 
   if (isLoading) {
     return (
@@ -83,9 +96,12 @@ const PlaceDetailPage = () => {
         <main className="flex-grow container mx-auto px-4 py-8">
           <div className="text-center py-16">
             <h1 className="text-2xl font-bold text-vietnam-red-600 mb-4">Không tìm thấy địa điểm</h1>
-            <p className="text-vietnam-blue-600">Địa điểm bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
-            <Button asChild variant="outline" className="mt-6 text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
-              <Link to="/search">Quay lại tìm kiếm</Link>
+            <p className="text-vietnam-blue-600 mb-8">Địa điểm bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
+            <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
+              <Link to="/search">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Quay lại tìm kiếm
+              </Link>
             </Button>
           </div>
         </main>
@@ -95,31 +111,44 @@ const PlaceDetailPage = () => {
   }
 
   const images = [place.main_image_url, ...(place.gallery_urls || [])].filter(Boolean) as string[];
+  if (images.length === 0) {
+    images.push('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
+        {/* Back button */}
+        <Button 
+          variant="ghost" 
+          className="mb-4 text-vietnam-blue-600 hover:text-vietnam-red-600 hover:bg-vietnam-red-50 -ml-2"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Quay lại
+        </Button>
+
         {/* Image Gallery */}
-        <div className="grid grid-cols-4 grid-rows-2 gap-2 h-96 mb-8">
-          <div className="col-span-2 row-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 h-64 md:h-96 mb-8">
+          <div className="col-span-1 md:col-span-2 row-span-2">
             <img 
-              src={images[0] || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} 
+              src={images[0]} 
               alt={place.name} 
               className="w-full h-full object-cover rounded-lg" 
             />
           </div>
-          {images[1] && (
+          {images.length > 1 && (
             <div className="col-span-1 row-span-1">
               <img src={images[1]} alt={place.name} className="w-full h-full object-cover rounded-lg" />
             </div>
           )}
-          {images[2] && (
+          {images.length > 2 && (
             <div className="col-span-1 row-span-1">
               <img src={images[2]} alt={place.name} className="w-full h-full object-cover rounded-lg" />
             </div>
           )}
-          <div className="col-span-2 row-span-1">
+          <div className="col-span-1 md:col-span-2 row-span-1">
             <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
               <Button variant="outline">Xem tất cả ảnh ({images.length})</Button>
             </div>
@@ -186,9 +215,9 @@ const PlaceDetailPage = () => {
             {/* Community Reviews */}
             <div>
               <h2 className="text-2xl font-bold mb-4 text-vietnam-red-600">
-                Đánh giá từ cộng đồng ({place.reviews.length})
+                Đánh giá từ cộng đồng ({place.reviews?.length || 0})
               </h2>
-              {place.reviews.length > 0 ? (
+              {place.reviews && place.reviews.length > 0 ? (
                 <div className="space-y-6">
                   {place.reviews.map(review => (
                     <div key={review.id}>
@@ -229,7 +258,7 @@ const PlaceDetailPage = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="border-vietnam-red-200">
+            <Card className="border-vietnam-red-200 sticky top-20">
               <CardHeader>
                 <CardTitle className="text-vietnam-red-600">Thông tin thêm</CardTitle>
               </CardHeader>
