@@ -66,39 +66,50 @@ interface LocationWithReviews extends Location {
 }
 
 const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | null> => {
-  const { data, error } = await supabase
+  // Step 1: Fetch the core location data first.
+  const { data: locationData, error: locationError } = await supabase
     .from('locations')
-    .select(`
-      *,
-      reviews (
-        *,
-        profiles (
-          full_name,
-          avatar_url
-        )
-      ),
-      location_categories (
-        categories (
-          name,
-          slug
-        )
-      ),
-      location_tags (
-        tags (
-          name,
-          slug
-        )
-      )
-    `)
+    .select('*')
     .eq('slug', slug)
     .single();
 
-  if (error) {
-    console.error('Error fetching location detail by slug:', error);
-    throw new Error(error.message);
+  // If the location itself is not found, stop here.
+  if (locationError || !locationData) {
+    console.error('Error fetching location by slug:', locationError?.message);
+    return null;
   }
 
-  return data;
+  // Step 2: Fetch all related data in parallel. This is more robust than a single complex query.
+  const [reviewsResult, categoriesResult, tagsResult] = await Promise.all([
+    supabase
+      .from('reviews')
+      .select('*, profiles(full_name, avatar_url)')
+      .eq('location_id', locationData.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('location_categories')
+      .select('categories(name, slug)')
+      .eq('location_id', locationData.id),
+    supabase
+      .from('location_tags')
+      .select('tags(name, slug)')
+      .eq('location_id', locationData.id)
+  ]);
+
+  // Log errors if any, but don't stop the process. This makes the query more resilient.
+  if (reviewsResult.error) console.error('Error fetching reviews:', reviewsResult.error.message);
+  if (categoriesResult.error) console.error('Error fetching categories:', categoriesResult.error.message);
+  if (tagsResult.error) console.error('Error fetching tags:', tagsResult.error.message);
+
+  // Step 3: Combine all the data into a single object for the UI.
+  const combinedData: LocationWithReviews = {
+    ...locationData,
+    reviews: (reviewsResult.data as ReviewWithProfile[]) || [],
+    location_categories: (categoriesResult.data as any[]) || [],
+    location_tags: (tagsResult.data as any[]) || [],
+  };
+
+  return combinedData;
 };
 
 const fetchSimilarLocations = async (district: string, currentId: string): Promise<Location[]> => {
