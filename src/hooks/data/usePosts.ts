@@ -3,6 +3,8 @@ import { supabase } from '../../integrations/supabase/client';
 import { Post } from '../../types/database';
 
 const fetchPosts = async (): Promise<Post[]> => {
+  console.log('Fetching posts...');
+  
   const { data, error } = await supabase
     .from('posts')
     .select(`
@@ -20,6 +22,7 @@ const fetchPosts = async (): Promise<Post[]> => {
     throw new Error(error.message);
   }
 
+  console.log('Posts fetched:', data);
   return data || [];
 };
 
@@ -27,5 +30,7 @@ export const usePosts = () => {
   return useQuery<Post[], Error>({
     queryKey: ['posts'],
     queryFn: fetchPosts,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
   });
 };

@@ -17,7 +17,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 4 });
-  const { data: posts, isLoading: isLoadingPosts } = usePosts();
+  const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
 
   useEffect(() => {
     if (locationsError) {
@@ -25,6 +25,13 @@ const Index = () => {
       showError("Không thể tải danh sách địa điểm. Vui lòng thử lại sau.");
     }
   }, [locationsError]);
+
+  useEffect(() => {
+    if (postsError) {
+      console.error("Error loading posts:", postsError);
+      showError("Không thể tải danh sách bài viết. Vui lòng thử lại sau.");
+    }
+  }, [postsError]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -242,10 +249,17 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {isLoadingPosts ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i}><Skeleton className="h-64 w-full" /></Card>
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="aspect-[16/9] w-full" />
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </CardHeader>
+                </Card>
               ))
-            ) : (
-              posts?.slice(0, 3).map((post) => (
+            ) : posts && posts.length > 0 ? (
+              posts.slice(0, 3).map((post) => (
                 <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col">
                     <div className="relative overflow-hidden">
@@ -266,6 +280,11 @@ const Index = () => {
                   </Card>
                 </Link>
               ))
+            ) : (
+              <div className="col-span-3 text-center py-8">
+                <p className="text-vietnam-blue-600">Chưa có bài viết nào. Hãy quay lại sau!</p>
+                <p className="text-sm text-muted-foreground mt-2">Debug: Posts loading: {isLoadingPosts ? 'true' : 'false'}, Posts data: {posts ? posts.length : 'null'}</p>
+              </div>
             )}
           </div>
           <div className="mt-12 text-center">
