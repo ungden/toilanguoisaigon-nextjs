@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Collection } from '@/types/database';
 import { Clock, MapPin, Target, Palette, Users, Award } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface CollectionWithCategory extends Collection {
   collection_categories: {
@@ -120,29 +121,31 @@ const CollectionsPage = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                       {collections.map((collection) => (
-                        <Card key={collection.id} className="overflow-hidden card-hover border-vietnam-red-200 group h-full">
-                          <div className="relative overflow-hidden">
-                            <img 
-                              src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
-                              alt={collection.title} 
-                              className="h-56 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                            />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute top-4 left-4">
-                              <Badge className="bg-vietnam-blue-600 text-white">
-                                {categoryName}
-                              </Badge>
+                        <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
+                          <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full">
+                            <div className="relative overflow-hidden">
+                              <img 
+                                src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                                alt={collection.title} 
+                                className="h-56 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                              />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <div className="absolute top-4 left-4">
+                                <Badge className="bg-vietnam-blue-600 text-white">
+                                  {categoryName}
+                                </Badge>
+                              </div>
                             </div>
-                          </div>
-                          <CardHeader className="bg-white flex-grow">
-                            <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg leading-tight">
-                              {collection.title}
-                            </CardTitle>
-                            <CardDescription className="text-vietnam-blue-600 text-sm leading-relaxed">
-                              {collection.description}
-                            </CardDescription>
-                          </CardHeader>
-                        </Card>
+                            <CardHeader className="bg-white flex-grow">
+                              <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg leading-tight">
+                                {collection.title}
+                              </CardTitle>
+                              <CardDescription className="text-vietnam-blue-600 text-sm leading-relaxed">
+                                {collection.description}
+                              </CardDescription>
+                            </CardHeader>
+                          </Card>
+                        </Link>
                       ))}
                     </div>
                   </div>

@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import SearchPage from "./pages/Search";
 import PlaceDetailPage from "./pages/PlaceDetail";
 import CollectionsPage from "./pages/Collections";
+import CollectionDetailPage from "./pages/CollectionDetail";
 import LoginPage from "./pages/Login";
 import ProfilePage from "./pages/Profile";
 import MyNotebookPage from "./pages/MyNotebook";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/search" element={<SearchPage />} />
             <Route path="/place/:slug" element={<PlaceDetailPage />} />
             <Route path="/collections" element={<CollectionsPage />} />
+            <Route path="/collection/:slug" element={<CollectionDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             
             <Route 
