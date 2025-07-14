@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bookmark, LogOut } from "lucide-react";
+import { Menu, User, Bookmark, LogOut, Star } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -31,30 +31,38 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm">
+      <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
-          <Link to="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold sm:inline-block">
-              Tôi là người Sài Gòn
-            </span>
+          <Link to="/" className="mr-8 flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <Star className="h-8 w-8 text-vietnam-red-600 fill-vietnam-red-600" />
+              <div className="flex flex-col">
+                <span className="font-bold text-lg gradient-text">
+                  Tôi là người Sài Gòn
+                </span>
+                <span className="text-xs text-vietnam-blue-600 font-medium">
+                  Khám phá ẩm thực
+                </span>
+              </div>
+            </div>
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <nav className="flex items-center space-x-8 text-sm font-medium">
             <Link
               to="/"
-              className="text-foreground/60 transition-colors hover:text-foreground/80"
+              className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Bộ sưu tập
             </Link>
             <Link
               to="/"
-              className="text-foreground/60 transition-colors hover:text-foreground/80"
+              className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Blog
             </Link>
             <Link
               to="/"
-              className="text-foreground/60 transition-colors hover:text-foreground/80"
+              className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Về chúng tôi
             </Link>
@@ -65,21 +73,22 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50"
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="pr-0">
-            <Link to="/" className="flex items-center">
-              <span className="font-bold">Tôi là người Sài Gòn</span>
+          <SheetContent side="left" className="pr-0 bg-white">
+            <Link to="/" className="flex items-center space-x-2 mb-6">
+              <Star className="h-6 w-6 text-vietnam-red-600 fill-vietnam-red-600" />
+              <span className="font-bold gradient-text">Tôi là người Sài Gòn</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
-              <div className="flex flex-col space-y-3">
-                 <Link to="/">Bộ sưu tập</Link>
-                 <Link to="/">Blog</Link>
-                 <Link to="/">Về chúng tôi</Link>
+              <div className="flex flex-col space-y-4">
+                 <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
+                 <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
+                 <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
               </div>
             </div>
           </SheetContent>
@@ -88,44 +97,46 @@ export function Header() {
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-vietnam-red-50">
+                  <Avatar className="h-10 w-10 border-2 border-vietnam-red-200">
                     <AvatarImage src={profile?.avatar_url} alt={profile?.full_name || 'User'} />
-                    <AvatarFallback>{getInitials(profile?.full_name, session.user.email)}</AvatarFallback>
+                    <AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700 font-semibold">
+                      {getInitials(profile?.full_name, session.user.email)}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56 bg-white border-vietnam-red-200" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{profile?.full_name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
+                    <p className="text-sm font-semibold text-vietnam-blue-800">{profile?.full_name}</p>
+                    <p className="text-xs leading-none text-vietnam-blue-600">
                       {session.user.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-vietnam-red-200" />
                 <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex items-center">
+                  <Link to="/profile" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <User className="mr-2 h-4 w-4" />
                     <span>Trang cá nhân</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/my-notebook" className="flex items-center">
+                  <Link to="/my-notebook" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Sổ tay của tôi</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                <DropdownMenuSeparator className="bg-vietnam-red-200" />
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Đăng xuất</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild>
+            <Button asChild className="btn-vietnam">
               <Link to="/login">Đăng nhập</Link>
             </Button>
           )}
