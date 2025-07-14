@@ -9,39 +9,34 @@ import { Star, MapPin, Clock, Phone, DollarSign, MessageSquare, UserCircle, Arro
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Location, ReviewWithProfile } from '@/types/database';
+import { Location, Review } from '@/types/database'; // Removed ReviewWithProfile
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { useEffect } from "react";
 import { showError } from "@/utils/toast";
 
-interface LocationWithReviews extends Location {
-  reviews: ReviewWithProfile[];
+// Simplified type for debugging
+interface LocationWithSimpleReviews extends Location {
+  reviews: Review[];
 }
 
-const fetchLocationDetail = async (id: string): Promise<LocationWithReviews | null> => {
-  console.log('Fetching location detail for ID:', id);
+const fetchLocationDetail = async (id: string): Promise<LocationWithSimpleReviews | null> => {
+  console.log('Fetching location detail for ID (simplified query):', id);
   
   const { data, error } = await supabase
     .from('locations')
     .select(`
       *,
-      reviews (
-        *,
-        profiles (
-          full_name,
-          avatar_url
-        )
-      )
-    `)
+      reviews (*)
+    `) // Simplified query, removed nested profiles
     .eq('id', id)
     .single();
 
   if (error) {
-    console.error('Error fetching location detail:', error);
+    console.error('Error fetching location detail (simplified query):', error);
     throw new Error(error.message);
   }
 
-  console.log('Fetched location detail:', data);
+  console.log('Fetched location detail (simplified query):', data);
   return data;
 };
 
@@ -49,7 +44,7 @@ const PlaceDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
+  const { data: place, isLoading, error } = useQuery<LocationWithSimpleReviews | null, Error>({
     queryKey: ['location-detail', id],
     queryFn: () => fetchLocationDetail(id!),
     enabled: !!id,
@@ -225,7 +220,7 @@ const PlaceDetailPage = () => {
                         <UserCircle className="h-8 w-8 mr-2 text-vietnam-blue-600" />
                         <div>
                           <p className="font-semibold text-vietnam-blue-800">
-                            {review.profiles?.full_name || 'Người dùng ẩn danh'}
+                            {'Người dùng ẩn danh'}
                           </p>
                           <div className="flex items-center text-sm">
                             {[...Array(5)].map((_, i) => (
