@@ -20,7 +20,7 @@ const ContactPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Thông tin liên hệ</h3>
-                <p className="mb-2"><strong>Email:</strong> <a href="mailto:contact@toilanguoisaigon.com" className="text-vietnam-red-600 hover:underline">contact@toilanguoisaigon.com</a></p>
+                <p className="mb-2"><strong>Email:</strong> <a href="mailto:toilanguoisaigonofficial@gmail.com" className="text-vietnam-red-600 hover:underline">toilanguoisaigonofficial@gmail.com</a></p>
                 <p className="mb-2"><strong>Địa chỉ:</strong> Quận 1, Thành phố Hồ Chí Minh, Việt Nam</p>
                 <p>Chúng tôi sẽ phản hồi trong vòng 24-48 giờ làm việc.</p>
               </div>
