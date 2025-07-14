@@ -128,24 +128,26 @@ const Index = () => {
               ))
             ) : (
               collections?.map((collection) => (
-                <Card key={collection.id} className="overflow-hidden card-hover border-vietnam-red-200 group">
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
-                      alt={collection.title} 
-                      className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                    />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <CardHeader className="bg-white">
-                    <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors">
-                      {collection.title}
-                    </CardTitle>
-                    <CardDescription className="text-vietnam-blue-600">
-                      {collection.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
+                <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
+                  <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full flex flex-col">
+                    <div className="relative overflow-hidden">
+                      <img 
+                        src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                        alt={collection.title} 
+                        className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <CardHeader className="bg-white flex-grow">
+                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors">
+                        {collection.title}
+                      </CardTitle>
+                      <CardDescription className="text-vietnam-blue-600 line-clamp-2">
+                        {collection.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
               ))
             )}
           </div>
