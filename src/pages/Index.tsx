@@ -244,8 +244,8 @@ const Index = () => {
               Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i}><Skeleton className="h-64 w-full" /></Card>
               ))
-            ) : posts && posts.length > 0 ? (
-              posts.slice(0, 3).map((post) => (
+            ) : (
+              posts?.slice(0, 3).map((post) => (
                 <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col">
                     <div className="relative overflow-hidden">
@@ -266,10 +266,6 @@ const Index = () => {
                   </Card>
                 </Link>
               ))
-            ) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-vietnam-blue-600">Chưa có bài viết nào để hiển thị.</p>
-              </div>
             )}
           </div>
           <div className="mt-12 text-center">
