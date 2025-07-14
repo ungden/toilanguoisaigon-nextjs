@@ -3,17 +3,21 @@ import { Link } from "react-router-dom";
 
 const TikTokIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="20"
     height="20"
     viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    xmlns="http://www.w3.org/2000/svg"
+    className="text-white/80 group-hover:text-vietnam-gold-300 transition-colors"
   >
-    <path d="M12 12a4 4 0 1 0 4 4V8a8 8 0 1 1-8-8" />
+    <defs>
+      <path
+        id="tiktok-path"
+        d="M16.6 5.82s.51.5 0 0A4.27 4.27 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.59A2.59 2.59 0 0 1 7.27 15.4a2.59 2.59 0 0 1 2.59-2.59h.4v-2.89h-.4a5.48 5.48 0 0 0-5.48 5.48A5.48 5.48 0 0 0 9.86 21a5.48 5.48 0 0 0 5.48-5.48V5.82h1.26Z"
+      />
+    </defs>
+    <use href="#tiktok-path" fill="#FF0050" transform="translate(1.5, 0)" />
+    <use href="#tiktok-path" fill="#00F2EA" transform="translate(-1.5, 0)" />
+    <use href="#tiktok-path" fill="currentColor" />
   </svg>
 );
 
@@ -97,25 +101,28 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/20 pt-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center text-white/80 mb-4 md:mb-0">
-              <Heart className="h-4 w-4 mr-2 text-vietnam-red-400 fill-vietnam-red-400" />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center text-white/80 text-center md:text-left">
+              <Heart className="h-4 w-4 mr-2 text-vietnam-red-400 fill-vietnam-red-400 flex-shrink-0" />
               <span className="text-sm">
                 &copy; {new Date().getFullYear()} Tôi là người Sài Gòn. Made with love in Saigon.
               </span>
             </div>
-            <div className="flex items-center space-x-4">
-              <a href="https://www.facebook.com/languoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="https://www.instagram.com/toilanguoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="https://www.tiktok.com/@toilanguoisaigonofficial" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
-                <TikTokIcon />
-              </a>
-              <a href="mailto:toilanguoisaigonofficial@gmail.com" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
+            <div className="flex flex-col sm:flex-row items-center gap-x-6 gap-y-4">
+              <div className="flex items-center space-x-5">
+                <a href="https://www.facebook.com/languoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="https://www.instagram.com/toilanguoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="https://www.tiktok.com/@toilanguoisaigonofficial" target="_blank" rel="noopener noreferrer" className="group">
+                  <TikTokIcon />
+                </a>
+              </div>
+              <a href="mailto:toilanguoisaigonofficial@gmail.com" className="text-white/80 hover:text-vietnam-gold-300 transition-colors flex items-center gap-2 text-sm">
                 <Mail className="h-5 w-5" />
+                toilanguoisaigonofficial@gmail.com
               </a>
             </div>
           </div>
