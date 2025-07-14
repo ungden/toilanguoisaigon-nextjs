@@ -6,16 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MapPin, Clock, Phone, DollarSign, MessageSquare, UserCircle } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Location, ReviewWithProfile } from '@/types/database';
+import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 
 interface LocationWithReviews extends Location {
   reviews: ReviewWithProfile[];
 }
 
-const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | null> => {
+const fetchLocationDetail = async (id: string): Promise<LocationWithReviews | null> => {
   const { data, error } = await supabase
     .from('locations')
     .select(`
@@ -28,7 +29,7 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
         )
       )
     `)
-    .ilike('slug', slug)
+    .eq('id', id)
     .eq('status', 'published')
     .single();
 
@@ -40,33 +41,13 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
   return data;
 };
 
-const formatPriceRange = (priceRange: string | null) => {
-  const priceMap: { [key: string]: string } = {
-    '$': 'Dưới 100.000đ',
-    '$$': '100.000đ - 300.000đ',
-    '$$$': '300.000đ - 500.000đ',
-    '$$$$': 'Trên 500.000đ'
-  };
-  return priceRange ? priceMap[priceRange] || priceRange : 'Chưa cập nhật';
-};
-
-const formatOpeningHours = (openingHours: any) => {
-  if (!openingHours || typeof openingHours !== 'object') return 'Chưa cập nhật';
-  
-  const today = new Date().getDay();
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  
-  const todayHours = openingHours[days[today]] || openingHours.monday;
-  return todayHours === '24h' ? 'Mở cửa 24h' : todayHours || 'Chưa cập nhật';
-};
-
 const PlaceDetailPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   
   const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
-    queryKey: ['location-detail', slug],
-    queryFn: () => fetchLocationDetail(slug!),
-    enabled: !!slug,
+    queryKey: ['location-detail', id],
+    queryFn: () => fetchLocationDetail(id!),
+    enabled: !!id,
   });
 
   if (isLoading) {
@@ -103,6 +84,9 @@ const PlaceDetailPage = () => {
           <div className="text-center py-16">
             <h1 className="text-2xl font-bold text-vietnam-red-600 mb-4">Không tìm thấy địa điểm</h1>
             <p className="text-vietnam-blue-600">Địa điểm bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
+            <Button asChild variant="outline" className="mt-6 text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
+              <Link to="/search">Quay lại tìm kiếm</Link>
+            </Button>
           </div>
         </main>
         <Footer />

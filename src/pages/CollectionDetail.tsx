@@ -3,11 +3,12 @@ import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Star, Clock, Phone, DollarSign } from "lucide-react";
+import { MapPin, Star, Clock } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Collection, Location } from '@/types/database';
+import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 
 interface CollectionWithLocations extends Collection {
   collection_categories: {
@@ -43,26 +44,6 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
   }
 
   return data;
-};
-
-const formatPriceRange = (priceRange: string | null) => {
-  const priceMap: { [key: string]: string } = {
-    '$': 'Dưới 100k',
-    '$$': '100k - 300k',
-    '$$$': '300k - 500k',
-    '$$$$': 'Trên 500k'
-  };
-  return priceRange ? priceMap[priceRange] || priceRange : 'Chưa cập nhật';
-};
-
-const formatOpeningHours = (openingHours: any) => {
-  if (!openingHours || typeof openingHours !== 'object') return 'Chưa cập nhật';
-  
-  const today = new Date().getDay();
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  
-  const todayHours = openingHours[days[today]] || openingHours.monday;
-  return todayHours === '24h' ? 'Mở cửa 24h' : todayHours || 'Chưa cập nhật';
 };
 
 const CollectionDetailPage = () => {
@@ -153,7 +134,7 @@ const CollectionDetailPage = () => {
         <section className="container mx-auto py-16 px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {locations.map((location) => (
-              <Link to={`/place/${location.slug}`} key={location.id} className="block group">
+              <Link to={`/place/${location.id}`} key={location.id} className="block group">
                 <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
                   <div className="relative overflow-hidden">
                     <img 
@@ -182,13 +163,6 @@ const CollectionDetailPage = () => {
                         <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
                         <span>{formatOpeningHours(location.opening_hours)}</span>
                       </div>
-                      
-                      {location.phone_number && (
-                        <div className="flex items-center">
-                          <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span>{location.phone_number}</span>
-                        </div>
-                      )}
                     </div>
 
                     {location.average_rating > 0 && (

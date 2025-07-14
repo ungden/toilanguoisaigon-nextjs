@@ -1,24 +1,20 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FilterSidebar } from "@/components/search/FilterSidebar";
-import { SearchResultCard, SearchResult } from "@/components/search/SearchResultCard";
+import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon, List, Map } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-
-const mockResults: SearchResult[] = [
-  { name: "Phở Haru", slug: "pho-haru", district: "Quận 1", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2070&auto=format&fit=crop", rating: 4.8, reviewCount: 120, cuisine: "Món Việt", priceRange: "100k - 200k" },
-  { name: "The Running Bean", slug: "the-running-bean", district: "Quận 3", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1974&auto=format&fit=crop", rating: 4.5, reviewCount: 350, cuisine: "Café", priceRange: "50k - 150k" },
-  { name: "Bún Chả Quán", slug: "bun-cha-quan", district: "Phú Nhuận", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=1964&auto=format&fit=crop", rating: 4.7, reviewCount: 215, cuisine: "Món Việt", priceRange: "50k - 100k" },
-  { name: "Cơm Tấm Ba Ghiền", slug: "com-tam-ba-ghien", district: "Bình Thạnh", image: "https://images.unsplash.com/photo-1598515599465-f36719464717?q=80&w=2070&auto=format&fit=crop", rating: 4.9, reviewCount: 890, cuisine: "Món Việt", priceRange: "50k - 100k" },
-  { name: "Sushi Tei", slug: "sushi-tei", district: "Quận 1", image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070&auto=format&fit=crop", rating: 4.6, reviewCount: 430, cuisine: "Món Nhật", priceRange: "300k - 500k" },
-  { name: "El Gaucho Argentinian Steakhouse", slug: "el-gaucho", district: "Quận 1", image: "https://images.unsplash.com/photo-1546824294-1671459746b9?q=80&w=2070&auto=format&fit=crop", rating: 4.8, reviewCount: 600, cuisine: "Món Âu", priceRange: "> 500k" },
-];
+import { useLocations } from "@/hooks/data/useLocations";
+import { Location } from "@/types/database";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
+  const { data: results, isLoading } = useLocations({ query, limit: 20 });
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -47,13 +43,27 @@ const SearchPage = () => {
           </div>
           
           <h2 className="text-2xl font-bold mb-4">
-            {mockResults.length} Kết quả {query && `cho "${query}"`}
+            {isLoading ? <Skeleton className="h-8 w-48" /> : `${results?.length || 0} Kết quả ${query && `cho "${query}"`}`}
           </h2>
           
           <div className="space-y-4">
-            {mockResults.map((place) => (
-              <SearchResultCard key={place.name} place={place} />
-            ))}
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="flex flex-col sm:flex-row overflow-hidden w-full">
+                  <Skeleton className="w-full sm:w-48 h-48 sm:h-auto object-cover flex-shrink-0" />
+                  <CardContent className="p-4 flex-grow space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-1/4 mt-4" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              results?.map((place) => (
+                <SearchResultCard key={place.id} place={place as Location} />
+              ))
+            )}
           </div>
         </main>
       </div>
