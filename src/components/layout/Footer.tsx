@@ -1,4 +1,3 @@
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Star, Heart, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -88,9 +87,6 @@ export function Footer() {
               <span className="text-sm">
                 &copy; {new Date().getFullYear()} Tôi là người Sài Gòn. Made with love in Saigon.
               </span>
-            </div>
-            <div className="text-white/60">
-              <MadeWithDyad />
             </div>
           </div>
         </div>
