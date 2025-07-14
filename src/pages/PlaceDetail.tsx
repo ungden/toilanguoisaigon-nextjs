@@ -66,50 +66,40 @@ interface LocationWithReviews extends Location {
 }
 
 const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | null> => {
-  // Step 1: Fetch the core location data first.
-  const { data: locationData, error: locationError } = await supabase
+  const { data, error } = await supabase
     .from('locations')
-    .select('*')
+    .select(`
+      *,
+      reviews (
+        *,
+        profiles (
+          full_name,
+          avatar_url
+        )
+      ),
+      location_categories (
+        categories (
+          name,
+          slug
+        )
+      ),
+      location_tags (
+        tags (
+          name,
+          slug
+        )
+      )
+    `)
     .eq('slug', slug)
+    .order('created_at', { foreignTable: 'reviews', ascending: false })
     .single();
 
-  // If the location itself is not found, stop here.
-  if (locationError || !locationData) {
-    console.error('Error fetching location by slug:', locationError?.message);
+  if (error) {
+    console.error('Error fetching location detail by slug:', error);
     return null;
   }
 
-  // Step 2: Fetch all related data in parallel. This is more robust than a single complex query.
-  const [reviewsResult, categoriesResult, tagsResult] = await Promise.all([
-    supabase
-      .from('reviews')
-      .select('*, profiles(full_name, avatar_url)')
-      .eq('location_id', locationData.id)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('location_categories')
-      .select('categories(name, slug)')
-      .eq('location_id', locationData.id),
-    supabase
-      .from('location_tags')
-      .select('tags(name, slug)')
-      .eq('location_id', locationData.id)
-  ]);
-
-  // Log errors if any, but don't stop the process. This makes the query more resilient.
-  if (reviewsResult.error) console.error('Error fetching reviews:', reviewsResult.error.message);
-  if (categoriesResult.error) console.error('Error fetching categories:', categoriesResult.error.message);
-  if (tagsResult.error) console.error('Error fetching tags:', tagsResult.error.message);
-
-  // Step 3: Combine all the data into a single object for the UI.
-  const combinedData: LocationWithReviews = {
-    ...locationData,
-    reviews: (reviewsResult.data as ReviewWithProfile[]) || [],
-    location_categories: (categoriesResult.data as any[]) || [],
-    location_tags: (tagsResult.data as any[]) || [],
-  };
-
-  return combinedData;
+  return data as LocationWithReviews;
 };
 
 const fetchSimilarLocations = async (district: string, currentId: string): Promise<Location[]> => {
@@ -278,16 +268,18 @@ const PlaceDetailPage = () => {
 
   const categories = place.location_categories?.map(lc => lc.categories) || [];
   const tags = place.location_tags?.map(lt => lt.tags) || [];
-  
+  const reviews = place.reviews || [];
+  const totalReviews = reviews.length;
+
   // Calculate rating distribution
   const ratingDistribution = [5, 4, 3, 2, 1].map(rating => {
-    const count = place.reviews?.filter(r => r.rating === rating).length || 0;
-    const percentage = place.review_count > 0 ? (count / place.review_count) * 100 : 0;
+    const count = reviews.filter(r => r.rating === rating).length;
+    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
     return { rating, count, percentage };
   });
 
   // Sort reviews
-  const sortedReviews = [...(place.reviews || [])].sort((a, b) => {
+  const sortedReviews = [...reviews].sort((a, b) => {
     if (reviewSort === 'newest') {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     } else if (reviewSort === 'oldest') {
@@ -431,7 +423,7 @@ const PlaceDetailPage = () => {
                       <Star className="h-5 w-5 mr-1 fill-vietnam-gold-500 text-vietnam-gold-500" />
                       <span className="font-semibold">{place.average_rating.toFixed(1)}</span>
                       <span className="mx-2">·</span>
-                      <span>({place.review_count} đánh giá)</span>
+                      <span>({totalReviews} đánh giá)</span>
                     </div>
                   )}
                   <Badge variant="secondary" className="bg-vietnam-red-100 text-vietnam-red-700">
@@ -476,7 +468,7 @@ const PlaceDetailPage = () => {
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="overview">Tổng quan</TabsTrigger>
-                <TabsTrigger value="reviews">Đánh giá ({place.review_count})</TabsTrigger>
+                <TabsTrigger value="reviews">Đánh giá ({totalReviews})</TabsTrigger>
                 <TabsTrigger value="hours">Giờ mở cửa</TabsTrigger>
                 <TabsTrigger value="location">Vị trí</TabsTrigger>
               </TabsList>
@@ -556,7 +548,7 @@ const PlaceDetailPage = () => {
 
               <TabsContent value="reviews" className="space-y-6">
                 {/* Rating Overview */}
-                {place.review_count > 0 && (
+                {totalReviews > 0 && (
                   <Card className="border-vietnam-red-200">
                     <CardHeader>
                       <CardTitle className="text-vietnam-red-600">Tổng quan đánh giá</CardTitle>
@@ -579,7 +571,7 @@ const PlaceDetailPage = () => {
                               />
                             ))}
                           </div>
-                          <p className="text-vietnam-blue-600">{place.review_count} đánh giá</p>
+                          <p className="text-vietnam-blue-600">{totalReviews} đánh giá</p>
                         </div>
                         <div className="space-y-2">
                           {ratingDistribution.map(({ rating, count, percentage }) => (
