@@ -2,13 +2,14 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePost } from "@/hooks/data/usePost";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, User, ArrowLeft } from "lucide-react";
+import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PostDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { data: post, isLoading, error } = usePost(slug!);
 
   if (isLoading) {
@@ -39,7 +40,7 @@ const PostDetailPage = () => {
           <div className="text-center py-16">
             <h1 className="text-2xl font-bold text-vietnam-red-600 mb-4">Không tìm thấy bài viết</h1>
             <p className="text-vietnam-blue-600">Bài viết bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
-            <Button asChild variant="outline" className="mt-8">
+            <Button asChild variant="outline" className="mt-8 text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
               <Link to="/blog">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Quay lại trang Blog
@@ -57,23 +58,30 @@ const PostDetailPage = () => {
       <Header />
       <main className="flex-grow py-8 md:py-16">
         <div className="container mx-auto px-4 max-w-4xl">
+          <Button 
+            variant="ghost" 
+            className="mb-6 text-vietnam-blue-600 hover:text-vietnam-red-600 hover:bg-vietnam-red-50 -ml-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Quay lại
+          </Button>
           <article>
             <header className="mb-8">
               <h1 className="text-3xl md:text-5xl font-bold text-vietnam-blue-800 mb-4 leading-tight">
                 {post.title}
               </h1>
-              <div className="flex items-center gap-6 text-muted-foreground text-sm">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <Avatar className="h-6 w-6 mr-1">
+                  <Avatar className="h-6 w-6">
                     <AvatarImage src={post.profiles?.avatar_url || ''} />
                     <AvatarFallback>{post.profiles?.full_name?.[0] || 'A'}</AvatarFallback>
                   </Avatar>
-                  <span>{post.profiles?.full_name || 'Admin'}</span>
+                  <span className="font-medium">{post.profiles?.full_name || 'Admin'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>{new Date(post.created_at).toLocaleDateString('vi-VN')}</span>
+                  <span>{new Date(post.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                 </div>
               </div>
             </header>
@@ -82,12 +90,12 @@ const PostDetailPage = () => {
               <img 
                 src={post.cover_image_url} 
                 alt={post.title}
-                className="w-full aspect-[16/9] object-cover rounded-lg mb-8"
+                className="w-full aspect-video object-cover rounded-lg mb-8 shadow-lg"
               />
             )}
 
             <div 
-              className="prose prose-lg max-w-none prose-p:text-vietnam-blue-700 prose-headings:text-vietnam-red-600"
+              className="prose prose-lg max-w-none prose-p:text-vietnam-blue-800 prose-headings:text-vietnam-red-600 prose-a:text-vietnam-red-600 hover:prose-a:text-vietnam-red-700 prose-strong:text-vietnam-blue-900"
               dangerouslySetInnerHTML={{ __html: post.content || '' }} 
             />
           </article>

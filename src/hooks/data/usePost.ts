@@ -17,6 +17,11 @@ const fetchPost = async (slug: string): Promise<Post | null> => {
     .single();
 
   if (error) {
+    // PostgREST error code for "exact one row not found"
+    if (error.code === 'PGRST116') {
+      console.warn(`Post with slug "${slug}" not found.`);
+      return null;
+    }
     console.error(`Error fetching post with slug ${slug}:`, error);
     throw new Error(error.message);
   }
