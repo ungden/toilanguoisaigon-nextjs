@@ -107,6 +107,28 @@
     @apply border-2 border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-600 hover:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300;
   }
 
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
   /* Hero Section Animations */
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
