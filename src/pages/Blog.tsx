@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePosts } from "@/hooks/data/usePosts";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar } from "lucide-react";
+import { Calendar, Rss } from "lucide-react";
 
 const BlogPage = () => {
   const { data: posts, isLoading } = usePosts();
@@ -39,9 +39,9 @@ const BlogPage = () => {
                 </Card>
               ))}
             </div>
-          ) : (
+          ) : posts && posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts?.map((post) => (
+              {posts.map((post) => (
                 <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full flex flex-col">
                     <div className="relative overflow-hidden">
@@ -77,6 +77,14 @@ const BlogPage = () => {
                   </Card>
                 </Link>
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Rss className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h2 className="mt-4 text-2xl font-semibold">Chưa có bài viết nào</h2>
+              <p className="mt-2 text-muted-foreground">
+                Nội dung đang được chuẩn bị. Vui lòng quay lại sau!
+              </p>
             </div>
           )}
         </section>
