@@ -52,19 +52,18 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative text-center py-24 md:py-32 overflow-hidden">
-          <div className="absolute inset-0 hero-gradient"></div>
+        <section className="relative text-center py-24 md:py-32 overflow-hidden bg-vietnam-red-600">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1531697111548-0c45f24911da?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20"></div>
           <div className="relative container mx-auto px-4 animate-fade-in">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
                 Tìm <span className="text-vietnam-gold-400">"chất"</span> Sài Gòn
               </h1>
-              <p className="text-xl md:text-2xl text-white/95 mb-8 leading-relaxed">
+              <p className="text-xl md:text-2xl text-white mb-8 leading-relaxed">
                 Khám phá những địa điểm ẩm thực và văn hóa độc đáo của Sài Gòn
               </p>
               <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
@@ -78,7 +77,7 @@ const Index = () => {
                       className="h-14 text-base pl-12 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 focus:border-white/50"
                     />
                   </div>
-                  <Button type="submit" size="lg" className="h-14 px-8 bg-vietnam-red-600 hover:bg-vietnam-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Button type="submit" size="lg" className="h-14 px-8 bg-vietnam-blue-600 hover:bg-vietnam-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
                     <Search className="h-5 w-5 mr-2" />
                     Tìm kiếm
                   </Button>
@@ -111,7 +110,7 @@ const Index = () => {
               <Star className="h-4 w-4 mr-1" />
               Nổi bật
             </Badge>
-            <h2 className="text-4xl font-bold mb-4 gradient-text">Bộ sưu tập nổi bật</h2>
+            <h2 className="text-4xl font-bold mb-4 text-vietnam-red-600">Bộ sưu tập nổi bật</h2>
             <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
               Những danh sách chọn lọc theo "gu" và "tâm trạng" của bạn, được tuyển chọn bởi đội ngũ chuyên gia ẩm thực.
             </p>
@@ -136,7 +135,7 @@ const Index = () => {
                       alt={collection.title} 
                       className="h-48 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
                   <CardHeader className="bg-white">
                     <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors">
@@ -153,14 +152,14 @@ const Index = () => {
         </section>
 
         {/* New Places Section */}
-        <section className="bg-gradient-to-r from-vietnam-red-50 to-vietnam-blue-50 py-20">
+        <section className="bg-vietnam-blue-50 py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <Badge className="mb-4 bg-vietnam-blue-100 text-vietnam-blue-700 hover:bg-vietnam-blue-200">
                 <TrendingUp className="h-4 w-4 mr-1" />
                 Mới cập nhật
               </Badge>
-              <h2 className="text-4xl font-bold mb-4 gradient-text">Địa điểm mới cập nhật</h2>
+              <h2 className="text-4xl font-bold mb-4 text-vietnam-blue-600">Địa điểm mới cập nhật</h2>
               <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
                 Những quán hay ho vừa được thêm vào hệ thống, chờ bạn khám phá và trải nghiệm.
               </p>
@@ -224,7 +223,7 @@ const Index = () => {
               <Users className="h-4 w-4 mr-1" />
               Cộng đồng
             </Badge>
-            <h2 className="text-4xl font-bold mb-4 gradient-text">Blog & Review chuyên sâu</h2>
+            <h2 className="text-4xl font-bold mb-4 text-vietnam-gold-600">Blog & Review chuyên sâu</h2>
             <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
               Đọc những câu chuyện và khám phá Sài Gòn qua từng góc nhìn của cộng đồng yêu ẩm thực.
             </p>

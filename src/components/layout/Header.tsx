@@ -31,14 +31,14 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-8 flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <Star className="h-8 w-8 text-vietnam-red-600 fill-vietnam-red-600" />
               <div className="flex flex-col">
-                <span className="font-bold text-lg gradient-text">
+                <span className="font-bold text-lg text-vietnam-red-600">
                   Tôi là người Sài Gòn
                 </span>
                 <span className="text-xs text-vietnam-blue-600 font-medium">
@@ -82,7 +82,7 @@ export function Header() {
           <SheetContent side="left" className="pr-0 bg-white">
             <Link to="/" className="flex items-center space-x-2 mb-6">
               <Star className="h-6 w-6 text-vietnam-red-600 fill-vietnam-red-600" />
-              <span className="font-bold gradient-text">Tôi là người Sài Gòn</span>
+              <span className="font-bold text-vietnam-red-600">Tôi là người Sài Gòn</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-4">

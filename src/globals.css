@@ -95,20 +95,12 @@
 }
 
 @layer components {
-  .gradient-text {
-    @apply bg-gradient-to-r from-vietnam-red-600 to-vietnam-blue-600 bg-clip-text text-transparent;
-  }
-  
-  .hero-gradient {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.95) 0%, rgba(59, 130, 246, 0.95) 100%);
-  }
-  
   .card-hover {
     @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
   }
   
   .btn-vietnam {
-    @apply bg-gradient-to-r from-vietnam-red-600 to-vietnam-red-700 hover:from-vietnam-red-700 hover:to-vietnam-red-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300;
+    @apply bg-vietnam-red-600 hover:bg-vietnam-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300;
   }
   
   .btn-vietnam-outline {
