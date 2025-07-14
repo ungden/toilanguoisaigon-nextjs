@@ -17,6 +17,11 @@ import MyNotebookPage from "./pages/MyNotebook";
 import BlogPage from "./pages/Blog";
 import PostDetailPage from "./pages/PostDetail";
 import NotFound from "./pages/NotFound";
+import AboutPage from "./pages/About";
+import ContactPage from "./pages/Contact";
+import TermsPage from "./pages/Terms";
+import PrivacyPage from "./pages/Privacy";
+import FaqPage from "./pages/Faq";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +41,12 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<PostDetailPage />} />
+            
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/faq" element={<FaqPage />} />
             
             <Route 
               path="/profile" 

@@ -55,13 +55,13 @@ export function Header() {
               Bộ sưu tập
             </Link>
             <Link
-              to="/"
+              to="/blog"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Blog
             </Link>
             <Link
-              to="/"
+              to="/about"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Về chúng tôi
@@ -87,8 +87,8 @@ export function Header() {
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-4">
                  <Link to="/collections" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
-                 <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
-                 <Link to="/" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
+                 <Link to="/blog" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
+                 <Link to="/about" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
               </div>
             </div>
           </SheetContent>
