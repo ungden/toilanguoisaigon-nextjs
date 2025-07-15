@@ -8,6 +8,7 @@ import { ShieldCheck, User, MessageSquare } from "lucide-react";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserReviewsList } from "@/components/profile/UserReviewsList";
+import { ProfileGamification } from "@/components/profile/ProfileGamification";
 
 const ProfilePage = () => {
     const { user, profile, role } = useAuth();
@@ -48,7 +49,8 @@ const ProfilePage = () => {
                     </Card>
 
                     {/* Right Content - Tabs */}
-                    <div className="flex-1">
+                    <div className="flex-1 space-y-6">
+                        {profile && <ProfileGamification profile={profile} />}
                         <Tabs defaultValue="reviews" className="w-full">
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="reviews">

@@ -6,9 +6,11 @@ import { AppRole } from '@/types/database';
 
 export interface Profile {
   id: string;
-  full_name: string;
-  avatar_url: string;
-  bio: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  xp?: number;
+  level?: number;
 }
 
 interface AuthContextType {

@@ -19,6 +19,8 @@ export interface Profile {
   bio: string | null;
   created_at: string;
   updated_at: string;
+  xp: number;
+  level: number;
 }
 
 export interface ProfileWithRole extends Profile {
@@ -123,4 +125,11 @@ export interface LocationSubmission {
   description: string | null;
   notes: string | null;
   status: SubmissionStatus;
+}
+
+export interface Level {
+  level: number;
+  xp_required: number;
+  title: string;
+  description: string | null;
 }
