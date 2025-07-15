@@ -10,14 +10,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 
-export const columns = (options: { onEdit: (location: Location) => void }): ColumnDef<Location>[] => [
+export const columns = (options: { 
+  onEdit: (location: Location) => void;
+  onDelete: (location: Location) => void;
+}): ColumnDef<Location>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -107,7 +109,10 @@ export const columns = (options: { onEdit: (location: Location) => void }): Colu
               <Pencil className="mr-2 h-4 w-4" />
               Chỉnh sửa
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+            <DropdownMenuItem 
+              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              onClick={() => options.onDelete(location)}
+            >
               <Trash className="mr-2 h-4 w-4" />
               Xóa
             </DropdownMenuItem>

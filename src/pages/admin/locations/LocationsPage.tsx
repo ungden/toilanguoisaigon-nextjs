@@ -11,23 +11,43 @@ import { LocationForm } from "@/components/admin/locations/LocationForm";
 import { Location } from "@/types/database";
 import { useCreateLocation } from "@/hooks/data/useCreateLocation";
 import { useUpdateLocation } from "@/hooks/data/useUpdateLocation";
+import { useDeleteLocation } from "@/hooks/data/useDeleteLocation";
+import { DeleteLocationDialog } from "@/components/admin/locations/DeleteLocationDialog";
 
 const AdminLocationsPage = () => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
     const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+    const [deletingLocation, setDeletingLocation] = useState<Location | null>(null);
 
     const { data: locations, isLoading, error } = useAdminLocations();
     const createLocationMutation = useCreateLocation();
     const updateLocationMutation = useUpdateLocation();
+    const deleteLocationMutation = useDeleteLocation();
 
-    const handleOpenDialog = (location: Location | null = null) => {
+    const handleOpenFormDialog = (location: Location | null = null) => {
         setEditingLocation(location);
-        setIsDialogOpen(true);
+        setIsFormDialogOpen(true);
     };
 
-    const handleCloseDialog = () => {
-        setIsDialogOpen(false);
+    const handleCloseFormDialog = () => {
+        setIsFormDialogOpen(false);
         setEditingLocation(null);
+    };
+
+    const handleOpenDeleteDialog = (location: Location) => {
+        setDeletingLocation(location);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setDeletingLocation(null);
+    };
+
+    const handleConfirmDelete = () => {
+        if (deletingLocation) {
+            deleteLocationMutation.mutate(deletingLocation.id, {
+                onSuccess: handleCloseDeleteDialog,
+            });
+        }
     };
 
     const handleSubmit = (values: any) => {
@@ -39,11 +59,11 @@ const AdminLocationsPage = () => {
 
         if (editingLocation) {
             updateLocationMutation.mutate({ id: editingLocation.id, ...processedValues }, {
-                onSuccess: handleCloseDialog,
+                onSuccess: handleCloseFormDialog,
             });
         } else {
             createLocationMutation.mutate(processedValues, {
-                onSuccess: handleCloseDialog,
+                onSuccess: handleCloseFormDialog,
             });
         }
     };
@@ -61,7 +81,7 @@ const AdminLocationsPage = () => {
                             <CardTitle>Quản lý Địa điểm</CardTitle>
                             <CardDescription>Xem, tạo, sửa và xóa các địa điểm trên trang web.</CardDescription>
                         </div>
-                        <Button onClick={() => handleOpenDialog()}>
+                        <Button onClick={() => handleOpenFormDialog()}>
                             <PlusCircle className="h-4 w-4 mr-2" />
                             Tạo địa điểm mới
                         </Button>
@@ -77,14 +97,14 @@ const AdminLocationsPage = () => {
                         </div>
                     ) : (
                         <LocationsDataTable 
-                            columns={columns({ onEdit: handleOpenDialog })} 
+                            columns={columns({ onEdit: handleOpenFormDialog, onDelete: handleOpenDeleteDialog })} 
                             data={locations || []} 
                         />
                     )}
                 </CardContent>
             </Card>
 
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
                 <DialogContent className="sm:max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>{editingLocation ? 'Chỉnh sửa địa điểm' : 'Tạo địa điểm mới'}</DialogTitle>
@@ -96,10 +116,20 @@ const AdminLocationsPage = () => {
                         location={editingLocation}
                         onSubmit={handleSubmit}
                         isPending={createLocationMutation.isPending || updateLocationMutation.isPending}
-                        onClose={handleCloseDialog}
+                        onClose={handleCloseFormDialog}
                     />
                 </DialogContent>
             </Dialog>
+
+            {deletingLocation && (
+                <DeleteLocationDialog
+                    isOpen={!!deletingLocation}
+                    onClose={handleCloseDeleteDialog}
+                    onConfirm={handleConfirmDelete}
+                    locationName={deletingLocation.name}
+                    isPending={deleteLocationMutation.isPending}
+                />
+            )}
         </>
     );
 };
