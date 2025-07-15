@@ -8,6 +8,7 @@ import {
   Library,
   MessageSquare,
   Star,
+  Inbox,
 } from "lucide-react";
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { to: "/admin/posts", icon: FileText, label: "Bài viết" },
   { to: "/admin/collections", icon: Library, label: "Bộ sưu tập" },
   { to: "/admin/reviews", icon: MessageSquare, label: "Đánh giá" },
+  { to: "/admin/submissions", icon: Inbox, label: "Đóng góp" },
 ];
 
 export function AdminSidebar() {

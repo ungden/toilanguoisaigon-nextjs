@@ -35,12 +35,13 @@ export function SubmissionForm({ onSuccess }: SubmissionFormProps) {
     },
   });
 
-  async function onSubmit(data: SubmissionFormValues) {
-    // We call mutateAsync and then handle success actions after it resolves.
-    // This simplifies the call and avoids potential type inference issues.
-    await submitLocationMutation.mutateAsync(data);
-    form.reset();
-    onSuccess();
+  function onSubmit(data: SubmissionFormValues) {
+    submitLocationMutation.mutate(data, {
+      onSuccess: () => {
+        form.reset();
+        onSuccess();
+      },
+    });
   }
 
   return (
