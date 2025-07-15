@@ -13,6 +13,7 @@ import { useLocations } from "../hooks/data/useLocations";
 import { usePosts } from "@/hooks/data/usePosts";
 import { showError } from "@/utils/toast";
 import { formatPriceRange } from "@/utils/formatters";
+import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -161,40 +162,47 @@ const Index = () => {
                   </Card>
                 ))
               ) : sortedCollections && sortedCollections.length > 0 ? (
-                sortedCollections.map((collection, index) => (
-                  <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
-                    <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
-                      <div className="relative overflow-hidden">
-                        <img 
-                          src={
-                            collection.title === "Michelin Sài Gòn 2025" 
-                              ? "https://assets.dyad.ai/michelin-saigon-2025.png" 
-                              : collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'
-                          } 
-                          alt={collection.title} 
-                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                        />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        {index < 2 && (
-                          <div className="absolute top-3 left-3">
-                            <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg">
-                              <Sparkles className="h-3 w-3 mr-1.5" />
-                              Đặc biệt
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                      <CardHeader className="bg-white flex-grow">
-                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
-                          {collection.title}
-                        </CardTitle>
-                        <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
-                          {collection.description}
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                ))
+                sortedCollections.map((collection, index) => {
+                  const imagePath = collection.cover_image_url ? getPathFromSupabaseUrl(collection.cover_image_url) : null;
+                  const optimizedImageUrl = imagePath 
+                    ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
+                    : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop';
+
+                  return (
+                    <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
+                      <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
+                        <div className="relative overflow-hidden">
+                          <img 
+                            src={
+                              collection.title === "Michelin Sài Gòn 2025" 
+                                ? "https://assets.dyad.ai/michelin-saigon-2025.png" 
+                                : optimizedImageUrl
+                            } 
+                            alt={collection.title} 
+                            className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                          />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          {index < 2 && (
+                            <div className="absolute top-3 left-3">
+                              <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg">
+                                <Sparkles className="h-3 w-3 mr-1.5" />
+                                Đặc biệt
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                        <CardHeader className="bg-white flex-grow">
+                          <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
+                            {collection.title}
+                          </CardTitle>
+                          <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
+                            {collection.description}
+                          </CardDescription>
+                        </CardHeader>
+                      </Card>
+                    </Link>
+                  )
+                })
               ) : (
                 <div className="col-span-4 text-center py-8">
                   <p className="text-vietnam-blue-600">Chưa có bộ sưu tập nào. Hãy quay lại sau!</p>
@@ -238,56 +246,63 @@ const Index = () => {
                 </Card>
               ))
             ) : newPlaces && newPlaces.length > 0 ? (
-              newPlaces.map((place) => (
-                <Link to={`/place/${place.slug}`} key={place.id} className="block group">
-                  <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
-                    <div className="relative overflow-hidden">
-                      <img 
-                        src={place.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} 
-                        alt={place.name} 
-                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      />
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-vietnam-red-600 text-white text-xs">
-                          {place.district}
-                        </Badge>
+              newPlaces.map((place) => {
+                const imagePath = place.main_image_url ? getPathFromSupabaseUrl(place.main_image_url) : null;
+                const optimizedImageUrl = imagePath 
+                  ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
+                  : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop';
+                
+                return (
+                  <Link to={`/place/${place.slug}`} key={place.id} className="block group">
+                    <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
+                      <div className="relative overflow-hidden">
+                        <img 
+                          src={optimizedImageUrl} 
+                          alt={place.name} 
+                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        />
+                        <div className="absolute top-3 left-3">
+                          <Badge className="bg-vietnam-red-600 text-white text-xs">
+                            {place.district}
+                          </Badge>
+                        </div>
+                        {place.average_rating > 0 && (
+                          <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-md text-xs flex items-center">
+                            <Star className="h-3 w-3 text-vietnam-gold-400 fill-vietnam-gold-400 mr-1" />
+                            {place.average_rating.toFixed(1)}
+                          </div>
+                        )}
                       </div>
-                      {place.average_rating > 0 && (
-                        <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-md text-xs flex items-center">
-                          <Star className="h-3 w-3 text-vietnam-gold-400 fill-vietnam-gold-400 mr-1" />
-                          {place.average_rating.toFixed(1)}
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2 line-clamp-1">
-                        {place.name}
-                      </h3>
-                      
-                      <div className="space-y-2 text-sm text-vietnam-blue-600">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{place.address}</span>
-                        </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2 line-clamp-1">
+                          {place.name}
+                        </h3>
                         
-                        {place.price_range && (
+                        <div className="space-y-2 text-sm text-vietnam-blue-600">
                           <div className="flex items-center">
-                            <span className="text-vietnam-gold-600 font-medium">
-                              {formatPriceRange(place.price_range)}
-                            </span>
+                            <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{place.address}</span>
                           </div>
-                        )}
+                          
+                          {place.price_range && (
+                            <div className="flex items-center">
+                              <span className="text-vietnam-gold-600 font-medium">
+                                {formatPriceRange(place.price_range)}
+                              </span>
+                            </div>
+                          )}
 
-                        {place.review_count > 0 && (
-                          <div className="text-xs text-vietnam-blue-500">
-                            {place.review_count} đánh giá
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
+                          {place.review_count > 0 && (
+                            <div className="text-xs text-vietnam-blue-500">
+                              {place.review_count} đánh giá
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })
             ) : (
               <div className="col-span-4 text-center py-8">
                 <p className="text-vietnam-blue-600">Chưa có địa điểm nào. Hãy quay lại sau!</p>
@@ -341,27 +356,34 @@ const Index = () => {
                 </Button>
               </div>
             ) : posts && posts.length > 0 ? (
-              posts.slice(0, 3).map((post) => (
-                <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
-                  <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col bg-white">
-                    <div className="relative overflow-hidden">
-                      <img 
-                        src={post.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
-                        alt={post.title} 
-                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      />
-                    </div>
-                    <CardHeader className="bg-white flex-grow">
-                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      <CardDescription className="text-vietnam-blue-600 text-sm line-clamp-2">
-                        {post.excerpt}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))
+              posts.slice(0, 3).map((post) => {
+                const imagePath = post.cover_image_url ? getPathFromSupabaseUrl(post.cover_image_url) : null;
+                const optimizedImageUrl = imagePath 
+                  ? getTransformedImageUrl(imagePath, { width: 500, height: 281 }) 
+                  : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop';
+
+                return (
+                  <Link to={`/blog/${post.slug}`} key={post.id} className="block group">
+                    <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col bg-white">
+                      <div className="relative overflow-hidden">
+                        <img 
+                          src={optimizedImageUrl} 
+                          alt={post.title} 
+                          className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        />
+                      </div>
+                      <CardHeader className="bg-white flex-grow">
+                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg line-clamp-2">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="text-vietnam-blue-600 text-sm line-clamp-2">
+                          {post.excerpt}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                )
+              })
             ) : (
               <div className="col-span-3 text-center py-8">
                 <p className="text-vietnam-blue-600">Chưa có bài viết nào. Hãy quay lại sau!</p>

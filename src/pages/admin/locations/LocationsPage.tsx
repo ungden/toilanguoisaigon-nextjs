@@ -13,6 +13,8 @@ import { useCreateLocation } from "@/hooks/data/useCreateLocation";
 import { useUpdateLocation } from "@/hooks/data/useUpdateLocation";
 import { useDeleteLocation } from "@/hooks/data/useDeleteLocation";
 import { DeleteLocationDialog } from "@/components/admin/locations/DeleteLocationDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { showError } from "@/utils/toast";
 
 const AdminLocationsPage = () => {
     const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
@@ -50,12 +52,36 @@ const AdminLocationsPage = () => {
         }
     };
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = async (values: any) => {
+        let imageUrl = editingLocation?.main_image_url || '';
+
+        if (values.image_file && values.image_file.length > 0) {
+            const file = values.image_file[0];
+            const filePath = `public/${Date.now()}-${file.name}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('location-images')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                showError(`Lỗi tải ảnh lên: ${uploadError.message}`);
+                return;
+            }
+
+            const { data: urlData } = supabase.storage
+                .from('location-images')
+                .getPublicUrl(filePath);
+            
+            imageUrl = urlData.publicUrl;
+        }
+
         const processedValues = {
             ...values,
+            main_image_url: imageUrl,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
             opening_hours: values.opening_hours ? JSON.parse(values.opening_hours) : null,
         };
+        delete processedValues.image_file;
 
         if (editingLocation) {
             updateLocationMutation.mutate({ id: editingLocation.id, ...processedValues }, {
