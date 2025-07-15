@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
@@ -23,7 +23,11 @@ import ContactPage from "@/pages/Contact";
 import TermsPage from "@/pages/Terms";
 import PrivacyPage from "@/pages/Privacy";
 import FaqPage from "@/pages/Faq";
+
+// Admin Pages
+import AdminLayout from "@/components/layout/AdminLayout";
 import AdminDashboardPage from "@/pages/admin/Dashboard";
+import AdminLocationsPage from "@/pages/admin/locations/LocationsPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +39,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/place/:slug" element={<PlaceDetailPage />} />
@@ -43,40 +48,37 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<PostDetailPage />} />
-            
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/faq" element={<FaqPage />} />
             
+            {/* Protected User Routes */}
             <Route 
               path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
+              element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} 
             />
             <Route 
               path="/my-notebook" 
-              element={
-                <ProtectedRoute>
-                  <MyNotebookPage />
-                </ProtectedRoute>
-              } 
+              element={<ProtectedRoute><MyNotebookPage /></ProtectedRoute>} 
             />
             
+            {/* Admin Routes */}
             <Route 
-              path="/admin" 
-              element={
-                <AdminRoute>
-                  <AdminDashboardPage />
-                </AdminRoute>
-              } 
-            />
+              path="/admin"
+              element={<AdminRoute><AdminLayout /></AdminRoute>}
+            >
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="locations" element={<AdminLocationsPage />} />
+              {/* Add other admin routes here as placeholders */}
+              <Route path="users" element={<div>Quản lý người dùng</div>} />
+              <Route path="posts" element={<div>Quản lý bài viết</div>} />
+              <Route path="collections" element={<div>Quản lý bộ sưu tập</div>} />
+              <Route path="reviews" element={<div>Quản lý đánh giá</div>} />
+            </Route>
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Catch-all Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
