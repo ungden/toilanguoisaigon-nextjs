@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { FormEvent, useEffect } from "react";
+import { FormEvent, useEffect, useMemo } from "react";
 import { useCollections } from "../hooks/data/useCollections";
 import { useLocations } from "../hooks/data/useLocations";
 import { usePosts } from "@/hooks/data/usePosts";
@@ -19,6 +19,30 @@ const Index = () => {
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 8 });
   const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
+
+  const sortedCollections = useMemo(() => {
+    if (!collections) return [];
+
+    const priorityTitles = [
+      "Michelin Sài Gòn 2025",
+      "Check-in Sống Ảo Triệu Like"
+    ];
+    
+    const priorityItems = [];
+    const otherItems = [];
+
+    for (const collection of collections) {
+      if (priorityTitles.includes(collection.title)) {
+        priorityItems.push(collection);
+      } else {
+        otherItems.push(collection);
+      }
+    }
+    
+    priorityItems.sort((a, b) => priorityTitles.indexOf(a.title) - priorityTitles.indexOf(b.title));
+
+    return [...priorityItems, ...otherItems];
+  }, [collections]);
 
   useEffect(() => {
     if (locationsError) {
@@ -134,8 +158,8 @@ const Index = () => {
                     </CardHeader>
                   </Card>
                 ))
-              ) : collections && collections.length > 0 ? (
-                collections.map((collection, index) => (
+              ) : sortedCollections && sortedCollections.length > 0 ? (
+                sortedCollections.map((collection, index) => (
                   <Link to={`/collection/${collection.slug}`} key={collection.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
                       <div className="relative overflow-hidden">
