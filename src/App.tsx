@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
@@ -34,6 +34,7 @@ import AdminPostsPage from "@/pages/admin/posts/PostsPage";
 import AdminCollectionsPage from "@/pages/admin/collections/CollectionsPage";
 import AdminReviewsPage from "@/pages/admin/reviews/ReviewsPage";
 import AdminSubmissionsPage from "@/pages/admin/submissions/SubmissionsPage";
+import AdminLevelsPage from "@/pages/admin/levels/LevelsPage";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="collections" element={<AdminCollectionsPage />} />
               <Route path="reviews" element={<AdminReviewsPage />} />
               <Route path="submissions" element={<AdminSubmissionsPage />} />
+              <Route path="levels" element={<AdminLevelsPage />} />
             </Route>
 
             {/* Catch-all Route */}

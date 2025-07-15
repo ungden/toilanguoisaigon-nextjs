@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Star,
   Inbox,
+  Award,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { to: "/admin/collections", icon: Library, label: "Bộ sưu tập" },
   { to: "/admin/reviews", icon: MessageSquare, label: "Đánh giá" },
   { to: "/admin/submissions", icon: Inbox, label: "Đóng góp" },
+  { to: "/admin/levels", icon: Award, label: "Cấp độ" },
 ];
 
 export function AdminSidebar() {
