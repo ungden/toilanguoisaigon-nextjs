@@ -10,6 +10,7 @@ import {
   Star,
   Inbox,
   Award,
+  Zap,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { to: "/admin/reviews", icon: MessageSquare, label: "Đánh giá" },
   { to: "/admin/submissions", icon: Inbox, label: "Đóng góp" },
   { to: "/admin/levels", icon: Award, label: "Cấp độ" },
+  { to: "/admin/xp-actions", icon: Zap, label: "Hành động XP" },
 ];
 
 export function AdminSidebar() {

@@ -133,3 +133,9 @@ export interface Level {
   title: string;
   description: string | null;
 }
+
+export interface XpAction {
+  action_name: string;
+  xp_value: number;
+  description: string | null;
+}
