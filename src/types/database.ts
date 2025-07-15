@@ -23,6 +23,8 @@ export interface Profile {
   level: number;
 }
 
+export type LeaderboardProfile = Pick<Profile, 'id' | 'full_name' | 'avatar_url' | 'xp' | 'level'>;
+
 export interface ProfileWithRole extends Profile {
   user_roles: { role: AppRole } | { role: AppRole }[] | null;
 }

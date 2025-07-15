@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bookmark, LogOut, Star, Send } from "lucide-react";
+import { Menu, User, Bookmark, LogOut, Star, Send, Trophy } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -61,6 +61,12 @@ export function Header() {
               Blog
             </Link>
             <Link
+              to="/leaderboard"
+              className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
+            >
+              Bảng xếp hạng
+            </Link>
+            <Link
               to="/about"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
@@ -88,6 +94,7 @@ export function Header() {
               <div className="flex flex-col space-y-4">
                  <Link to="/collections" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
                  <Link to="/blog" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
+                 <Link to="/leaderboard" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bảng xếp hạng</Link>
                  <Link to="/about" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
               </div>
             </div>

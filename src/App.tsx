@@ -18,6 +18,7 @@ import MyNotebookPage from "@/pages/MyNotebook";
 import BlogPage from "@/pages/Blog";
 import PostDetailPage from "@/pages/PostDetail";
 import SubmitLocationPage from "@/pages/SubmitLocation";
+import LeaderboardPage from "@/pages/Leaderboard";
 import NotFound from "@/pages/NotFound";
 import AboutPage from "@/pages/About";
 import ContactPage from "@/pages/Contact";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/faq" element={<FaqPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             
             {/* Protected User Routes */}
             <Route 
