@@ -11,6 +11,7 @@ import {
   Inbox,
   Award,
   Zap,
+  Badge,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { to: "/admin/submissions", icon: Inbox, label: "Đóng góp" },
   { to: "/admin/levels", icon: Award, label: "Cấp độ" },
   { to: "/admin/xp-actions", icon: Zap, label: "Hành động XP" },
+  { to: "/admin/badges", icon: Badge, label: "Huy hiệu" },
 ];
 
 export function AdminSidebar() {

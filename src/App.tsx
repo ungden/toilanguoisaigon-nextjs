@@ -37,6 +37,7 @@ import AdminReviewsPage from "@/pages/admin/reviews/ReviewsPage";
 import AdminSubmissionsPage from "@/pages/admin/submissions/SubmissionsPage";
 import AdminLevelsPage from "@/pages/admin/levels/LevelsPage";
 import AdminXpActionsPage from "@/pages/admin/xp-actions/XpActionsPage";
+import AdminBadgesPage from "@/pages/admin/badges/BadgesPage";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +93,7 @@ const App = () => (
               <Route path="submissions" element={<AdminSubmissionsPage />} />
               <Route path="levels" element={<AdminLevelsPage />} />
               <Route path="xp-actions" element={<AdminXpActionsPage />} />
+              <Route path="badges" element={<AdminBadgesPage />} />
             </Route>
 
             {/* Catch-all Route */}

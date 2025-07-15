@@ -141,3 +141,11 @@ export interface XpAction {
   xp_value: number;
   description: string | null;
 }
+
+export interface Badge {
+  id: number;
+  name: string;
+  description: string | null;
+  icon_name: string | null;
+  created_at: string;
+}
