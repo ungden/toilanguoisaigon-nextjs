@@ -17,6 +17,7 @@ import ProfilePage from "@/pages/Profile";
 import MyNotebookPage from "@/pages/MyNotebook";
 import BlogPage from "@/pages/Blog";
 import PostDetailPage from "@/pages/PostDetail";
+import SubmitLocationPage from "@/pages/SubmitLocation";
 import NotFound from "@/pages/NotFound";
 import AboutPage from "@/pages/About";
 import ContactPage from "@/pages/Contact";
@@ -66,6 +67,10 @@ const App = () => (
             <Route 
               path="/my-notebook" 
               element={<ProtectedRoute><MyNotebookPage /></ProtectedRoute>} 
+            />
+            <Route 
+              path="/submit-location" 
+              element={<ProtectedRoute><SubmitLocationPage /></ProtectedRoute>} 
             />
             
             {/* Admin Routes */}

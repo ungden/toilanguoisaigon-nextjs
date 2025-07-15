@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bookmark, LogOut, Star } from "lucide-react";
+import { Menu, User, Bookmark, LogOut, Star, Send } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -126,6 +126,12 @@ export function Header() {
                   <Link to="/my-notebook" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Sổ tay của tôi</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/submit-location" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
+                    <Send className="mr-2 h-4 w-4" />
+                    <span>Đóng góp địa điểm</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-vietnam-red-200" />

@@ -9,6 +9,7 @@ export type Json =
 export type PriceRange = "$" | "$$" | "$$$" | "$$$$";
 export type LocationStatus = "draft" | "published" | "rejected";
 export type AppRole = "admin" | "moderator" | "user";
+export type SubmissionStatus = "pending" | "approved" | "rejected";
 
 export interface Profile {
   id: string;
@@ -110,4 +111,16 @@ export interface Post {
   author_id: string | null;
   status: string;
   profiles: Pick<Profile, 'full_name' | 'avatar_url'> | null;
+}
+
+export interface LocationSubmission {
+  id: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  address: string;
+  district: string;
+  description: string | null;
+  notes: string | null;
+  status: SubmissionStatus;
 }
