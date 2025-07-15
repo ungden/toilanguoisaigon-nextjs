@@ -3,16 +3,14 @@ import { Footer } from "@/components/layout/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, ShieldCheck } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { ShieldCheck, User, MessageSquare } from "lucide-react";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserReviewsList } from "@/components/profile/UserReviewsList";
 
 const ProfilePage = () => {
     const { user, profile, role } = useAuth();
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     const getInitials = (name: string | undefined | null) => {
         if (name) {
@@ -22,58 +20,71 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground">
+        <div className="flex flex-col min-h-screen bg-muted/40 text-foreground">
             <Header />
             <main className="flex-grow container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-6">Trang cá nhân</h1>
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-16 w-16">
-                                    <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User Avatar'} />
-                                    <AvatarFallback>{getInitials(profile?.full_name)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <CardTitle className="text-2xl">{profile?.full_name || 'Người dùng mới'}</CardTitle>
-                                        {role === 'admin' && (
-                                            <Badge variant="destructive" className="flex items-center gap-1">
-                                                <ShieldCheck className="h-3 w-3" />
-                                                Admin
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <p className="text-muted-foreground">{user?.email}</p>
-                                </div>
+                <div className="flex flex-col md:flex-row items-start gap-8">
+                    {/* Left Sidebar - Profile Card */}
+                    <Card className="w-full md:w-80 md:sticky top-24">
+                        <CardHeader className="items-center text-center">
+                            <Avatar className="h-24 w-24 mb-4">
+                                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User Avatar'} />
+                                <AvatarFallback className="text-3xl">{getInitials(profile?.full_name)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex items-center gap-2">
+                                <CardTitle className="text-2xl">{profile?.full_name || 'Người dùng mới'}</CardTitle>
+                                {role === 'admin' && (
+                                    <Badge variant="destructive" className="flex items-center gap-1">
+                                        <ShieldCheck className="h-3 w-3" />
+                                        Admin
+                                    </Badge>
+                                )}
                             </div>
-                            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm" className="text-vietnam-blue-600 border-vietnam-blue-600 hover:bg-vietnam-blue-50">
-                                        <Pencil className="h-4 w-4 mr-2" />
-                                        Chỉnh sửa
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                        <DialogTitle>Chỉnh sửa hồ sơ</DialogTitle>
-                                        <DialogDescription>
-                                            Cập nhật thông tin cá nhân của bạn. Nhấn lưu khi hoàn tất.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <EditProfileForm onSuccess={() => setIsEditDialogOpen(false)} />
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <h3 className="font-semibold">Tiểu sử</h3>
-                            <p className="text-muted-foreground">{profile?.bio || 'Chưa có tiểu sử.'}</p>
-                        </div>
-                        {/* Add more profile editing features here in the future */}
-                    </CardContent>
-                </Card>
+                            <p className="text-muted-foreground">{user?.email}</p>
+                        </CardHeader>
+                        <CardContent className="text-center">
+                            <p className="text-sm text-muted-foreground">{profile?.bio || 'Chưa có tiểu sử.'}</p>
+                        </CardContent>
+                    </Card>
+
+                    {/* Right Content - Tabs */}
+                    <div className="flex-1">
+                        <Tabs defaultValue="reviews" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="reviews">
+                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                    Đánh giá của tôi
+                                </TabsTrigger>
+                                <TabsTrigger value="settings">
+                                    <User className="h-4 w-4 mr-2" />
+                                    Thông tin cá nhân
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="reviews" className="mt-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Quản lý đánh giá</CardTitle>
+                                        <p className="text-muted-foreground">Xem, sửa hoặc xóa các đánh giá bạn đã gửi.</p>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <UserReviewsList />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                            <TabsContent value="settings" className="mt-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Thông tin cá nhân</CardTitle>
+                                        <p className="text-muted-foreground">Cập nhật thông tin hiển thị công khai của bạn.</p>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <EditProfileForm onSuccess={() => {}} />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </div>
             </main>
             <Footer />
         </div>
