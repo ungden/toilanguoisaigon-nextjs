@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Collection, Location, CollectionCategory } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
+import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 
 interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
@@ -129,56 +130,63 @@ const CollectionDetailPage = () => {
         {/* Locations Grid */}
         <section className="container mx-auto py-16 px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {locations.map((location) => (
-              <Link to={`/place/${location.slug}`} key={location.id} className="block group">
-                <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={location.main_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop'} 
-                      alt={location.name} 
-                      className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                    />
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-vietnam-red-600 text-white">
-                        {formatPriceRange(location.price_range)}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2">
-                      {location.name}
-                    </h3>
-                    
-                    <div className="space-y-2 text-sm text-vietnam-blue-600 mb-4">
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>{location.district}</span>
+            {locations.map((location) => {
+              const imagePath = location.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
+              const optimizedImageUrl = imagePath 
+                ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
+                : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop';
+
+              return (
+                <Link to={`/place/${location.slug}`} key={location.id} className="block group">
+                  <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
+                    <div className="relative overflow-hidden">
+                      <img 
+                        src={optimizedImageUrl} 
+                        alt={location.name} 
+                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-vietnam-red-600 text-white">
+                          {formatPriceRange(location.price_range)}
+                        </Badge>
                       </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2">
+                        {location.name}
+                      </h3>
                       
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>{formatOpeningHours(location.opening_hours)}</span>
+                      <div className="space-y-2 text-sm text-vietnam-blue-600 mb-4">
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <span>{location.district}</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <span>{formatOpeningHours(location.opening_hours)}</span>
+                        </div>
                       </div>
-                    </div>
 
-                    {location.average_rating > 0 && (
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-vietnam-gold-500 fill-vietnam-gold-500 mr-1" />
-                        <span className="text-sm font-medium text-vietnam-blue-700">
-                          {location.average_rating.toFixed(1)} ({location.review_count} đánh giá)
-                        </span>
-                      </div>
-                    )}
+                      {location.average_rating > 0 && (
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-vietnam-gold-500 fill-vietnam-gold-500 mr-1" />
+                          <span className="text-sm font-medium text-vietnam-blue-700">
+                            {location.average_rating.toFixed(1)} ({location.review_count} đánh giá)
+                          </span>
+                        </div>
+                      )}
 
-                    {location.description && (
-                      <p className="text-sm text-vietnam-blue-600 mt-3 line-clamp-2">
-                        {location.description}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                      {location.description && (
+                        <p className="text-sm text-vietnam-blue-600 mt-3 line-clamp-2">
+                          {location.description}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
 
           {locations.length === 0 && (
