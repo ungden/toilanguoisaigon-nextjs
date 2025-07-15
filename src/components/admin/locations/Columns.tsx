@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Location } from "@/types/database"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,14 +17,17 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 
-export const columns: ColumnDef<Location>[] = [
+export const columns = (options: { onEdit: (location: Location) => void }): ColumnDef<Location>[] => [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected()
+            ? true
+            : table.getIsSomePageRowsSelected()
+            ? "indeterminate"
+            : false
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -55,8 +58,8 @@ export const columns: ColumnDef<Location>[] = [
     },
   },
   {
-    accessorKey: "address",
-    header: "Địa chỉ",
+    accessorKey: "district",
+    header: "Quận",
   },
   {
     accessorKey: "status",
@@ -100,15 +103,14 @@ export const columns: ColumnDef<Location>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(location.id)}
-            >
-              Copy ID
+            <DropdownMenuItem onClick={() => options.onEdit(location)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Chỉnh sửa
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
-            <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Xóa</DropdownMenuItem>
+            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+              <Trash className="mr-2 h-4 w-4" />
+              Xóa
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
