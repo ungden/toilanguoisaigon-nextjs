@@ -1,10 +1,10 @@
 export const formatPriceRange = (priceRange: string | null | undefined) => {
   if (!priceRange) return 'Chưa cập nhật';
   const priceMap: { [key: string]: string } = {
-    '$': 'Dưới 100.000đ',
-    '$$': '100.000đ - 300.000đ',
-    '$$$': '300.000đ - 500.000đ',
-    '$$$$': 'Trên 500.000đ'
+    '$': 'Dưới 200.000đ',
+    '$$': '200.000đ - 500.000đ',
+    '$$$': '500.000đ - 1.000.000đ',
+    '$$$$': 'Trên 1.000.000đ'
   };
   return priceMap[priceRange] || priceRange;
 };

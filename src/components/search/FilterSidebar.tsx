@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 
 const filterSections = {
@@ -18,9 +17,14 @@ const filterSections = {
   "Phù hợp cho": ["Hẹn hò", "Gia đình", "Bạn bè", "Tiếp khách", "Làm việc", "Một mình"],
 };
 
-export function FilterSidebar() {
-  const [priceRange, setPriceRange] = React.useState([50000, 500000]);
+const priceRangeOptions = [
+  { id: 'price-1', label: 'Dưới 200.000đ', value: '$' },
+  { id: 'price-2', label: '200.000đ - 500.000đ', value: '$$' },
+  { id: 'price-3', label: '500.000đ - 1.000.000đ', value: '$$$' },
+  { id: 'price-4', label: 'Trên 1.000.000đ', value: '$$$$' },
+];
 
+export function FilterSidebar() {
   return (
     <aside className="w-full lg:w-72 xl:w-80 lg:sticky top-16 h-auto lg:h-[calc(100vh-4rem)] border-b lg:border-b-0 lg:border-r">
       <div className="p-4 h-full overflow-y-auto">
@@ -46,17 +50,15 @@ export function FilterSidebar() {
           <AccordionItem value="Mức giá">
             <AccordionTrigger>Mức giá</AccordionTrigger>
             <AccordionContent>
-              <div className="p-2">
-                <Slider
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  max={1000000}
-                  step={10000}
-                />
-                <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                    <span>{priceRange[0].toLocaleString()}đ</span>
-                    <span>{priceRange[1].toLocaleString()}đ</span>
-                </div>
+              <div className="space-y-2 pt-2">
+                {priceRangeOptions.map((option) => (
+                  <div key={option.id} className="flex items-center space-x-2">
+                    <Checkbox id={option.id} />
+                    <Label htmlFor={option.id} className="font-normal cursor-pointer">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
               </div>
             </AccordionContent>
           </AccordionItem>
