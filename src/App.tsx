@@ -31,6 +31,7 @@ import AdminLocationsPage from "@/pages/admin/locations/LocationsPage";
 import AdminUsersPage from "@/pages/admin/users/UsersPage";
 import AdminPostsPage from "@/pages/admin/posts/PostsPage";
 import AdminCollectionsPage from "@/pages/admin/collections/CollectionsPage";
+import AdminReviewsPage from "@/pages/admin/reviews/ReviewsPage";
 
 const queryClient = new QueryClient();
 
@@ -77,7 +78,7 @@ const App = () => (
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="posts" element={<AdminPostsPage />} />
               <Route path="collections" element={<AdminCollectionsPage />} />
-              <Route path="reviews" element={<div>Quản lý đánh giá</div>} />
+              <Route path="reviews" element={<AdminReviewsPage />} />
             </Route>
 
             {/* Catch-all Route */}
