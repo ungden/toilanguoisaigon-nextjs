@@ -166,7 +166,11 @@ const Index = () => {
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
                       <div className="relative overflow-hidden">
                         <img 
-                          src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                          src={
+                            collection.title === "Michelin Sài Gòn 2025" 
+                              ? "https://assets.dyad.ai/michelin-saigon-2025.png" 
+                              : collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'
+                          } 
                           alt={collection.title} 
                           className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         />
