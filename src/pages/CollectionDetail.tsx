@@ -7,15 +7,11 @@ import { MapPin, Star, Clock } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Collection, Location } from '@/types/database';
+import { Collection, Location, CollectionCategory } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 
-interface CollectionWithLocations extends Collection {
-  collection_categories: {
-    name: string;
-    slug: string;
-    icon: string;
-  } | null;
+interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
+  collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
   collection_locations: {
     locations: Location;
   }[];
@@ -43,7 +39,7 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
     throw new Error(error.message);
   }
 
-  return data;
+  return data as CollectionWithLocations | null;
 };
 
 const CollectionDetailPage = () => {

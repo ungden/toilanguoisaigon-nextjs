@@ -58,6 +58,15 @@ export interface ReviewWithProfile extends Review {
   profiles: Pick<Profile, 'full_name' | 'avatar_url'> | null;
 }
 
+export interface CollectionCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  created_at: string;
+}
+
 export interface Collection {
   id: number;
   category_id: number | null;
@@ -66,6 +75,7 @@ export interface Collection {
   slug: string;
   cover_image_url: string | null;
   created_at: string;
+  collection_categories?: CollectionCategory | null;
 }
 
 export interface Category {

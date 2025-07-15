@@ -5,16 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Collection } from '@/types/database';
+import { Collection, CollectionCategory } from '@/types/database';
 import { Clock, MapPin, Target, Palette, Users, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
-interface CollectionWithCategory extends Collection {
-  collection_categories: {
-    name: string;
-    slug: string;
-    icon: string;
-  } | null;
+interface CollectionWithCategory extends Omit<Collection, 'collection_categories'> {
+  collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
 }
 
 const fetchCollectionsWithCategories = async (): Promise<CollectionWithCategory[]> => {
@@ -35,10 +31,10 @@ const fetchCollectionsWithCategories = async (): Promise<CollectionWithCategory[
     throw new Error(error.message);
   }
 
-  return data || [];
+  return (data as CollectionWithCategory[]) || [];
 };
 
-const getIconComponent = (iconName: string) => {
+const getIconComponent = (iconName: string | null) => {
   const icons: { [key: string]: any } = {
     Clock,
     MapPin,
@@ -47,7 +43,7 @@ const getIconComponent = (iconName: string) => {
     Users,
     Award
   };
-  return icons[iconName] || MapPin;
+  return icons[iconName || 'MapPin'] || MapPin;
 };
 
 const CollectionsPage = () => {
@@ -110,7 +106,7 @@ const CollectionsPage = () => {
           ) : (
             <div className="space-y-16">
               {Object.entries(groupedCollections || {}).map(([categoryName, { category, collections }]) => {
-                const IconComponent = getIconComponent(category?.icon || 'MapPin');
+                const IconComponent = getIconComponent(category?.icon);
                 
                 return (
                   <div key={categoryName}>

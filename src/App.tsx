@@ -30,6 +30,7 @@ import AdminDashboardPage from "@/pages/admin/Dashboard";
 import AdminLocationsPage from "@/pages/admin/locations/LocationsPage";
 import AdminUsersPage from "@/pages/admin/users/UsersPage";
 import AdminPostsPage from "@/pages/admin/posts/PostsPage";
+import AdminCollectionsPage from "@/pages/admin/collections/CollectionsPage";
 
 const queryClient = new QueryClient();
 
@@ -75,7 +76,7 @@ const App = () => (
               <Route path="locations" element={<AdminLocationsPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="posts" element={<AdminPostsPage />} />
-              <Route path="collections" element={<div>Quản lý bộ sưu tập</div>} />
+              <Route path="collections" element={<AdminCollectionsPage />} />
               <Route path="reviews" element={<div>Quản lý đánh giá</div>} />
             </Route>
 
