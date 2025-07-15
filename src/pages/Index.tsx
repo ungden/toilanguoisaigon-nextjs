@@ -14,6 +14,7 @@ import { usePosts } from "@/hooks/data/usePosts";
 import { showError } from "@/utils/toast";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
+import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -137,8 +138,25 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Collections Section */}
+        {/* Mystery Box Section */}
         <section className="bg-vietnam-blue-50 py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-semibold text-vietnam-red-700 bg-vietnam-red-100 rounded-full mb-4">
+                <Sparkles className="h-4 w-4 mr-2" />
+                <span>Thử Vận May</span>
+              </div>
+              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Đi Đâu Cũng Được</h2>
+              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
+                Không biết đi đâu? Hãy để chúng tôi chọn giúp bạn một địa điểm ngẫu nhiên!
+              </p>
+            </div>
+            <MysteryLocationCards />
+          </div>
+        </section>
+
+        {/* Collections Section */}
+        <section className="bg-white py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <Badge className="mb-4 bg-vietnam-blue-100 text-vietnam-blue-700 hover:bg-vietnam-blue-200">

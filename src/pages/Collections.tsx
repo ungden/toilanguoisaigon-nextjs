@@ -6,9 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Collection, CollectionCategory } from '@/types/database';
-import { Clock, MapPin, Target, Palette, Users, Award, Sparkles } from "lucide-react";
+import { Clock, MapPin, Target, Palette, Users, Award } from "lucide-react";
 import { Link } from "react-router-dom";
-import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
 
 interface CollectionWithCategory extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
@@ -79,23 +78,6 @@ const CollectionsPage = () => {
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
               Khám phá Sài Gòn qua những góc nhìn độc đáo, từ những quán vỉa hè tinh hoa đến không gian fine dining đẳng cấp
             </p>
-          </div>
-        </section>
-
-        {/* Mystery Box Section */}
-        <section className="bg-vietnam-blue-50 py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-semibold text-vietnam-red-700 bg-vietnam-red-100 rounded-full mb-4">
-                <Sparkles className="h-4 w-4 mr-2" />
-                <span>Thử Vận May</span>
-              </div>
-              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Đi Đâu Cũng Được</h2>
-              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-                Không biết đi đâu? Hãy để chúng tôi chọn giúp bạn một địa điểm ngẫu nhiên!
-              </p>
-            </div>
-            <MysteryLocationCards />
           </div>
         </section>
 
