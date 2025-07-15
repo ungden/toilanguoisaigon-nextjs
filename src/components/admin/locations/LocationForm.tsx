@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Location, PriceRange, LocationStatus } from '@/types/database';
 import { slugify } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { Sparkles, Loader2 } from 'lucide-react';
+import { useGeminiAssistant } from '@/hooks/data/useGeminiAssistant';
+import { showError } from '@/utils/toast';
 
 const locationFormSchema = z.object({
   name: z.string().min(3, { message: 'Tên phải có ít nhất 3 ký tự.' }),
@@ -54,6 +57,25 @@ export function LocationForm({ location, onSubmit, isPending, onClose }: Locatio
     },
   });
 
+  const geminiAssistant = useGeminiAssistant({
+    onSuccess: (result) => {
+      form.setValue('description', result, { shouldValidate: true });
+    },
+  });
+
+  const handleGenerateDescription = () => {
+    const name = form.getValues('name');
+    const district = form.getValues('district');
+    if (!name || !district) {
+      showError('Vui lòng nhập Tên và Quận của địa điểm trước.');
+      return;
+    }
+    geminiAssistant.mutate({
+      task: 'generate_location_description',
+      payload: { name, district },
+    });
+  };
+
   const watchedName = form.watch('name');
   useEffect(() => {
     if (watchedName && !form.getValues('slug')) {
@@ -68,7 +90,34 @@ export function LocationForm({ location, onSubmit, isPending, onClose }: Locatio
         <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug (URL)</FormLabel> <FormControl><Input placeholder="vi-du-pho-hoa-pasteur" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="address" render={({ field }) => ( <FormItem> <FormLabel>Địa chỉ</FormLabel> <FormControl><Input placeholder="260C Pasteur, Phường 8..." {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="district" render={({ field }) => ( <FormItem> <FormLabel>Quận</FormLabel> <FormControl><Input placeholder="Quận 3" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-        <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Mô tả</FormLabel> <FormControl><Textarea placeholder="Mô tả ngắn về địa điểm..." {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+        
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center justify-between">
+                <FormLabel>Mô tả</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateDescription}
+                  disabled={geminiAssistant.isPending}
+                >
+                  {geminiAssistant.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />
+                  )}
+                  AI Gợi ý
+                </Button>
+              </div>
+              <FormControl><Textarea placeholder="Mô tả ngắn về địa điểm..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}

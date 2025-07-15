@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Post } from '@/types/database';
 import { slugify } from '@/lib/utils';
 import { useEffect } from 'react';
+import { Sparkles, Loader2 } from 'lucide-react';
+import { useGeminiAssistant } from '@/hooks/data/useGeminiAssistant';
+import { showError } from '@/utils/toast';
 
 const postFormSchema = z.object({
   title: z.string().min(3, { message: 'Tiêu đề phải có ít nhất 3 ký tự.' }),
@@ -40,6 +43,26 @@ export function PostForm({ post, onSubmit, isPending, onClose }: PostFormProps) 
       status: (post?.status as 'draft' | 'published') || 'draft',
     },
   });
+
+  const excerptAssistant = useGeminiAssistant({
+    onSuccess: (result) => form.setValue('excerpt', result, { shouldValidate: true }),
+  });
+
+  const outlineAssistant = useGeminiAssistant({
+    onSuccess: (result) => form.setValue('content', result, { shouldValidate: true }),
+  });
+
+  const handleAIAssist = (
+    assistant: typeof excerptAssistant,
+    task: 'generate_post_excerpt' | 'generate_post_outline'
+  ) => {
+    const title = form.getValues('title');
+    if (!title) {
+      showError('Vui lòng nhập Tiêu đề bài viết trước.');
+      return;
+    }
+    assistant.mutate({ task, payload: { title } });
+  };
 
   const watchedTitle = form.watch('title');
   useEffect(() => {
@@ -78,7 +101,13 @@ export function PostForm({ post, onSubmit, isPending, onClose }: PostFormProps) 
           name="excerpt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tóm tắt</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Tóm tắt</FormLabel>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleAIAssist(excerptAssistant, 'generate_post_excerpt')} disabled={excerptAssistant.isPending}>
+                  {excerptAssistant.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />}
+                  Gợi ý
+                </Button>
+              </div>
               <FormControl><Textarea placeholder="Tóm tắt ngắn gọn nội dung bài viết..." {...field} /></FormControl>
               <FormMessage />
             </FormItem>
@@ -89,7 +118,13 @@ export function PostForm({ post, onSubmit, isPending, onClose }: PostFormProps) 
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nội dung (Hỗ trợ HTML)</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Nội dung (Hỗ trợ HTML)</FormLabel>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleAIAssist(outlineAssistant, 'generate_post_outline')} disabled={outlineAssistant.isPending}>
+                  {outlineAssistant.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />}
+                  Tạo dàn ý
+                </Button>
+              </div>
               <FormControl><Textarea placeholder="Viết nội dung của bạn ở đây..." {...field} className="min-h-[200px]" /></FormControl>
               <FormMessage />
             </FormItem>
