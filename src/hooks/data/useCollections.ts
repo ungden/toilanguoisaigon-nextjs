@@ -7,7 +7,7 @@ const fetchCollections = async (): Promise<Collection[]> => {
     .from('collections')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(8);
+    .limit(20);
 
   if (error) {
     console.error('Error fetching collections:', error);

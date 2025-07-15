@@ -41,7 +41,9 @@ const Index = () => {
     
     priorityItems.sort((a, b) => priorityTitles.indexOf(a.title) - priorityTitles.indexOf(b.title));
 
-    return [...priorityItems, ...otherItems];
+    const allSorted = [...priorityItems, ...otherItems];
+    return allSorted.slice(0, 8);
+
   }, [collections]);
 
   useEffect(() => {
