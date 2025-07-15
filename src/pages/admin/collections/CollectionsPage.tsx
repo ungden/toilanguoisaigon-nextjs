@@ -53,7 +53,10 @@ const AdminCollectionsPage = () => {
     const handleSubmit = (values: any) => {
         if (editingCollection) {
             updateCollectionMutation.mutate({ id: editingCollection.id, ...values }, {
-                onSuccess: handleCloseFormDialog,
+                onSuccess: () => {
+                    // Don't close the dialog on metadata update
+                    // The user might want to continue managing locations
+                },
             });
         } else {
             createCollectionMutation.mutate(values, {
@@ -98,11 +101,11 @@ const AdminCollectionsPage = () => {
             </Card>
 
             <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-                <DialogContent className="sm:max-w-2xl">
+                <DialogContent className="sm:max-w-4xl">
                     <DialogHeader>
                         <DialogTitle>{editingCollection ? 'Chỉnh sửa bộ sưu tập' : 'Tạo bộ sưu tập mới'}</DialogTitle>
                         <DialogDescription>
-                            {editingCollection ? 'Cập nhật thông tin cho bộ sưu tập này.' : 'Điền thông tin để tạo một bộ sưu tập mới.'}
+                            {editingCollection ? 'Cập nhật thông tin và quản lý địa điểm cho bộ sưu tập này.' : 'Điền thông tin để tạo một bộ sưu tập mới. Bạn có thể thêm địa điểm sau khi tạo.'}
                         </DialogDescription>
                     </DialogHeader>
                     <CollectionForm 
