@@ -10,17 +10,30 @@ import { useLocations } from "@/hooks/data/useLocations";
 import { Location } from "@/types/database";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+
+interface Filters {
+  priceRanges: string[];
+}
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const { data: results, isLoading } = useLocations({ query, limit: 20 });
+  const [filters, setFilters] = useState<Filters>({
+    priceRanges: [],
+  });
+
+  const { data: results, isLoading } = useLocations({ 
+    query, 
+    limit: 20,
+    priceRanges: filters.priceRanges,
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
       <div className="container mx-auto flex flex-col lg:flex-row flex-grow w-full">
-        <FilterSidebar />
+        <FilterSidebar filters={filters} onFilterChange={setFilters} />
         <main className="flex-grow p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="relative flex-grow">

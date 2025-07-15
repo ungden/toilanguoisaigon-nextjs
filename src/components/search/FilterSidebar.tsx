@@ -7,7 +7,15 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+
+interface Filters {
+  priceRanges: string[];
+}
+
+interface FilterSidebarProps {
+  filters: Filters;
+  onFilterChange: (newFilters: Filters) => void;
+}
 
 const filterSections = {
   "Loại hình": ["Nhà hàng", "Quán ăn", "Café", "Trà sữa", "Bar/Pub", "Ăn vặt/Vỉa hè"],
@@ -24,7 +32,14 @@ const priceRangeOptions = [
   { id: 'price-4', label: 'Trên 1.000.000đ', value: '$$$$' },
 ];
 
-export function FilterSidebar() {
+export function FilterSidebar({ filters, onFilterChange }: FilterSidebarProps) {
+  const handlePriceChange = (checked: boolean, value: string) => {
+    const newPriceRanges = checked
+      ? [...filters.priceRanges, value]
+      : filters.priceRanges.filter((p) => p !== value);
+    onFilterChange({ ...filters, priceRanges: newPriceRanges });
+  };
+
   return (
     <aside className="w-full lg:w-72 xl:w-80 lg:sticky top-16 h-auto lg:h-[calc(100vh-4rem)] border-b lg:border-b-0 lg:border-r">
       <div className="p-4 h-full overflow-y-auto">
@@ -53,7 +68,11 @@ export function FilterSidebar() {
               <div className="space-y-2 pt-2">
                 {priceRangeOptions.map((option) => (
                   <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox id={option.id} />
+                    <Checkbox 
+                      id={option.id} 
+                      checked={filters.priceRanges.includes(option.value)}
+                      onCheckedChange={(checked) => handlePriceChange(!!checked, option.value)}
+                    />
                     <Label htmlFor={option.id} className="font-normal cursor-pointer">
                       {option.label}
                     </Label>
@@ -63,7 +82,6 @@ export function FilterSidebar() {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-        <Button className="w-full mt-6">Áp dụng</Button>
       </div>
     </aside>
   );

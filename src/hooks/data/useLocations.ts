@@ -5,10 +5,11 @@ import { Location } from '@/types/database';
 interface UseLocationsOptions {
   limit?: number;
   query?: string;
+  priceRanges?: string[];
 }
 
 const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Location[]> => {
-  const { limit = 10, query } = options;
+  const { limit = 10, query, priceRanges } = options;
   
   console.log('Fetching locations with options:', options);
 
@@ -20,6 +21,10 @@ const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Locati
 
   if (query && query.trim() !== '') {
     queryBuilder = queryBuilder.ilike('name', `%${query.trim()}%`);
+  }
+
+  if (priceRanges && priceRanges.length > 0) {
+    queryBuilder = queryBuilder.in('price_range', priceRanges);
   }
 
   queryBuilder = queryBuilder.limit(limit);
