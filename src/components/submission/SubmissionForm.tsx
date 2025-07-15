@@ -36,7 +36,16 @@ export function SubmissionForm({ onSuccess }: SubmissionFormProps) {
   });
 
   function onSubmit(data: SubmissionFormValues) {
-    submitLocationMutation.mutate(data, {
+    // Tạo payload một cách tường minh để đảm bảo kiểu dữ liệu chính xác
+    const payload = {
+      name: data.name,
+      address: data.address,
+      district: data.district,
+      description: data.description,
+      notes: data.notes,
+    };
+
+    submitLocationMutation.mutate(payload, {
       onSuccess: () => {
         form.reset();
         onSuccess();
