@@ -28,6 +28,7 @@ import FaqPage from "@/pages/Faq";
 import AdminLayout from "@/components/layout/AdminLayout";
 import AdminDashboardPage from "@/pages/admin/Dashboard";
 import AdminLocationsPage from "@/pages/admin/locations/LocationsPage";
+import AdminUsersPage from "@/pages/admin/users/UsersPage";
 
 const queryClient = new QueryClient();
 
@@ -71,8 +72,7 @@ const App = () => (
             >
               <Route index element={<AdminDashboardPage />} />
               <Route path="locations" element={<AdminLocationsPage />} />
-              {/* Add other admin routes here as placeholders */}
-              <Route path="users" element={<div>Quản lý người dùng</div>} />
+              <Route path="users" element={<AdminUsersPage />} />
               <Route path="posts" element={<div>Quản lý bài viết</div>} />
               <Route path="collections" element={<div>Quản lý bộ sưu tập</div>} />
               <Route path="reviews" element={<div>Quản lý đánh giá</div>} />

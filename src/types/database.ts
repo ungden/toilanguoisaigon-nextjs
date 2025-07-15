@@ -20,6 +20,10 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface ProfileWithRole extends Profile {
+  user_roles: { role: AppRole } | { role: AppRole }[] | null;
+}
+
 export interface Location {
   id: string;
   created_at: string;
