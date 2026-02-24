@@ -1,32 +1,32 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { FilterSidebar } from "@/components/search/FilterSidebar";
+import { FilterSidebar, Filters } from "@/components/search/FilterSidebar";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon, List, Map } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLocations } from "@/hooks/data/useLocations";
 import { Location } from "@/types/database";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
-
-interface Filters {
-  priceRanges: string[];
-}
+import { useState, FormEvent } from "react";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get("q") || "";
   const [filters, setFilters] = useState<Filters>({
     priceRanges: [],
+    districts: [],
+    categories: [],
   });
 
-  const { data: results, isLoading } = useLocations({ 
-    query, 
-    limit: 20,
-    priceRanges: filters.priceRanges,
+  const { data: results, isLoading } = useLocations({
+    query,
+    limit: 50,
+    priceRanges: filters.priceRanges.length > 0 ? filters.priceRanges : undefined,
+    districts: filters.districts.length > 0 ? filters.districts : undefined,
   });
 
   return (
@@ -35,30 +35,39 @@ const SearchPage = () => {
       <div className="container mx-auto flex flex-col lg:flex-row flex-grow w-full">
         <FilterSidebar filters={filters} onFilterChange={setFilters} />
         <main className="flex-grow p-4 lg:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <form
+            onSubmit={(e: FormEvent<HTMLFormElement>) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const q = (formData.get("q") as string) || "";
+              navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+            }}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+          >
             <div className="relative flex-grow">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="text"
+                name="q"
                 placeholder="Tìm kiếm tên quán, món ăn, địa chỉ..."
                 className="h-12 text-base pl-10 w-full"
                 defaultValue={query}
               />
             </div>
             <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" aria-label="List view">
-                    <List className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon" aria-label="Map view">
-                    <Map className="h-5 w-5" />
-                </Button>
+              <Button variant="outline" size="icon" aria-label="List view" type="button">
+                <List className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" aria-label="Map view" type="button">
+                <Map className="h-5 w-5" />
+              </Button>
             </div>
-          </div>
-          
+          </form>
+
           <h2 className="text-2xl font-bold mb-4">
             {isLoading ? <Skeleton className="h-8 w-48" /> : `${results?.length || 0} Kết quả ${query && `cho "${query}"`}`}
           </h2>
-          
+
           <div className="space-y-4">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -72,10 +81,18 @@ const SearchPage = () => {
                   </CardContent>
                 </Card>
               ))
-            ) : (
-              results?.map((place) => (
+            ) : results && results.length > 0 ? (
+              results.map((place) => (
                 <SearchResultCard key={place.id} place={place as Location} />
               ))
+            ) : (
+              <div className="text-center py-16">
+                <SearchIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium">Không tìm thấy kết quả</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm lại.
+                </p>
+              </div>
             )}
           </div>
         </main>

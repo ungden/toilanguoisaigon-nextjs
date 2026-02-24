@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Collection, CollectionCategory } from '@/types/database';
 import { Clock, MapPin, Target, Palette, Users, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 interface CollectionWithCategory extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
@@ -67,6 +68,7 @@ const CollectionsPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <PageMeta title="Bộ Sưu Tập" description="Khám phá Sài Gòn qua những bộ sưu tập địa điểm được tuyển chọn kỹ lưỡng." />
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
@@ -123,7 +125,7 @@ const CollectionsPage = () => {
                               <img 
                                 src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
                                 alt={collection.title} 
-                                className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
                               />
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                               <div className="absolute top-4 left-4">

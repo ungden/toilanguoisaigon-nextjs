@@ -2,16 +2,15 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Location } from '@/types/database';
 
-interface UseLocationsOptions {
+export interface UseLocationsOptions {
   limit?: number;
   query?: string;
   priceRanges?: string[];
+  districts?: string[];
 }
 
 const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Location[]> => {
-  const { limit = 10, query, priceRanges } = options;
-  
-  console.log('Fetching locations with options:', options);
+  const { limit = 10, query, priceRanges, districts } = options;
 
   let queryBuilder = supabase
     .from('locations')
@@ -20,11 +19,16 @@ const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Locati
     .order('created_at', { ascending: false });
 
   if (query && query.trim() !== '') {
-    queryBuilder = queryBuilder.ilike('name', `%${query.trim()}%`);
+    const q = query.trim();
+    queryBuilder = queryBuilder.or(`name.ilike.%${q}%,address.ilike.%${q}%,district.ilike.%${q}%,description.ilike.%${q}%`);
   }
 
   if (priceRanges && priceRanges.length > 0) {
     queryBuilder = queryBuilder.in('price_range', priceRanges);
+  }
+
+  if (districts && districts.length > 0) {
+    queryBuilder = queryBuilder.in('district', districts);
   }
 
   queryBuilder = queryBuilder.limit(limit);
@@ -32,11 +36,9 @@ const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Locati
   const { data, error } = await queryBuilder;
 
   if (error) {
-    console.error('Error fetching locations:', error);
     throw new Error(error.message);
   }
 
-  console.log('Fetched locations:', data);
   return data || [];
 };
 
@@ -45,6 +47,6 @@ export const useLocations = (options: UseLocationsOptions = {}) => {
     queryKey: ['locations', options],
     queryFn: () => fetchLocations(options),
     enabled: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 };

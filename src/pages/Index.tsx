@@ -15,6 +15,7 @@ import { showError } from "@/utils/toast";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -50,15 +51,13 @@ const Index = () => {
 
   useEffect(() => {
     if (locationsError) {
-      console.error("Error loading locations:", locationsError);
       showError("Không thể tải danh sách địa điểm. Vui lòng thử lại sau.");
     }
   }, [locationsError]);
 
   useEffect(() => {
     if (postsError) {
-      console.error("Error loading posts:", postsError);
-      console.log("Posts error details:", postsError.message);
+      showError("Không thể tải bài viết. Vui lòng thử lại sau.");
     }
   }, [postsError]);
 
@@ -75,6 +74,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <PageMeta title="Trang chủ" description="Khám phá ẩm thực Sài Gòn - Tìm kiếm nhà hàng, quán ăn, café tốt nhất TP.HCM. Đánh giá từ cộng đồng, bộ sưu tập đặc biệt." />
       <Header />
       <main className="flex-grow">
         {/* Compact Hero Section with Saigon Image */}
@@ -197,7 +197,7 @@ const Index = () => {
                                 : optimizedImageUrl
                             } 
                             alt={collection.title} 
-                            className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                            className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
                           />
                           <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           {index < 2 && (
@@ -277,7 +277,7 @@ const Index = () => {
                         <img 
                           src={optimizedImageUrl} 
                           alt={place.name} 
-                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
                         />
                         <div className="absolute top-3 left-3">
                           <Badge className="bg-vietnam-red-600 text-white text-xs">

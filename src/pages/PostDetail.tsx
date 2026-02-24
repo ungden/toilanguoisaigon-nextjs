@@ -6,13 +6,12 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const PostDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: post, isLoading, error } = usePost(slug!);
-
-  console.log('PostDetail - slug:', slug, 'post:', post, 'loading:', isLoading, 'error:', error);
 
   if (isLoading) {
     return (
@@ -35,15 +34,13 @@ const PostDetailPage = () => {
   }
 
   if (error || !post) {
-    console.error('Error or no post found:', error, post);
     return (
       <div className="flex flex-col min-h-screen bg-white">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-8">
           <div className="text-center py-16">
             <h1 className="text-2xl font-bold text-vietnam-red-600 mb-4">Không tìm thấy bài viết</h1>
-            <p className="text-vietnam-blue-600 mb-4">Bài viết bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
-            <p className="text-sm text-muted-foreground mb-8">Debug: slug = "{slug}", error = {error?.message || 'null'}</p>
+            <p className="text-vietnam-blue-600 mb-8">Bài viết bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
             <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
               <Link to="/blog">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -59,6 +56,7 @@ const PostDetailPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <PageMeta title={post.title} description={post.excerpt || undefined} image={post.cover_image_url || undefined} type="article" />
       <Header />
       <main className="flex-grow py-8 md:py-16">
         <div className="container mx-auto px-4 max-w-4xl">

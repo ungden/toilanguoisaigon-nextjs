@@ -22,6 +22,7 @@ export function SearchResultCard({ place }: SearchResultCardProps) {
           src={optimizedImageUrl}
           alt={place.name}
           className="w-full sm:w-48 h-48 sm:h-auto object-cover flex-shrink-0"
+          loading="lazy"
         />
         <CardContent className="p-4 flex flex-col justify-between flex-grow">
           <div>
