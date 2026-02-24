@@ -50,15 +50,13 @@ const Index = () => {
 
   useEffect(() => {
     if (locationsError) {
-      console.error("Error loading locations:", locationsError);
       showError("Không thể tải danh sách địa điểm. Vui lòng thử lại sau.");
     }
   }, [locationsError]);
 
   useEffect(() => {
     if (postsError) {
-      console.error("Error loading posts:", postsError);
-      console.log("Posts error details:", postsError.message);
+      showError("Không thể tải bài viết. Vui lòng thử lại sau.");
     }
   }, [postsError]);
 

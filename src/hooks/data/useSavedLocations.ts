@@ -21,7 +21,8 @@ const fetchSavedLocations = async (userId: string): Promise<Location[]> => {
       user_id,
       created_at,
       locations (*)
-    `);
+    `)
+    .eq('user_id', userId);
 
   if (error) {
     console.error('Error fetching saved locations:', error);

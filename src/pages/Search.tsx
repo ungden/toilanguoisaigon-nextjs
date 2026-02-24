@@ -5,12 +5,12 @@ import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon, List, Map } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLocations } from "@/hooks/data/useLocations";
 import { Location } from "@/types/database";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 
 interface Filters {
   priceRanges: string[];
@@ -18,6 +18,7 @@ interface Filters {
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get("q") || "";
   const [filters, setFilters] = useState<Filters>({
     priceRanges: [],
@@ -35,25 +36,34 @@ const SearchPage = () => {
       <div className="container mx-auto flex flex-col lg:flex-row flex-grow w-full">
         <FilterSidebar filters={filters} onFilterChange={setFilters} />
         <main className="flex-grow p-4 lg:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <form
+            onSubmit={(e: FormEvent<HTMLFormElement>) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const q = (formData.get("q") as string) || "";
+              navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+            }}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+          >
             <div className="relative flex-grow">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="text"
+                name="q"
                 placeholder="Tìm kiếm tên quán, món ăn, địa chỉ..."
                 className="h-12 text-base pl-10 w-full"
                 defaultValue={query}
               />
             </div>
             <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" aria-label="List view">
+                <Button variant="outline" size="icon" aria-label="List view" type="button">
                     <List className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon" aria-label="Map view">
+                <Button variant="ghost" size="icon" aria-label="Map view" type="button">
                     <Map className="h-5 w-5" />
                 </Button>
             </div>
-          </div>
+          </form>
           
           <h2 className="text-2xl font-bold mb-4">
             {isLoading ? <Skeleton className="h-8 w-48" /> : `${results?.length || 0} Kết quả ${query && `cho "${query}"`}`}

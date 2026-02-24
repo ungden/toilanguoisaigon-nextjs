@@ -71,7 +71,7 @@ interface LocationWithReviews extends Location {
   location_tags: { tags: { name: string; slug: string } }[];
 }
 
-const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | null> => {
+const fetchLocationDetail = async (slug: string, userId?: string): Promise<LocationWithReviews | null> => {
   const { data: locationData, error: locationError } = await supabase
     .from('locations')
     .select('*')
@@ -79,11 +79,10 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
     .single();
 
   if (locationError || !locationData) {
-    console.error(`Error fetching location by slug '${slug}':`, locationError?.message);
     return null;
   }
 
-  const [reviewsResult, categoriesResult, tagsResult, savedStatusResult] = await Promise.all([
+  const [reviewsResult, categoriesResult, tagsResult] = await Promise.all([
     supabase
       .from('reviews')
       .select('*, profiles(full_name, avatar_url)')
@@ -97,24 +96,26 @@ const fetchLocationDetail = async (slug: string): Promise<LocationWithReviews | 
       .from('location_tags')
       .select('tags(name, slug)')
       .eq('location_id', locationData.id),
-    supabase
+  ]);
+
+  // Only check saved status if user is logged in
+  let isSaved = false;
+  if (userId) {
+    const { data: savedData } = await supabase
       .from('saved_locations')
       .select('user_id')
       .eq('location_id', locationData.id)
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id || '') // Check if current user saved it
-      .single()
-  ]);
-
-  if (reviewsResult.error) console.error('Error fetching reviews:', reviewsResult.error.message);
-  if (categoriesResult.error) console.error('Error fetching categories:', categoriesResult.error.message);
-  if (tagsResult.error) console.error('Error fetching tags:', tagsResult.error.message);
+      .eq('user_id', userId)
+      .single();
+    isSaved = !!savedData;
+  }
 
   const combinedData: LocationWithReviews = {
     ...locationData,
     reviews: (reviewsResult.data as ReviewWithProfile[]) || [],
     location_categories: (categoriesResult.data as any[]) || [],
     location_tags: (tagsResult.data as any[]) || [],
-    isSaved: !!savedStatusResult.data // Add isSaved property
+    isSaved
   };
 
   return combinedData;
@@ -150,7 +151,7 @@ const PlaceDetailPage = () => {
   
   const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
     queryKey: ['location-detail', slug, user?.id],
-    queryFn: () => fetchLocationDetail(slug!),
+    queryFn: () => fetchLocationDetail(slug!, user?.id),
     enabled: !!slug,
     retry: 1,
   });

@@ -10,8 +10,6 @@ interface UseLocationsOptions {
 
 const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Location[]> => {
   const { limit = 10, query, priceRanges } = options;
-  
-  console.log('Fetching locations with options:', options);
 
   let queryBuilder = supabase
     .from('locations')
@@ -32,11 +30,9 @@ const fetchLocations = async (options: UseLocationsOptions = {}): Promise<Locati
   const { data, error } = await queryBuilder;
 
   if (error) {
-    console.error('Error fetching locations:', error);
     throw new Error(error.message);
   }
 
-  console.log('Fetched locations:', data);
   return data || [];
 };
 
