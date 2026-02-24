@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .single();
     
     if (profileError) {
-      showError('Không thể tải thông tin cá nhân.');
+      showError('Khong the tai thong tin ca nhan.');
       console.error('Error fetching profile:', profileError);
     } else {
       setProfile(profileData);
@@ -90,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (roleError) {
       console.error('Error fetching user role:', roleError);
-      setRole('user'); // Default to 'user' if not found
+      setRole('user');
     } else {
       setRole(roleData.role);
     }

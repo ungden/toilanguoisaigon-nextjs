@@ -1,10 +1,12 @@
+"use client";
+
+import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useLocation } from "react-router-dom";
+import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
-  const location = useLocation();
 
   if (loading) {
     return (
@@ -20,7 +22,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!session) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    redirect("/login");
   }
 
   return <>{children}</>;

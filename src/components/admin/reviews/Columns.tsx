@@ -6,7 +6,7 @@ import { MoreHorizontal, Star, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Link } from "react-router-dom"
+import Link from "next/link"
 
 export const columns = (options: { 
   onDelete: (review: ReviewWithProfileAndLocation) => void;
@@ -53,7 +53,7 @@ export const columns = (options: {
       const location = row.original.locations;
       if (!location) return "N/A";
       return (
-        <Link to={`/place/${location.slug}`} className="hover:underline" target="_blank">
+        <Link href={`/place/${location.slug}`} className="hover:underline" target="_blank">
           {location.name}
         </Link>
       )

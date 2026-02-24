@@ -1,10 +1,11 @@
+"use client";
+
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useLocation } from "react-router-dom";
+import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { role, loading } = useAuth();
-  const location = useLocation();
 
   if (loading) {
     return (
@@ -16,7 +17,7 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (role !== 'admin') {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    redirect("/");
   }
 
   return <>{children}</>;

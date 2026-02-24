@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Star, Pencil, Trash2 } from "lucide-react";
 import { ReviewWithProfileAndLocation } from "@/types/database";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useDeleteReview } from "@/hooks/data/useDeleteReview";
 import { EditReviewForm } from './EditReviewForm';
 
@@ -27,7 +29,7 @@ export function UserReviewCard({ review }: UserReviewCardProps) {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg">
-              <Link to={`/place/${review.locations?.slug}`} className="hover:underline text-vietnam-blue-800">
+              <Link href={`/place/${review.locations?.slug}`} className="hover:underline text-vietnam-blue-800">
                 {review.locations?.name || 'Địa điểm không xác định'}
               </Link>
             </CardTitle>

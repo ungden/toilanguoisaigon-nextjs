@@ -1,5 +1,5 @@
 import { Star, Heart, MapPin, Facebook, Instagram, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 const TikTokIcon = () => (
   <svg
@@ -50,22 +50,22 @@ export function Footer() {
             <h4 className="text-lg font-semibold mb-4 text-vietnam-gold-300">Khám phá</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/collections" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/collections" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Bộ sưu tập
                 </Link>
               </li>
               <li>
-                <Link to="/search" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/search" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Tìm kiếm địa điểm
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/blog" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Blog & Review
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/about" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Về chúng tôi
                 </Link>
               </li>
@@ -77,22 +77,22 @@ export function Footer() {
             <h4 className="text-lg font-semibold mb-4 text-vietnam-gold-300">Hỗ trợ</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/contact" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/contact" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Liên hệ
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/terms" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Điều khoản sử dụng
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/privacy" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   Chính sách bảo mật
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
+                <Link href="/faq" className="text-white/80 hover:text-vietnam-gold-300 transition-colors text-sm">
                   FAQ
                 </Link>
               </li>

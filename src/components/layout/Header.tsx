@@ -1,4 +1,7 @@
-import { Link } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, User, Bookmark, LogOut, Star, Send, Trophy } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -19,6 +22,7 @@ import {
 
 export function Header() {
   const { session, profile, signOut } = useAuth();
+  const router = useRouter();
 
   const getInitials = (name: string | undefined | null, email: string | undefined | null) => {
     if (name) {
@@ -34,7 +38,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
-          <Link to="/" className="mr-8 flex items-center space-x-3">
+          <Link href="/" className="mr-8 flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <Star className="h-8 w-8 text-vietnam-red-600 fill-vietnam-red-600" />
               <div className="flex flex-col">
@@ -49,25 +53,25 @@ export function Header() {
           </Link>
           <nav className="flex items-center space-x-8 text-sm font-medium">
             <Link
-              to="/collections"
+              href="/collections"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Bộ sưu tập
             </Link>
             <Link
-              to="/blog"
+              href="/blog"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Blog
             </Link>
             <Link
-              to="/leaderboard"
+              href="/leaderboard"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Bảng xếp hạng
             </Link>
             <Link
-              to="/about"
+              href="/about"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
               Về chúng tôi
@@ -86,16 +90,16 @@ export function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="pr-0 bg-white">
-            <Link to="/" className="flex items-center space-x-2 mb-6">
+            <Link href="/" className="flex items-center space-x-2 mb-6">
               <Star className="h-6 w-6 text-vietnam-red-600 fill-vietnam-red-600" />
               <span className="font-bold text-vietnam-red-600">Tôi là người Sài Gòn</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-4">
-                 <Link to="/collections" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
-                 <Link to="/blog" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
-                 <Link to="/leaderboard" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bảng xếp hạng</Link>
-                 <Link to="/about" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
+                 <Link href="/collections" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
+                 <Link href="/blog" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
+                 <Link href="/leaderboard" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bảng xếp hạng</Link>
+                 <Link href="/about" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Về chúng tôi</Link>
               </div>
             </div>
           </SheetContent>
@@ -124,19 +128,19 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-vietnam-red-200" />
                 <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
+                  <Link href="/profile" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <User className="mr-2 h-4 w-4" />
                     <span>Trang cá nhân</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/my-notebook" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
+                  <Link href="/my-notebook" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Sổ tay của tôi</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/submit-location" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
+                  <Link href="/submit-location" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <Send className="mr-2 h-4 w-4" />
                     <span>Đóng góp địa điểm</span>
                   </Link>
@@ -150,7 +154,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Button asChild className="btn-vietnam">
-              <Link to="/login">Đăng nhập</Link>
+              <Link href="/login">Đăng nhập</Link>
             </Button>
           )}
         </div>

@@ -1,7 +1,9 @@
+"use client";
+
 import { Location } from '@/types/database';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { cn } from '@/lib/utils';
 import { HelpCircle, ArrowRight } from 'lucide-react';
@@ -57,7 +59,7 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
                   <p className="text-sm text-muted-foreground">{location.district}</p>
                 </div>
                 <Button asChild size="sm" className="w-full mt-2 btn-vietnam">
-                  <Link to={`/place/${location.slug}`}>
+                  <Link href={`/place/${location.slug}`}>
                     Xem chi tiết <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
