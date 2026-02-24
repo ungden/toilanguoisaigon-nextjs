@@ -6,6 +6,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const PostDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -55,6 +56,7 @@ const PostDetailPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <PageMeta title={post.title} description={post.excerpt || undefined} image={post.cover_image_url || undefined} type="article" />
       <Header />
       <main className="flex-grow py-8 md:py-16">
         <div className="container mx-auto px-4 max-w-4xl">

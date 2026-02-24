@@ -143,7 +143,7 @@ const CollectionDetailPage = () => {
                       <img 
                         src={optimizedImageUrl} 
                         alt={location.name} 
-                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
                       />
                       <div className="absolute top-4 right-4">
                         <Badge className="bg-vietnam-red-600 text-white">

@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePosts } from "@/hooks/data/usePosts";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, MessageSquare } from "lucide-react";
@@ -12,6 +13,7 @@ const BlogPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <PageMeta title="Blog & Review" description="Khám phá Sài Gòn qua những câu chuyện, góc nhìn và bài đánh giá chuyên sâu từ cộng đồng." />
       <Header />
       <main className="flex-grow">
         <section className="bg-vietnam-blue-600 text-white py-16">
@@ -48,7 +50,7 @@ const BlogPage = () => {
                       <img 
                         src={post.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
                         alt={post.title} 
-                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
                       />
                     </div>
                     <CardHeader className="bg-white flex-grow">

@@ -1,6 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { FilterSidebar } from "@/components/search/FilterSidebar";
+import { FilterSidebar, Filters } from "@/components/search/FilterSidebar";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,22 +12,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, FormEvent } from "react";
 
-interface Filters {
-  priceRanges: string[];
-}
-
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get("q") || "";
   const [filters, setFilters] = useState<Filters>({
     priceRanges: [],
+    districts: [],
+    categories: [],
   });
 
-  const { data: results, isLoading } = useLocations({ 
-    query, 
-    limit: 20,
-    priceRanges: filters.priceRanges,
+  const { data: results, isLoading } = useLocations({
+    query,
+    limit: 50,
+    priceRanges: filters.priceRanges.length > 0 ? filters.priceRanges : undefined,
+    districts: filters.districts.length > 0 ? filters.districts : undefined,
   });
 
   return (
@@ -56,19 +55,19 @@ const SearchPage = () => {
               />
             </div>
             <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" aria-label="List view" type="button">
-                    <List className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon" aria-label="Map view" type="button">
-                    <Map className="h-5 w-5" />
-                </Button>
+              <Button variant="outline" size="icon" aria-label="List view" type="button">
+                <List className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" aria-label="Map view" type="button">
+                <Map className="h-5 w-5" />
+              </Button>
             </div>
           </form>
-          
+
           <h2 className="text-2xl font-bold mb-4">
             {isLoading ? <Skeleton className="h-8 w-48" /> : `${results?.length || 0} Kết quả ${query && `cho "${query}"`}`}
           </h2>
-          
+
           <div className="space-y-4">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -82,10 +81,18 @@ const SearchPage = () => {
                   </CardContent>
                 </Card>
               ))
-            ) : (
-              results?.map((place) => (
+            ) : results && results.length > 0 ? (
+              results.map((place) => (
                 <SearchResultCard key={place.id} place={place as Location} />
               ))
+            ) : (
+              <div className="text-center py-16">
+                <SearchIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium">Không tìm thấy kết quả</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm lại.
+                </p>
+              </div>
             )}
           </div>
         </main>
