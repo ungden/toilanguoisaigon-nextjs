@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { showError } from '@/utils/toast';
@@ -32,20 +32,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  // Guard against stale async callbacks (race condition prevention)
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
+    let isMounted = true;
+    requestIdRef.current += 1;
+    const currentRequestId = requestIdRef.current;
+
+    const isStale = () => !isMounted || requestIdRef.current !== currentRequestId;
+
     const getSessionAndProfile = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (isStale()) return;
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfileAndRole(session.user.id);
+          await fetchProfileAndRole(session.user.id, isStale);
         }
       } catch (error) {
         console.error("Error getting session:", error);
       } finally {
-        setLoading(false);
+        if (!isStale()) setLoading(false);
       }
     };
 
@@ -53,32 +62,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return;
+        // Bump request ID so any in-flight fetchProfileAndRole from a previous event becomes stale
+        requestIdRef.current += 1;
+        const callId = requestIdRef.current;
+        const isCallStale = () => !isMounted || requestIdRef.current !== callId;
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfileAndRole(session.user.id);
+          await fetchProfileAndRole(session.user.id, isCallStale);
         } else {
           setProfile(null);
           setRole(null);
         }
-        setLoading(false);
+        if (!isCallStale()) setLoading(false);
       }
     );
 
     return () => {
+      isMounted = false;
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  const fetchProfileAndRole = async (userId: string) => {
+  const fetchProfileAndRole = async (userId: string, isStale: () => boolean = () => false) => {
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
     
+    if (isStale()) return;
+
     if (profileError) {
-      showError('Khong the tai thong tin ca nhan.');
+      showError('Không thể tải thông tin cá nhân.');
       console.error('Error fetching profile:', profileError);
     } else {
       setProfile(profileData);
@@ -90,6 +108,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .eq('user_id', userId)
       .single();
 
+    if (isStale()) return;
+
     if (roleError) {
       console.error('Error fetching user role:', roleError);
       setRole('user');
@@ -99,7 +119,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const value = {

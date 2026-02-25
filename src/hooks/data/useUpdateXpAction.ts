@@ -1,12 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { XpAction } from '@/types/database';
+
+type UpdateXpActionData = { action_name: string } & Partial<Omit<XpAction, 'action_name'>>;
 
 export const useUpdateXpAction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ action_name, ...updateData }: { action_name: string, [key: string]: any }) => {
+    mutationFn: async ({ action_name, ...updateData }: UpdateXpActionData) => {
       const { data, error } = await supabase
         .from('xp_actions')
         .update(updateData)

@@ -133,6 +133,7 @@ export function LocationForm({ location, onSubmit, isPending, onClose }: Locatio
                     field.onChange(e.target.files);
                     if (e.target.files && e.target.files[0]) {
                       const file = e.target.files[0];
+                      if (preview) URL.revokeObjectURL(preview);
                       setPreview(URL.createObjectURL(file));
                     }
                   }}

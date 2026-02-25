@@ -1,4 +1,9 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Trang không tồn tại",
+};
 
 export default function NotFound() {
   return (
@@ -6,16 +11,16 @@ export default function NotFound() {
       <div className="text-center space-y-6 max-w-md">
         <h1 className="text-8xl font-bold text-vietnam-red-600">404</h1>
         <h2 className="text-2xl font-semibold text-vietnam-blue-800">
-          Trang khong ton tai
+          Trang không tồn tại
         </h2>
         <p className="text-vietnam-blue-600">
-          Xin loi, trang ban dang tim kiem khong ton tai hoac da bi di chuyen.
+          Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
         </p>
         <Link
           href="/"
           className="inline-block btn-vietnam"
         >
-          Ve trang chu
+          Về trang chủ
         </Link>
       </div>
     </div>

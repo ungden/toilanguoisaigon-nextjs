@@ -52,7 +52,7 @@ const AdminSubmissionsPage = () => {
         const processedValues = {
             ...values,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
-            opening_hours: values.opening_hours ? JSON.parse(values.opening_hours) : null,
+            opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { return null; } })() : null,
         };
         createLocationMutation.mutate(processedValues, {
             onSuccess: () => {

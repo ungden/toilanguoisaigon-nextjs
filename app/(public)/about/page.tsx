@@ -1,4 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Về chúng tôi",
+  description: "Tìm hiểu về Tôi là người Sài Gòn - Nền tảng khám phá ẩm thực và văn hóa Sài Gòn, được xây dựng bởi những người trẻ yêu thành phố.",
+};
 
 export default function AboutPage() {
   return (

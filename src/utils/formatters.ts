@@ -9,12 +9,13 @@ export const formatPriceRange = (priceRange: string | null | undefined) => {
   return priceMap[priceRange] || priceRange;
 };
 
-export const formatOpeningHours = (openingHours: any) => {
-  if (!openingHours || typeof openingHours !== 'object') return 'Chưa cập nhật';
+export const formatOpeningHours = (openingHours: unknown) => {
+  if (!openingHours || typeof openingHours !== 'object' || Array.isArray(openingHours)) return 'Chưa cập nhật';
+  const hours = openingHours as Record<string, string>;
   
   const today = new Date().getDay();
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   
-  const todayHours = openingHours[days[today]] || openingHours.monday;
+  const todayHours = hours[days[today]] || hours.monday;
   return todayHours === '24h' ? 'Mở cửa 24h' : todayHours || 'Chưa cập nhật';
 };

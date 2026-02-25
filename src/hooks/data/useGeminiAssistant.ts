@@ -10,7 +10,7 @@ interface UseGeminiAssistantProps {
 
 export const useGeminiAssistant = ({ onSuccess }: UseGeminiAssistantProps) => {
   return useMutation({
-    mutationFn: async ({ task, payload }: { task: AssistantTask, payload: any }) => {
+    mutationFn: async ({ task, payload }: { task: AssistantTask, payload: Record<string, unknown> }) => {
       const { data, error } = await supabase.functions.invoke('gemini-assistant', {
         body: { task, payload },
       });

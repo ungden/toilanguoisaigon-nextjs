@@ -1,5 +1,6 @@
 import { Star, Heart, MapPin, Facebook, Instagram, Mail } from "lucide-react";
 import Link from "next/link";
+import { SITE_CONFIG } from "@/utils/constants";
 
 const TikTokIcon = () => (
   <svg
@@ -110,19 +111,19 @@ export function Footer() {
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-x-6 gap-y-4">
               <div className="flex items-center space-x-5">
-                <a href="https://www.facebook.com/languoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
+                <a href="https://www.facebook.com/languoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors" aria-label="Facebook">
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a href="https://www.instagram.com/toilanguoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors">
+                <a href="https://www.instagram.com/toilanguoisaigon" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-vietnam-gold-300 transition-colors" aria-label="Instagram">
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a href="https://www.tiktok.com/@toilanguoisaigonofficial" target="_blank" rel="noopener noreferrer" className="group">
+                <a href="https://www.tiktok.com/@toilanguoisaigonofficial" target="_blank" rel="noopener noreferrer" className="group" aria-label="TikTok">
                   <TikTokIcon />
                 </a>
               </div>
-              <a href="mailto:toilanguoisaigonofficial@gmail.com" className="text-white/80 hover:text-vietnam-gold-300 transition-colors flex items-center gap-2 text-sm">
+              <a href={`mailto:${SITE_CONFIG.email}`} className="text-white/80 hover:text-vietnam-gold-300 transition-colors flex items-center gap-2 text-sm">
                 <Mail className="h-5 w-5" />
-                toilanguoisaigonofficial@gmail.com
+                {SITE_CONFIG.email}
               </a>
             </div>
           </div>

@@ -6,11 +6,15 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "wsysphytctpgbzoatuzw.supabase.co",
-        pathname: "/storage/v1/object/**",
+        pathname: "/storage/v1/**",
       },
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.dyad.ai",
       },
     ],
   },

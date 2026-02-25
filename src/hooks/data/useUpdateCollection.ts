@@ -1,12 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { Collection } from '@/types/database';
+
+type UpdateCollectionData = { id: number } & Partial<Omit<Collection, 'id' | 'created_at' | 'collection_categories'>>;
 
 export const useUpdateCollection = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updateData }: { id: number, [key: string]: any }) => {
+    mutationFn: async ({ id, ...updateData }: UpdateCollectionData) => {
       const { data, error } = await supabase
         .from('collections')
         .update(updateData)

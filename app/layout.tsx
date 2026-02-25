@@ -1,38 +1,46 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
+import { WebsiteJsonLd } from "@/components/seo/JsonLd";
+import { FALLBACK_IMAGES } from "@/utils/constants";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Toi la nguoi Sai Gon - Kham pha am thuc & van hoa",
-    template: "%s | Toi la nguoi Sai Gon",
+    default: "Tôi là người Sài Gòn - Khám phá ẩm thực & văn hóa Sài Gòn",
+    template: "%s | Tôi là người Sài Gòn",
   },
   description:
-    "Nen tang kham pha am thuc va van hoa Sai Gon, noi ket noi nhung nguoi yeu thich kham pha voi nhung dia diem doc dao va day chat luong trong thanh pho.",
+    "Nền tảng khám phá ẩm thực và văn hóa Sài Gòn. Tìm kiếm nhà hàng, quán ăn, quán cà phê tuyệt vời nhất TP.HCM với đánh giá từ cộng đồng.",
   metadataBase: new URL("https://www.toilanguoisaigon.com"),
   openGraph: {
     type: "website",
+    locale: "vi_VN",
     url: "https://www.toilanguoisaigon.com/",
-    title: "Toi la nguoi Sai Gon - Kham pha am thuc & van hoa",
+    siteName: "Tôi là người Sài Gòn",
+    title: "Tôi là người Sài Gòn - Khám phá ẩm thực & văn hóa Sài Gòn",
     description:
-      "Nen tang kham pha am thuc va van hoa Sai Gon, noi ket noi nhung nguoi yeu thich kham pha voi nhung dia diem doc dao va day chat luong trong thanh pho.",
+      "Nền tảng khám phá ẩm thực và văn hóa Sài Gòn. Tìm kiếm nhà hàng, quán ăn, quán cà phê tuyệt vời nhất TP.HCM với đánh giá từ cộng đồng.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=1200&auto=format&fit=crop",
+        url: FALLBACK_IMAGES.og,
+        width: 1200,
+        height: 630,
+        alt: "Khám phá ẩm thực Sài Gòn",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Toi la nguoi Sai Gon - Kham pha am thuc & van hoa",
+    title: "Tôi là người Sài Gòn - Khám phá ẩm thực & văn hóa Sài Gòn",
     description:
-      "Nen tang kham pha am thuc va van hoa Sai Gon, noi ket noi nhung nguoi yeu thich kham pha voi nhung dia diem doc dao va day chat luong trong thanh pho.",
-    images: [
-      "https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=1200&auto=format&fit=crop",
-    ],
+      "Nền tảng khám phá ẩm thực và văn hóa Sài Gòn. Tìm kiếm nhà hàng, quán ăn, quán cà phê tuyệt vời nhất TP.HCM với đánh giá từ cộng đồng.",
+    images: [FALLBACK_IMAGES.og],
   },
   icons: {
     icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>",
+  },
+  alternates: {
+    canonical: "https://www.toilanguoisaigon.com",
   },
 };
 
@@ -44,6 +52,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body>
+        <WebsiteJsonLd />
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -6,7 +6,20 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
+import { sanitizeHtml } from "@/utils/sanitize";
+
+function SafeBlogContent({ content }: { content: string }) {
+  const sanitized = useMemo(() => sanitizeHtml(content), [content]);
+  return (
+    <div
+      className="prose prose-lg max-w-none prose-p:text-vietnam-blue-800 prose-headings:text-vietnam-red-600 prose-a:text-vietnam-red-600 hover:prose-a:text-vietnam-red-700 prose-strong:text-vietnam-blue-900"
+      dangerouslySetInnerHTML={{ __html: sanitized }}
+    />
+  );
+}
 
 const PostDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -79,17 +92,17 @@ const PostDetailPage = () => {
             </header>
 
             {post.cover_image_url && (
-              <img 
+              <Image 
                 src={post.cover_image_url} 
                 alt={post.title}
                 className="w-full aspect-video object-cover rounded-lg mb-8 shadow-lg"
+                width={896}
+                height={504}
+                priority
               />
             )}
 
-            <div 
-              className="prose prose-lg max-w-none prose-p:text-vietnam-blue-800 prose-headings:text-vietnam-red-600 prose-a:text-vietnam-red-600 hover:prose-a:text-vietnam-red-700 prose-strong:text-vietnam-blue-900"
-              dangerouslySetInnerHTML={{ __html: post.content || '' }} 
-            />
+            <SafeBlogContent content={post.content || ''} />
           </article>
         </div>
       </div>

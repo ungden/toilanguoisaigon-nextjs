@@ -4,8 +4,10 @@ import { Location } from '@/types/database';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { cn } from '@/lib/utils';
+import { FALLBACK_IMAGES } from '@/utils/constants';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 
 interface MysteryCardProps {
@@ -19,7 +21,7 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
   const imagePath = location?.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
   const optimizedImageUrl = imagePath
     ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
-    : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop';
+    : FALLBACK_IMAGES.location;
 
   const handleCardClick = () => {
     if (isFlippable && !isRevealed) {
@@ -52,7 +54,7 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
         <div className="absolute w-full h-full backface-hidden rotate-y-180">
           {location && (
             <Card className="w-full h-full overflow-hidden flex flex-col">
-              <img src={optimizedImageUrl} alt={location.name} className="w-full h-40 object-cover" />
+              <Image src={optimizedImageUrl} alt={location.name} className="w-full h-40 object-cover" width={400} height={160} />
               <CardContent className="p-4 flex flex-col justify-between flex-grow">
                 <div>
                   <h3 className="font-bold text-lg text-vietnam-blue-800 line-clamp-2">{location.name}</h3>

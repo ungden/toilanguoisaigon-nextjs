@@ -81,7 +81,7 @@ const AdminLocationsPage = () => {
             ...values,
             main_image_url: imageUrl,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
-            opening_hours: values.opening_hours ? JSON.parse(values.opening_hours) : null,
+            opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { showError('Giờ mở cửa không phải JSON hợp lệ.'); return null; } })() : null,
         };
         delete processedValues.image_file;
 

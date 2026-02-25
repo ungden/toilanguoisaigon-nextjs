@@ -96,7 +96,7 @@ const AdminDashboardPage = () => {
         />
         <StatCard
           title="Tỷ lệ đánh giá"
-          value={stats && stats.totalLocations > 0 ? `${(stats.totalReviews / stats.publishedLocations).toFixed(1)}/nơi` : '0'}
+          value={stats && stats.publishedLocations > 0 ? `${(stats.totalReviews / stats.publishedLocations).toFixed(1)}/nơi` : '0'}
           icon={TrendingUp}
           description="Trung bình đánh giá mỗi địa điểm"
           color="text-purple-600"

@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Collection, CollectionCategory } from '@/types/database';
 import { Clock, MapPin, Target, Palette, Users, Award } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { FALLBACK_IMAGES } from "@/utils/constants";
 
 interface CollectionWithCategory extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
@@ -35,7 +37,7 @@ const fetchCollectionsWithCategories = async (): Promise<CollectionWithCategory[
 };
 
 const getIconComponent = (iconName: string | null) => {
-  const icons: { [key: string]: any } = {
+  const icons: Record<string, typeof MapPin> = {
     Clock,
     MapPin,
     Target,
@@ -63,7 +65,7 @@ const CollectionsPage = () => {
     }
     acc[categoryName].collections.push(collection);
     return acc;
-  }, {} as Record<string, { category: any, collections: CollectionWithCategory[] }>);
+  }, {} as Record<string, { category: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null, collections: CollectionWithCategory[] }>);
 
   return (
     <div className="flex flex-col bg-white">
@@ -118,10 +120,13 @@ const CollectionsPage = () => {
                       <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
                         <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full">
                           <div className="relative overflow-hidden">
-                            <img 
-                              src={collection.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                            <Image 
+                              src={collection.cover_image_url || FALLBACK_IMAGES.collection} 
                               alt={collection.title} 
-                              className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
+                              className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              width={400}
+                              height={300}
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <div className="absolute top-4 left-4">

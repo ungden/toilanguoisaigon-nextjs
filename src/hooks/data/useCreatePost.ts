@@ -1,12 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { Post } from '@/types/database';
+
+type CreatePostData = Omit<Post, 'id' | 'created_at' | 'updated_at' | 'profiles'>;
 
 export const useCreatePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (postData: any) => {
+    mutationFn: async (postData: CreatePostData) => {
       const { data, error } = await supabase
         .from('posts')
         .insert([postData])

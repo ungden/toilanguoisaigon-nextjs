@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Collection, Location, CollectionCategory } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
+import { FALLBACK_IMAGES } from "@/utils/constants";
+import Image from "next/image";
 
 interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
@@ -95,7 +97,7 @@ const CollectionDetailPage = () => {
     <div className="flex flex-col bg-white">
       {/* Hero Section */}
       <section className="relative py-16 bg-vietnam-red-600">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1531697111548-0c45f24911da?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20"></div>
+        <div className={`absolute inset-0 bg-cover bg-center opacity-20`} style={{ backgroundImage: `url('${FALLBACK_IMAGES.collectionHero}')` }}></div>
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
             {collection.collection_categories && (
@@ -125,16 +127,19 @@ const CollectionDetailPage = () => {
             const imagePath = location.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
             const optimizedImageUrl = imagePath 
               ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
-              : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop';
+              : FALLBACK_IMAGES.location;
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id} className="block group">
                 <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
                   <div className="relative overflow-hidden">
-                    <img 
+                    <Image 
                       src={optimizedImageUrl} 
                       alt={location.name} 
-                      className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
+                      className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      width={400}
+                      height={300}
+                      loading="lazy"
                     />
                     <div className="absolute top-4 right-4">
                       <Badge className="bg-vietnam-red-600 text-white">

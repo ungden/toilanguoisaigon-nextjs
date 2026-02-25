@@ -8,6 +8,10 @@ export function cn(...inputs: ClassValue[]) {
 export function slugify(text: string) {
   return text
     .toString()
+    .normalize('NFD')                // Normalize Vietnamese diacritics
+    .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
+    .replace(/đ/g, 'd')             // Handle Vietnamese đ
+    .replace(/Đ/g, 'd')
     .toLowerCase()
     .replace(/\s+/g, '-')           // Replace spaces with -
     .replace(/[^\w\-]+/g, '')       // Remove all non-word chars

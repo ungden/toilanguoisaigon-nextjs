@@ -1,9 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Star } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Location } from "@/types/database";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
+import { FALLBACK_IMAGES } from "@/utils/constants";
 
 interface SearchResultCardProps {
   place: Location;
@@ -13,15 +15,17 @@ export function SearchResultCard({ place }: SearchResultCardProps) {
   const imagePath = place.main_image_url ? getPathFromSupabaseUrl(place.main_image_url) : null;
   const optimizedImageUrl = imagePath 
     ? getTransformedImageUrl(imagePath, { width: 400, height: 400 }) 
-    : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop';
+    : FALLBACK_IMAGES.location;
 
   return (
     <Link href={`/place/${place.slug}`} className="block">
       <Card className="flex flex-col sm:flex-row overflow-hidden hover:shadow-lg transition-shadow w-full">
-        <img
+        <Image
           src={optimizedImageUrl}
           alt={place.name}
           className="w-full sm:w-48 h-48 sm:h-auto object-cover flex-shrink-0"
+          width={400}
+          height={400}
           loading="lazy"
         />
         <CardContent className="p-4 flex flex-col justify-between flex-grow">

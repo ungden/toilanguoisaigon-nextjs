@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { Level } from '@/types/database';
 
 export const useCreateLevel = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (levelData: any) => {
+    mutationFn: async (levelData: Level) => {
       const { data, error } = await supabase
         .from('levels')
         .insert([levelData])

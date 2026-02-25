@@ -6,6 +6,8 @@ import { usePosts } from "@/hooks/data/usePosts";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, MessageSquare } from "lucide-react";
+import Image from "next/image";
+import { FALLBACK_IMAGES } from "@/utils/constants";
 
 const BlogPage = () => {
   const { data: posts, isLoading } = usePosts();
@@ -43,10 +45,13 @@ const BlogPage = () => {
               <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
                 <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full flex flex-col">
                   <div className="relative overflow-hidden">
-                    <img 
-                      src={post.cover_image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop'} 
+                    <Image 
+                      src={post.cover_image_url || FALLBACK_IMAGES.collection} 
                       alt={post.title} 
-                      className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
+                      className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      width={500}
+                      height={281}
+                      loading="lazy"
                     />
                   </div>
                   <CardHeader className="bg-white flex-grow">

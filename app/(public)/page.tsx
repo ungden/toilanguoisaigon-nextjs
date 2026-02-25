@@ -7,47 +7,48 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo } from "react";
 import { useCollections } from "@/hooks/data/useCollections";
 import { useLocations } from "@/hooks/data/useLocations";
 import { usePosts } from "@/hooks/data/usePosts";
+import { useStats } from "@/hooks/data/useStats";
 import { showError } from "@/utils/toast";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
+import { FALLBACK_IMAGES, FEATURED_COLLECTIONS } from "@/utils/constants";
 
 const Index = () => {
   const router = useRouter();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 8 });
   const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
+  const { data: stats } = useStats();
+
+  const featuredTitles = useMemo(() => FEATURED_COLLECTIONS.map(fc => fc.title), []);
 
   const sortedCollections = useMemo(() => {
     if (!collections) return [];
 
-    const priorityTitles = [
-      "Michelin Sài Gòn 2025",
-      "Check-in Sống Ảo Triệu Like"
-    ];
-    
     const priorityItems: typeof collections = [];
     const otherItems: typeof collections = [];
 
     for (const collection of collections) {
-      if (priorityTitles.includes(collection.title)) {
+      if (featuredTitles.includes(collection.title)) {
         priorityItems.push(collection);
       } else {
         otherItems.push(collection);
       }
     }
     
-    priorityItems.sort((a, b) => priorityTitles.indexOf(a.title) - priorityTitles.indexOf(b.title));
+    priorityItems.sort((a, b) => featuredTitles.indexOf(a.title) - featuredTitles.indexOf(b.title));
 
     const allSorted = [...priorityItems, ...otherItems];
     return allSorted.slice(0, 8);
 
-  }, [collections]);
+  }, [collections, featuredTitles]);
 
   useEffect(() => {
     if (locationsError) {
@@ -77,10 +78,13 @@ const Index = () => {
       {/* Compact Hero Section with Saigon Image */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=2070&auto=format&fit=crop" 
+          <Image 
+            src={FALLBACK_IMAGES.hero}
             alt="Sài Gòn skyline" 
             className="w-full h-full object-cover"
+            fill
+            priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
@@ -119,15 +123,15 @@ const Index = () => {
             </form>
             <div className="flex justify-center gap-8 mt-8 text-sm">
               <div className="text-center">
-                <div className="text-2xl font-bold text-vietnam-gold-300">500+</div>
+                <div className="text-2xl font-bold text-vietnam-gold-300">{stats ? `${stats.locationCount}+` : '...'}</div>
                 <div className="text-white/80">Địa điểm</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vietnam-gold-300">1000+</div>
+                <div className="text-2xl font-bold text-vietnam-gold-300">{stats ? `${stats.reviewCount}+` : '...'}</div>
                 <div className="text-white/80">Đánh giá</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vietnam-gold-300">50+</div>
+                <div className="text-2xl font-bold text-vietnam-gold-300">{stats ? `${stats.collectionCount}+` : '...'}</div>
                 <div className="text-white/80">Bộ sưu tập</div>
               </div>
             </div>
@@ -181,20 +185,22 @@ const Index = () => {
                 const imagePath = collection.cover_image_url ? getPathFromSupabaseUrl(collection.cover_image_url) : null;
                 const optimizedImageUrl = imagePath 
                   ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
-                  : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop';
+                  : FALLBACK_IMAGES.collection;
 
                 return (
                   <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
                       <div className="relative overflow-hidden">
-                        <img 
+                        <Image 
                           src={
-                            collection.title === "Michelin Sài Gòn 2025" 
-                              ? "https://assets.dyad.ai/michelin-saigon-2025.png" 
-                              : optimizedImageUrl
+                            FEATURED_COLLECTIONS.find(fc => fc.title === collection.title)?.overrideImage
+                              ?? optimizedImageUrl
                           } 
                           alt={collection.title} 
-                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
+                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          width={400}
+                          height={300}
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         {index < 2 && (
@@ -265,16 +271,19 @@ const Index = () => {
               const imagePath = place.main_image_url ? getPathFromSupabaseUrl(place.main_image_url) : null;
               const optimizedImageUrl = imagePath 
                 ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
-                : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop';
+                : FALLBACK_IMAGES.location;
               
               return (
                 <Link href={`/place/${place.slug}`} key={place.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
                     <div className="relative overflow-hidden">
-                      <img 
+                      <Image 
                         src={optimizedImageUrl} 
                         alt={place.name} 
-                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" 
+                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        width={400}
+                        height={300}
+                        loading="lazy"
                       />
                       <div className="absolute top-3 left-3">
                         <Badge className="bg-vietnam-red-600 text-white text-xs">
@@ -375,16 +384,19 @@ const Index = () => {
               const imagePath = post.cover_image_url ? getPathFromSupabaseUrl(post.cover_image_url) : null;
               const optimizedImageUrl = imagePath 
                 ? getTransformedImageUrl(imagePath, { width: 500, height: 281 }) 
-                : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop';
+                : FALLBACK_IMAGES.collection;
 
               return (
                 <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col bg-white">
                     <div className="relative overflow-hidden">
-                      <img 
+                      <Image 
                         src={optimizedImageUrl} 
                         alt={post.title} 
-                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        width={500}
+                        height={281}
+                        loading="lazy"
                       />
                     </div>
                     <CardHeader className="bg-white flex-grow">
