@@ -1,0 +1,237 @@
+# CLAUDE.md - AI Context for toilanguoisaigon
+
+This file provides context for AI assistants working on this codebase. Read this before making changes.
+
+## Project Overview
+
+**Tôi là người Sài Gòn** is a Vietnamese food and culture discovery platform for Ho Chi Minh City. It's a Next.js 16 App Router project with Supabase backend, deployed on Vercel.
+
+**All user-facing text must be in Vietnamese with proper diacritics** (e.g., "Không thể tải", not "Khong the tai").
+
+## Tech Stack
+
+- **Next.js 16** (App Router, NOT Pages Router)
+- **TypeScript** (strict: false in tsconfig.json)
+- **Supabase** (PostgreSQL + Auth + Storage + Edge Functions)
+- **TanStack React Query v5** for data fetching
+- **shadcn/ui** (49 components in `src/components/ui/`)
+- **Tailwind CSS 3** with custom `vietnam-*` color palette
+- **React Hook Form + Zod** for forms
+- **next-themes** for dark mode
+- **ESLint 9** flat config (`eslint.config.mjs`)
+
+## Architecture Decisions
+
+### Client-heavy rendering
+Almost all pages are `"use client"` (25/29). This is intentional - the app relies on Supabase client-side queries via React Query. Server components are only used for layouts and metadata.
+
+### Two Supabase client files
+- `src/lib/supabase/client.ts` - **Canonical** browser client using `createBrowserClient` from `@supabase/ssr`
+- `src/integrations/supabase/client.ts` - **Lazy singleton proxy** for backward compatibility. Most hooks import from here: `import { supabase } from '@/integrations/supabase/client'`
+- `src/lib/supabase/server.ts` - Server client for server components/API routes
+- `src/lib/supabase/middleware.ts` - Session update logic used by `middleware.ts`
+
+**Do NOT create a third client file.** Use the integration proxy for client components and the server client for server-side code.
+
+### Path alias
+`@/*` maps to `./src/*` (configured in `tsconfig.json`). Always use `@/` imports, never relative paths like `../../`.
+
+### State management
+- **React Query** for all server state (50 hooks in `src/hooks/data/`)
+- **AuthContext** (`src/contexts/AuthContext.tsx`) for auth state (session, user, profile, role)
+- No Redux, Zustand, or other state libraries
+
+### Constants
+All hardcoded values are centralized in `src/utils/constants.ts`:
+- `FALLBACK_IMAGES` - Fallback images for locations, collections, hero, OG
+- `SITE_CONFIG` - Site name, email, URL
+- `FEATURED_COLLECTIONS` - Pinned collections on homepage with optional override images
+
+**When adding new fallback URLs or site-wide config, add them here.**
+
+## Key Files to Know
+
+| File | Purpose |
+|------|---------|
+| `app/layout.tsx` | Root layout, global metadata, `<Providers>`, `<WebsiteJsonLd>` |
+| `app/(public)/layout.tsx` | Public layout: Header + Footer + CookieConsent |
+| `app/(public)/page.tsx` | Homepage (hero, mystery cards, collections, locations, blog) |
+| `src/components/providers.tsx` | QueryClientProvider + ThemeProvider + Toaster |
+| `src/contexts/AuthContext.tsx` | Auth state with race condition guards |
+| `src/types/database.ts` | All TypeScript interfaces for DB tables |
+| `src/utils/constants.ts` | Centralized constants (images, config, featured) |
+| `src/utils/sanitize.ts` | HTML sanitizer for blog content (XSS prevention) |
+| `src/utils/image.ts` | Supabase image transform helpers |
+| `middleware.ts` | Route protection (protected + admin paths) |
+| `next.config.ts` | Image remotePatterns (Supabase, Unsplash, dyad.ai) |
+
+## Route Structure
+
+```
+(public)/           - No auth required
+(protected)/        - Requires login (redirects to /login)
+admin/              - Requires login (admin role checked in UI)
+auth/callback       - Supabase auth callback
+```
+
+Middleware handles redirect to `/login?redirectTo=...` for protected/admin routes when no user session exists.
+
+## Data Flow Pattern
+
+All data hooks follow this pattern:
+```typescript
+// src/hooks/data/useLocations.ts
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+
+export const useLocations = (options) => {
+  return useQuery({
+    queryKey: ['locations', options],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('locations').select('*')...
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+```
+
+Mutations use `useMutation` + `queryClient.invalidateQueries()` + toast notifications.
+
+## Admin Hooks Typing
+
+All admin CRUD hooks are properly typed using database interfaces:
+- Create hooks: `Omit<Entity, 'id' | 'created_at' | ...>`
+- Update hooks: `{ id: string } & Partial<Omit<Entity, 'id' | 'created_at' | ...>>`
+- 8 remaining `any` usages are in admin page form handlers (`values: any` from react-hook-form) - these are typed by the Zod schema at the component level.
+
+## Image Handling
+
+- All public-facing images use `next/image` (`<Image>`) for optimization
+- Only exception: `src/components/admin/locations/LocationForm.tsx` uses `<img>` for file upload preview (acceptable)
+- Supabase storage images are transformed via `getTransformedImageUrl()` from `src/utils/image.ts`
+- Fallback images use constants from `src/utils/constants.ts`
+- Remote patterns configured in `next.config.ts`: Supabase, Unsplash, dyad.ai
+
+## SEO
+
+- Root layout has full metadata (title template, OG, Twitter, icons, alternates)
+- Dynamic routes have `generateMetadata` in layout files:
+  - `app/(public)/place/[slug]/layout.tsx`
+  - `app/(public)/blog/[slug]/layout.tsx`
+  - `app/(public)/collection/[slug]/layout.tsx`
+- Static pages have metadata exports (about, privacy, terms)
+- `app/sitemap.ts` generates dynamic sitemap from DB
+- `src/components/seo/JsonLd.tsx` provides WebSite + SearchAction structured data
+
+## Security
+
+- Blog HTML content is sanitized via `sanitizeHtml()` before rendering with `dangerouslySetInnerHTML`
+- Duplicate review prevention (checks existing review before insert)
+- Environment variables validated at runtime in all 3 Supabase client files
+- Route protection via middleware (session check) + UI-level role check for admin
+
+## Auth Race Condition Fix
+
+`AuthContext.tsx` uses a `requestIdRef` + `isStale()` callback pattern to prevent stale async callbacks from overwriting fresh state when auth state changes rapidly. The `fetchProfileAndRole` function accepts an `isStale` parameter and bails out between async operations if superseded.
+
+## Supabase Edge Function
+
+`supabase/functions/gemini-assistant/index.ts` is a **Deno Edge Function** that calls Google Gemini AI. It has persistent TypeScript errors in the IDE because:
+- It uses Deno imports (`https://deno.land/std@...`)
+- It accesses `Deno.env`
+- The project tsconfig excludes `supabase/` directory
+
+**These errors are expected. Do not try to fix them.**
+
+## Known Limitations / Deferred Items
+
+1. **`strict: false` in tsconfig.json** - Enabling strict mode would require significant refactoring. Deferred.
+2. **8 `any` types in admin page form handlers** - Low risk, typed by Zod schemas at component level.
+3. **57 console.error/log statements** - Would need a proper logging service to replace. Left as-is.
+4. **Supabase Edge Function TS errors** - Deno runtime, not fixable in project tsconfig.
+5. **No automated tests** - No test framework is set up yet.
+6. **Admin role check is UI-only** - Middleware checks auth but not admin role; Supabase RLS should enforce server-side.
+
+## Development Commands
+
+```bash
+npm run dev        # Dev server at http://localhost:3000
+npm run build      # Production build (includes typecheck)
+npm run start      # Production server
+npm run lint       # ESLint (app/ + src/)
+npx tsc --noEmit   # TypeScript check only
+```
+
+## CI Pipeline
+
+`.github/workflows/ci.yml` runs on push/PR to main:
+1. `npm run lint` - ESLint
+2. `npx tsc --noEmit` - TypeScript check
+3. `npm run build` - Production build
+
+## File Naming Conventions
+
+- Pages: `page.tsx` (Next.js convention)
+- Layouts: `layout.tsx`
+- Error boundaries: `error.tsx`
+- Hooks: `use[Action][Entity].ts` (e.g., `useCreateLocation.ts`, `useAdminPosts.ts`)
+- Components: PascalCase (e.g., `SearchResultCard.tsx`, `MysteryCard.tsx`)
+- Utils: camelCase (e.g., `formatters.ts`, `sanitize.ts`)
+
+## Color Palette
+
+Custom Tailwind colors defined in `tailwind.config.ts`:
+- `vietnam-red-*` - Primary brand color (CTAs, highlights)
+- `vietnam-blue-*` - Secondary (text, backgrounds)
+- `vietnam-gold-*` - Accent (badges, ratings, special)
+
+## What Was Done (Changelog)
+
+### Phase 1: SEO
+- Root layout metadata with Vietnamese diacritics, locale, siteName, alternates
+- `generateMetadata` for dynamic routes (place, blog, collection)
+- Static metadata for about, privacy, terms
+- `app/sitemap.ts` - dynamic sitemap from DB
+- `robots.txt` with Sitemap directive
+- `JsonLd.tsx` with WebSite + SearchAction structured data
+
+### Phase 2: Content
+- Full rewrite: privacy (9 sections), terms (12 sections), FAQ (14 items)
+- Contact form with Supabase backend + mailto fallback + validation
+
+### Phase 3: Security
+- HTML sanitizer for blog content (`sanitize.ts`)
+- Duplicate review prevention
+- Error boundaries for all 3 route groups
+
+### Phase 4: Features
+- Search: pagination, category filter, Suspense boundary
+- Homepage: dynamic stats from DB (useStats hook)
+- Place detail: "Write Review" scrolls to review section
+
+### Phase 5-6: Architecture & Features
+- Dark mode (next-themes ThemeProvider + ThemeToggle)
+- Cookie consent banner (localStorage)
+- Responsive admin sidebar (Sheet/hamburger on mobile)
+
+### Phase 7: DevOps & Cleanup
+- CI pipeline (`.github/workflows/ci.yml`)
+- Deleted dead code: AI_RULES.md, dist/, PageMeta.tsx, AdminRoute, ProtectedRoute, AdminLayout
+
+### Code Audit Fixes
+- JSON.parse try/catch in admin pages
+- Division by zero fix in admin dashboard
+- Clipboard.writeText promise handling
+- Vietnamese-safe slugify (NFD normalization)
+- Centralized constants (FALLBACK_IMAGES, SITE_CONFIG, FEATURED_COLLECTIONS)
+- Applied constants to all 8+ consumer files
+- next/image migration (16 public `<img>` -> `<Image>`)
+- AuthContext race condition fix (requestIdRef + isStale guard)
+- Middleware env var validation (removed non-null assertions)
+- Typed 14 `any` usages in admin hooks with proper Omit/Partial types
+- Removed unused imports/exports across codebase
+- Memory leak fix (URL.revokeObjectURL in LocationForm)
+- Aria-labels for accessibility (social links, buttons)
+- ESLint flat config (TypeScript + React Hooks rules)
+- signOut error handling in AuthContext
