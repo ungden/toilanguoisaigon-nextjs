@@ -29,6 +29,7 @@ export const usePlaylists = (options?: { limit?: number; featured?: boolean }) =
       if (error) throw error;
       return data as Playlist[];
     },
+    retry: 1,
   });
 };
 
