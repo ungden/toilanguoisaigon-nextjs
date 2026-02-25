@@ -1,0 +1,42 @@
+# Danh sách queries mẫu để import từ Google Maps
+# Mỗi dòng là một query riêng, dòng bắt đầu bằng # sẽ bị bỏ qua
+#
+# Chạy: npx tsx scripts/import-from-maps.ts --file scripts/queries-sample.txt --dry-run
+
+# === Phở ===
+Quán phở ngon nhất Sài Gòn
+Phở gà ngon quận 1 quận 3
+
+# === Cơm ===
+Cơm tấm ngon Sài Gòn
+Cơm bình dân ngon quận 1
+
+# === Bún ===
+Bún bò Huế ngon Sài Gòn
+Bún chả Hà Nội ở Sài Gòn
+Bún riêu cua ngon TP HCM
+
+# === Bánh mì ===
+Tiệm bánh mì ngon nhất Sài Gòn
+
+# === Cà phê ===
+Quán cà phê đẹp quận 1
+Cà phê rooftop view đẹp Sài Gòn
+Quán cà phê sách yên tĩnh Sài Gòn
+
+# === Nhà hàng ===
+Nhà hàng hải sản ngon quận 7
+Nhà hàng chay ngon Sài Gòn
+Quán lẩu ngon Sài Gòn
+
+# === Đường phố ===
+Quán ăn vỉa hè nổi tiếng Sài Gòn
+Chợ ẩm thực đường phố Sài Gòn
+
+# === Bar & Đồ uống ===
+Rooftop bar đẹp Sài Gòn
+Quán trà sữa ngon quận 1
+
+# === Bánh & Dessert ===
+Tiệm bánh ngọt ngon Sài Gòn
+Quán chè ngon Sài Gòn

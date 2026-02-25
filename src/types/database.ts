@@ -47,6 +47,13 @@ export interface Location {
   status: LocationStatus;
   average_rating: number;
   review_count: number;
+  // Google Maps data (populated by AI import)
+  google_maps_uri: string | null;
+  google_place_id: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
+  google_review_summary: string | null; // AI-tổng hợp review từ Google Maps
+  google_highlights: string[] | null; // Điểm nổi bật từ reviews (ví dụ: "phở đậm đà", "phục vụ nhanh")
   isSaved?: boolean; // Added for client-side tracking
 }
 
@@ -148,4 +155,60 @@ export interface Badge {
   description: string | null;
   icon_name: string | null;
   created_at: string;
+}
+
+// ─── Playlists (AI-generated daily food playlists) ───────────────────────
+
+export type PlaylistStatus = "draft" | "published" | "archived";
+
+export type PlaylistMood =
+  | "morning"
+  | "lunch"
+  | "dinner"
+  | "late-night"
+  | "rainy-day"
+  | "weekend"
+  | "date-night"
+  | "family"
+  | "budget"
+  | "premium"
+  | "adventure"
+  | "comfort"
+  | "healthy"
+  | "street-food"
+  | "seasonal";
+
+export interface Playlist {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  cover_image_url: string | null;
+  mood: PlaylistMood | null;
+  emoji: string | null;
+  status: PlaylistStatus;
+  is_featured: boolean;
+  generated_date: string; // YYYY-MM-DD, ngày playlist được tạo
+  ai_context: string | null; // prompt/context AI dùng để tạo playlist
+  location_count: number;
+}
+
+export interface PlaylistLocation {
+  playlist_id: string;
+  location_id: string;
+  position: number; // thứ tự trong playlist
+  ai_note: string | null; // ghi chú AI cho location này trong playlist
+}
+
+export interface PlaylistWithLocations extends Playlist {
+  playlist_locations: Array<
+    PlaylistLocation & {
+      locations: Pick<
+        Location,
+        'id' | 'name' | 'slug' | 'address' | 'district' | 'main_image_url' | 'average_rating' | 'review_count' | 'price_range'
+      >;
+    }
+  >;
 }

@@ -368,6 +368,48 @@ const PlaceDetailPage = () => {
                 <Collapsible><CollapsibleTrigger asChild><div className="flex justify-between items-center p-3 border rounded-lg cursor-pointer hover:bg-muted"><div className="flex items-center"><Clock className="h-5 w-5 mr-3 text-vietnam-red-600" /><div><span className="font-semibold text-vietnam-blue-800">{todayInfo.label} (Hôm nay):</span><span className="ml-2 text-vietnam-blue-700 font-medium">{todayHours}</span></div></div><Button variant="ghost" size="sm" className="p-1"><ChevronsUpDown className="h-4 w-4" /><span className="sr-only">Xem thêm</span></Button></div></CollapsibleTrigger><CollapsibleContent><div className="mt-2 p-4 border rounded-lg space-y-3">{daysOfWeek.map(({ key, label }, index) => { const hours = openingHoursData?.[key] || 'Đóng cửa'; const isToday = todayIndex === index; return (<div key={key} className={`flex justify-between items-center`}><span className={`font-medium ${isToday ? 'text-vietnam-red-700' : 'text-vietnam-blue-800'}`}>{label}</span><span className={`${isToday ? 'text-vietnam-red-600 font-semibold' : 'text-vietnam-blue-600'}`}>{hours}</span></div>);})}</div></CollapsibleContent></Collapsible>
                 <Alert className="border-vietnam-blue-200 bg-vietnam-blue-50"><Info className="h-4 w-4 text-vietnam-blue-600" /><AlertTitle className="font-semibold text-vietnam-blue-800">Dành cho chủ sở hữu</AlertTitle><AlertDescription className="text-vietnam-blue-700">Chủ quán / chủ cơ sở liên hệ chúng tôi để <strong>xác nhận</strong> địa điểm và update số điện thoại.</AlertDescription></Alert>
                 {place.description && (<div><h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Về địa điểm này</h3><div className="prose prose-lg max-w-none text-vietnam-blue-700"><p className="leading-relaxed">{place.description}</p></div></div>)}
+                {(place.google_rating || place.google_review_summary || (place.google_highlights && place.google_highlights.length > 0)) && (
+                  <Card className="border-vietnam-gold-200 bg-vietnam-gold-50/50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-vietnam-red-600 flex items-center text-xl">
+                        <Star className="h-5 w-5 mr-2 fill-vietnam-gold-500 text-vietnam-gold-500" />
+                        Đánh giá từ Google Maps
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {place.google_rating && (
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1">
+                            <span className="text-3xl font-bold text-vietnam-blue-800">{place.google_rating.toFixed(1)}</span>
+                            <div className="flex ml-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${i < Math.round(place.google_rating!) ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          {place.google_review_count && (
+                            <span className="text-sm text-vietnam-blue-600">({place.google_review_count.toLocaleString('vi-VN')} đánh giá trên Google)</span>
+                          )}
+                        </div>
+                      )}
+                      {place.google_review_summary && (
+                        <p className="text-vietnam-blue-700 leading-relaxed italic">&ldquo;{place.google_review_summary}&rdquo;</p>
+                      )}
+                      {place.google_highlights && place.google_highlights.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {place.google_highlights.map((highlight, idx) => (
+                            <Badge key={idx} variant="secondary" className="bg-vietnam-gold-100 text-vietnam-gold-800 border-vietnam-gold-300">
+                              {highlight}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
                 {tags.length > 0 && (<div><h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Tiện ích & Đặc điểm</h3><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{tags.map((tag) => {const iconMap: Record<string, any> = { 'wifi': Wifi, 'parking': Car, 'card-payment': CreditCard, 'group': Users, 'kid-friendly': Baby, 'pet-friendly': Dog }; const IconComp = iconMap[tag.slug] || Utensils; return (<div key={tag.slug} className="flex items-center text-vietnam-blue-700"><IconComp className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>{tag.name}</span></div>);})}</div></div>)}
                 <Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600 flex items-center"><MapPin className="h-5 w-5 mr-2" />Vị trí trên bản đồ</CardTitle></CardHeader><CardContent className="space-y-4">{place.latitude && place.longitude ? (<><div className="h-64 rounded-lg overflow-hidden"><iframe title={`Bản đồ ${place.name}`} width="100%" height="100%" style={{ border: 0 }} loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${place.longitude - 0.005}%2C${place.latitude - 0.003}%2C${place.longitude + 0.005}%2C${place.latitude + 0.003}&layer=mapnik&marker=${place.latitude}%2C${place.longitude}`} /></div><Button className="btn-vietnam" asChild><a href={`https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`} target="_blank" rel="noopener noreferrer"><Navigation className="h-4 w-4 mr-2" />Chỉ đường</a></Button></>) : (<><div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center"><p className="text-gray-500">Chưa có tọa độ cho địa điểm này</p></div><Button className="btn-vietnam" asChild><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address + ', ' + place.district + ', TP.HCM')}`} target="_blank" rel="noopener noreferrer"><Navigation className="h-4 w-4 mr-2" />Tìm trên Google Maps</a></Button></>)}</CardContent></Card>
               </TabsContent>

@@ -60,5 +60,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...locationPages, ...postPages, ...collectionPages];
+  // Dynamic: playlists
+  const { data: playlists } = await supabase
+    .from("playlists")
+    .select("slug, created_at, updated_at")
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  const playlistPages: MetadataRoute.Sitemap = (playlists || []).map((pl) => ({
+    url: `${baseUrl}/playlist/${pl.slug}`,
+    lastModified: new Date(pl.updated_at || pl.created_at),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
+  // Static: playlists listing page
+  const playlistListingPage: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/playlists`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.8 },
+  ];
+
+  return [...staticPages, ...locationPages, ...postPages, ...collectionPages, ...playlistListingPage, ...playlistPages];
 }
