@@ -12,7 +12,6 @@ const fetchUserSubmissions = async (userId: string): Promise<LocationSubmission[
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching user submissions:', error);
     throw new Error(error.message);
   }
 

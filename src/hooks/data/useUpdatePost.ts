@@ -24,8 +24,7 @@ export const useUpdatePost = () => {
       showSuccess('Cập nhật bài viết thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
     },
-    onError: (error) => {
-      console.error('Error updating post:', error);
+    onError: () => {
       showError('Không thể cập nhật bài viết. Vui lòng thử lại.');
     },
   });

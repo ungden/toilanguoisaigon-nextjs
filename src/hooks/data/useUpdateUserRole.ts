@@ -25,8 +25,7 @@ export const useUpdateUserRole = () => {
       showSuccess('Cập nhật vai trò người dùng thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: (error) => {
-      console.error('Error updating user role:', error);
+    onError: () => {
       showError('Không thể cập nhật vai trò. Vui lòng thử lại.');
     },
   });

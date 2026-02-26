@@ -24,8 +24,7 @@ export const useUpdateLevel = () => {
       showSuccess('Cập nhật cấp độ thành công!');
       queryClient.invalidateQueries({ queryKey: ['levels'] });
     },
-    onError: (error) => {
-      console.error('Error updating level:', error);
+    onError: () => {
       showError('Không thể cập nhật cấp độ. Vui lòng thử lại.');
     },
   });

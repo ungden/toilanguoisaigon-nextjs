@@ -19,8 +19,7 @@ export const useDeletePost = () => {
       showSuccess('Bài viết đã được xóa thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
     },
-    onError: (error) => {
-      console.error('Error deleting post:', error);
+    onError: () => {
       showError('Không thể xóa bài viết. Vui lòng thử lại.');
     },
   });

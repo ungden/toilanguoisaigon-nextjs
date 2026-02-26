@@ -19,8 +19,7 @@ export const useDeleteLocation = () => {
       showSuccess('Địa điểm đã được xóa thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-locations'] });
     },
-    onError: (error) => {
-      console.error('Error deleting location:', error);
+    onError: () => {
       showError('Không thể xóa địa điểm. Vui lòng thử lại.');
     },
   });

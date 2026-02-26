@@ -27,8 +27,7 @@ export const useUpdateSubmissionStatus = () => {
       showSuccess('Cập nhật trạng thái đóng góp thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-submissions'] });
     },
-    onError: (error) => {
-      console.error('Error updating submission status:', error);
+    onError: () => {
       showError('Không thể cập nhật trạng thái. Vui lòng thử lại.');
     },
   });

@@ -22,7 +22,6 @@ const fetchAdminSubmissions = async (): Promise<SubmissionWithProfile[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin submissions:', error);
     throw new Error(error.message);
   }
 

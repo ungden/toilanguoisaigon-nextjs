@@ -29,8 +29,7 @@ export const useUpdateReview = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['location-detail'] });
     },
-    onError: (error) => {
-      console.error('Error updating review:', error);
+    onError: () => {
       showError('Không thể cập nhật đánh giá. Vui lòng thử lại.');
     },
   });

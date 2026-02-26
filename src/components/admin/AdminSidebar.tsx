@@ -9,7 +9,7 @@ import {
   LayoutDashboard,
   Map,
   MapPinPlus,
-  ListMusic,
+
   Users,
   FileText,
   Library,
@@ -26,7 +26,6 @@ const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Tổng quan" },
   { href: "/admin/locations", icon: Map, label: "Địa điểm" },
   { href: "/admin/import-maps", icon: MapPinPlus, label: "Import từ Maps" },
-  { href: "/admin/playlists", icon: ListMusic, label: "Playlist AI" },
   { href: "/admin/users", icon: Users, label: "Người dùng" },
   { href: "/admin/posts", icon: FileText, label: "Bài viết" },
   { href: "/admin/collections", icon: Library, label: "Bộ sưu tập" },

@@ -21,8 +21,7 @@ export const useUnsaveLocation = () => {
       queryClient.invalidateQueries({ queryKey: ['savedLocations'] });
       queryClient.invalidateQueries({ queryKey: ['location-detail'] }); // Invalidate detail page to update save status
     },
-    onError: (error) => {
-      console.error('Error unsaving location:', error);
+    onError: () => {
       showError('Không thể xóa địa điểm khỏi sổ tay. Vui lòng thử lại.');
     },
   });

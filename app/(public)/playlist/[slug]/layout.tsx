@@ -19,14 +19,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!playlist) {
     return {
-      title: "Playlist không tìm thấy",
+      title: "Bộ sưu tập không tìm thấy",
     };
   }
 
   const title = `${playlist.emoji || ""} ${playlist.title}`.trim();
   const description =
     playlist.description ||
-    `Playlist ẩm thực ${playlist.title} - ${playlist.location_count} địa điểm được AI gợi ý tại Sài Gòn.`;
+    `Bộ sưu tập ẩm thực ${playlist.title} - ${playlist.location_count} địa điểm được AI gợi ý tại Sài Gòn.`;
 
   return {
     title,

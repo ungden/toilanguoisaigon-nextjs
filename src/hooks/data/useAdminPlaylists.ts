@@ -58,7 +58,6 @@ export const useGeneratePlaylist = () => {
       showSuccess(`Đã tạo ${data.total} playlist mới!`);
     },
     onError: (error: Error) => {
-      console.error('Generate playlist error:', error);
       showError(error.message || 'Không thể tạo playlist. Vui lòng thử lại.');
     },
   });

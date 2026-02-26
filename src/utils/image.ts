@@ -21,8 +21,7 @@ export const getPathFromSupabaseUrl = (url: string): string | null => {
             return pathParts[pathParts.length - 1]; // Fallback for simpler paths
         }
         return pathParts.slice(bucketIndex + 1).join('/');
-    } catch (error) {
-        console.error("Invalid URL for path extraction:", url);
+    } catch {
         return null;
     }
 }

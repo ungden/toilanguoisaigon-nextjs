@@ -9,7 +9,6 @@ const fetchAdminLocations = async (): Promise<Location[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin locations:', error);
     throw new Error(error.message);
   }
 

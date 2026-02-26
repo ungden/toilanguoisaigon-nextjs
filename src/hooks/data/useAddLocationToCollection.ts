@@ -21,7 +21,6 @@ export const useAddLocationToCollection = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-collection-detail', variables.collectionId] });
     },
     onError: (error: Error) => {
-      console.error('Error adding location to collection:', error);
       if (error.message.includes('duplicate key value')) {
         showError('Địa điểm này đã có trong bộ sưu tập.');
       } else {

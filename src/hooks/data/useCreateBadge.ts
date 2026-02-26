@@ -23,8 +23,7 @@ export const useCreateBadge = () => {
       showSuccess('Tạo huy hiệu mới thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-badges'] });
     },
-    onError: (error) => {
-      console.error('Error creating badge:', error);
+    onError: () => {
       showError('Không thể tạo huy hiệu. Vui lòng thử lại.');
     },
   });

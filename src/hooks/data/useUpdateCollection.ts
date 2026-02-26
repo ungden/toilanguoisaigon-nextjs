@@ -24,8 +24,7 @@ export const useUpdateCollection = () => {
       showSuccess('Cập nhật bộ sưu tập thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
     },
-    onError: (error) => {
-      console.error('Error updating collection:', error);
+    onError: () => {
       showError('Không thể cập nhật bộ sưu tập. Vui lòng thử lại.');
     },
   });

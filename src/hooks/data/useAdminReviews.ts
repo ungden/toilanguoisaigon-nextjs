@@ -13,7 +13,6 @@ const fetchAdminReviews = async (): Promise<ReviewWithProfileAndLocation[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin reviews:', error);
     throw new Error(error.message);
   }
 

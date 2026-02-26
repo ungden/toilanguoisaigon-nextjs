@@ -14,7 +14,6 @@ const searchLocations = async (query: string): Promise<Pick<Location, 'id' | 'na
     .limit(10);
 
   if (error) {
-    console.error('Error searching locations:', error);
     throw new Error(error.message);
   }
 

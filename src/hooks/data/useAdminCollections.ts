@@ -14,7 +14,6 @@ const fetchAdminCollections = async (): Promise<Collection[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin collections:', error);
     throw new Error(error.message);
   }
 

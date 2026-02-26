@@ -56,11 +56,30 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(path)
   );
 
+  // Redirect unauthenticated users to login
   if ((isProtectedPath || isAdminPath) && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", request.nextUrl.pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Admin role check: query user_roles table to verify admin access
+  if (isAdminPath && user) {
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    const userRole = roleData?.role || 'user';
+
+    if (userRole !== 'admin') {
+      // Non-admin users get redirected to homepage
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

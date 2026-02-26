@@ -21,8 +21,7 @@ export const useCreateLevel = () => {
       showSuccess('Tạo cấp độ mới thành công!');
       queryClient.invalidateQueries({ queryKey: ['levels'] });
     },
-    onError: (error) => {
-      console.error('Error creating level:', error);
+    onError: () => {
       showError('Không thể tạo cấp độ. Vui lòng thử lại.');
     },
   });

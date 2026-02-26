@@ -9,7 +9,6 @@ const fetchLevels = async (): Promise<Level[]> => {
     .order('level', { ascending: true });
 
   if (error) {
-    console.error('Error fetching levels:', error);
     throw new Error(error.message);
   }
 

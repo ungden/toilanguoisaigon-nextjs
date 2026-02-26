@@ -23,7 +23,6 @@ const fetchCollectionDetail = async (collectionId: number): Promise<CollectionWi
     .single();
 
   if (error) {
-    console.error('Error fetching collection detail:', error);
     throw new Error(error.message);
   }
 

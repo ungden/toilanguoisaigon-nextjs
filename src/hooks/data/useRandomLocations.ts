@@ -8,7 +8,6 @@ const fetchRandomLocations = async (count: number): Promise<Location[]> => {
   });
 
   if (error) {
-    console.error('Error fetching random locations:', error);
     throw new Error(error.message);
   }
 

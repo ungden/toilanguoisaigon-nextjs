@@ -51,8 +51,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user) {
           await fetchProfileAndRole(session.user.id, isStale);
         }
-      } catch (error) {
-        console.error("Error getting session:", error);
+      } catch {
+        // Error is handled by auth state change listener
       } finally {
         if (!isStale()) setLoading(false);
       }
@@ -97,7 +97,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (profileError) {
       showError('Không thể tải thông tin cá nhân.');
-      console.error('Error fetching profile:', profileError);
     } else {
       setProfile(profileData);
     }
@@ -111,7 +110,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (isStale()) return;
 
     if (roleError) {
-      console.error('Error fetching user role:', roleError);
       setRole('user');
     } else {
       setRole(roleData.role);
@@ -121,8 +119,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
+    } catch {
+      // Sign out error is non-critical; session will expire naturally
     }
   };
 

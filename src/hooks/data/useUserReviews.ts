@@ -15,7 +15,6 @@ const fetchUserReviews = async (userId: string): Promise<ReviewWithProfileAndLoc
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching user reviews:', error);
     throw new Error(error.message);
   }
 

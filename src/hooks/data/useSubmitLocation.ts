@@ -32,8 +32,7 @@ export const useSubmitLocation = () => {
       showSuccess('Gửi địa điểm thành công! Chúng tôi sẽ xem xét sớm nhất có thể.');
       queryClient.invalidateQueries({ queryKey: ['user-submissions'] });
     },
-    onError: (error) => {
-      console.error('Error submitting location:', error);
+    onError: () => {
       showError('Không thể gửi địa điểm. Vui lòng thử lại.');
     },
   });

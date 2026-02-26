@@ -23,8 +23,7 @@ export const useCreateCollection = () => {
       showSuccess('Tạo bộ sưu tập mới thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
     },
-    onError: (error) => {
-      console.error('Error creating collection:', error);
+    onError: () => {
       showError('Không thể tạo bộ sưu tập. Vui lòng thử lại.');
     },
   });

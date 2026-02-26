@@ -14,7 +14,6 @@ const fetchAdminPosts = async (): Promise<Post[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin posts:', error);
     throw new Error(error.message);
   }
 

@@ -134,7 +134,6 @@ const fetchSimilarLocations = async (district: string, currentId: string): Promi
     .limit(4);
 
   if (error) {
-    console.error('Error fetching similar locations:', error);
     return [];
   }
 
@@ -205,7 +204,6 @@ const PlaceDetailPage = () => {
       queryClient.invalidateQueries({ queryKey: ['location-detail', slug] });
     },
     onError: (error: Error) => {
-      console.error('Error submitting review:', error);
       if (error.message === 'DUPLICATE_REVIEW') {
         showError('Bạn đã đánh giá địa điểm này rồi. Mỗi người chỉ được đánh giá một lần.');
       } else {
@@ -216,7 +214,6 @@ const PlaceDetailPage = () => {
 
   useEffect(() => {
     if (error) {
-      console.error('Error loading location detail:', error);
       showError('Không thể tải thông tin địa điểm. Vui lòng thử lại sau.');
     }
   }, [error]);
@@ -246,8 +243,8 @@ const PlaceDetailPage = () => {
           text: `Khám phá ${place.name} tại ${place.address}`,
           url: window.location.href,
         });
-      } catch (error) {
-        console.log('Error sharing:', error);
+      } catch {
+        // User cancelled share dialog
       }
     } else {
       navigator.clipboard.writeText(window.location.href).then(() => {

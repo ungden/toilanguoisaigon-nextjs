@@ -14,7 +14,6 @@ const fetchAdminUsers = async (): Promise<ProfileWithRole[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin users:', error);
     throw new Error(error.message);
   }
 

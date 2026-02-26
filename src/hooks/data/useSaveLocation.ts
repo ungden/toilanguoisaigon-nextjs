@@ -21,8 +21,7 @@ export const useSaveLocation = () => {
       queryClient.invalidateQueries({ queryKey: ['savedLocations'] });
       queryClient.invalidateQueries({ queryKey: ['location-detail'] }); // Invalidate detail page to update save status
     },
-    onError: (error) => {
-      console.error('Error saving location:', error);
+    onError: () => {
       showError('Không thể lưu địa điểm. Vui lòng thử lại.');
     },
   });

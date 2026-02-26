@@ -19,8 +19,7 @@ export const useDeleteBadge = () => {
       showSuccess('Huy hiệu đã được xóa thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-badges'] });
     },
-    onError: (error) => {
-      console.error('Error deleting badge:', error);
+    onError: () => {
       showError('Không thể xóa huy hiệu. Vui lòng thử lại.');
     },
   });

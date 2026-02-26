@@ -9,7 +9,6 @@ const fetchAdminXpActions = async (): Promise<XpAction[]> => {
     .order('action_name', { ascending: true });
 
   if (error) {
-    console.error('Error fetching admin xp actions:', error);
     throw new Error(error.message);
   }
 

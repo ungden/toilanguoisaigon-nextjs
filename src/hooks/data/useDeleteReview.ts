@@ -21,8 +21,7 @@ export const useDeleteReview = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['location-detail'] });
     },
-    onError: (error) => {
-      console.error('Error deleting review:', error);
+    onError: () => {
       showError('Không thể xóa đánh giá. Vui lòng thử lại.');
     },
   });

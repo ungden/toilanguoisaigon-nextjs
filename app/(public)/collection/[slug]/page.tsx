@@ -39,7 +39,6 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
     .single();
 
   if (error) {
-    console.error('Error fetching collection detail:', error);
     throw new Error(error.message);
   }
 

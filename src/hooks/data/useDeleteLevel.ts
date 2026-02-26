@@ -19,8 +19,7 @@ export const useDeleteLevel = () => {
       showSuccess('Cấp độ đã được xóa thành công!');
       queryClient.invalidateQueries({ queryKey: ['levels'] });
     },
-    onError: (error) => {
-      console.error('Error deleting level:', error);
+    onError: () => {
       showError('Không thể xóa cấp độ. Vui lòng thử lại.');
     },
   });

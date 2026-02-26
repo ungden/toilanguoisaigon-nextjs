@@ -10,7 +10,6 @@ const fetchCollections = async (): Promise<Collection[]> => {
     .limit(20);
 
   if (error) {
-    console.error('Error fetching collections:', error);
     throw new Error(error.message);
   }
 

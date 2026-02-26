@@ -29,7 +29,6 @@ export const useGeminiAssistant = ({ onSuccess }: UseGeminiAssistantProps) => {
       onSuccess(result);
     },
     onError: (error: Error) => {
-      console.error('Lỗi trợ lý AI:', error);
       showError(error.message || 'Không thể nhận phản hồi từ AI. Vui lòng thử lại.');
     },
   });

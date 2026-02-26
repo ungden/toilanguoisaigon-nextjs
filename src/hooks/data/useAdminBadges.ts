@@ -9,7 +9,6 @@ const fetchAdminBadges = async (): Promise<Badge[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching admin badges:', error);
     throw new Error(error.message);
   }
 

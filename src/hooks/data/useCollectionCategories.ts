@@ -9,7 +9,6 @@ const fetchCollectionCategories = async (): Promise<CollectionCategory[]> => {
     .order('name', { ascending: true });
 
   if (error) {
-    console.error('Error fetching collection categories:', error);
     throw new Error(error.message);
   }
 

@@ -16,7 +16,6 @@ const MyNotebookPage = () => {
     const isLoading = authLoading || locationsLoading;
 
     if (locationsError) {
-        console.error("Error fetching saved locations:", locationsError);
         return (
             <div className="container mx-auto px-4 py-8">
                 <div className="text-center py-16">

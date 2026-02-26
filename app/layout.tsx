@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/providers";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { FALLBACK_IMAGES } from "@/utils/constants";
@@ -54,6 +56,8 @@ export default function RootLayout({
       <body>
         <WebsiteJsonLd />
         <Providers>{children}</Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

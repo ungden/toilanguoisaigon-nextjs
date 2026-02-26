@@ -62,7 +62,6 @@ export const useGoogleMapsSearch = () => {
       return data as MapsImportResponse;
     },
     onError: (error: Error) => {
-      console.error('Google Maps search error:', error);
       showError(error.message || 'Không thể tìm kiếm từ Google Maps. Vui lòng thử lại.');
     },
   });
@@ -149,7 +148,6 @@ export const useImportLocations = () => {
       }
     },
     onError: (error: Error) => {
-      console.error('Import locations error:', error);
       showError(error.message || 'Lỗi khi import địa điểm.');
     },
   });

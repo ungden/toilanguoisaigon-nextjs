@@ -31,8 +31,7 @@ export const useUpdateProfile = () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] }); // Invalidate posts to update author info
       queryClient.invalidateQueries({ queryKey: ['location-detail'] }); // Invalidate location detail to update review author info
     },
-    onError: (error) => {
-      console.error('Error updating profile:', error);
+    onError: () => {
       showError('Có lỗi xảy ra khi cập nhật hồ sơ. Vui lòng thử lại.');
     },
   });

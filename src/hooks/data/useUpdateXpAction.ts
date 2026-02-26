@@ -24,8 +24,7 @@ export const useUpdateXpAction = () => {
       showSuccess('Cập nhật hành động thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-xp-actions'] });
     },
-    onError: (error) => {
-      console.error('Error updating xp action:', error);
+    onError: () => {
       showError('Không thể cập nhật hành động. Vui lòng thử lại.');
     },
   });

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles, ListMusic } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,8 +18,6 @@ import { showError } from "@/utils/toast";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
-import { PlaylistCard } from "@/components/playlists/PlaylistCard";
-import { usePlaylists } from "@/hooks/data/usePlaylists";
 import { FALLBACK_IMAGES, FEATURED_COLLECTIONS } from "@/utils/constants";
 
 const Index = () => {
@@ -28,7 +26,6 @@ const Index = () => {
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 8 });
   const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
   const { data: stats } = useStats();
-  const { data: playlists, isLoading: isLoadingPlaylists } = usePlaylists({ limit: 6 });
 
   const featuredTitles = useMemo(() => FEATURED_COLLECTIONS.map(fc => fc.title), []);
 
@@ -158,50 +155,6 @@ const Index = () => {
           <MysteryLocationCards />
         </div>
       </section>
-
-      {/* Playlist Section - AI-generated daily playlists */}
-      {(isLoadingPlaylists || (playlists && playlists.length > 0)) && (
-        <section className="bg-white py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-vietnam-red-100 text-vietnam-red-700 hover:bg-vietnam-red-200">
-                <ListMusic className="h-4 w-4 mr-1" />
-                Playlist hôm nay
-              </Badge>
-              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Playlist Ẩm Thực</h2>
-              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-                Mỗi ngày một gợi ý mới - AI chọn lọc những địa điểm phù hợp nhất cho bạn
-              </p>
-            </div>
-
-            {isLoadingPlaylists ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="aspect-[16/10] w-full rounded-xl" />
-                    <Skeleton className="h-4 w-3/4" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {playlists?.map((playlist) => (
-                  <PlaylistCard key={playlist.id} playlist={playlist} />
-                ))}
-              </div>
-            )}
-
-            <div className="mt-8 text-center">
-              <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
-                <Link href="/playlists">
-                  Xem tất cả playlist
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Collections Section */}
       <section className="bg-white py-16">

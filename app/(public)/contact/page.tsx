@@ -43,7 +43,6 @@ const ContactPage = () => {
 
       if (error) {
         // If table doesn't exist, fall back to mailto
-        console.error("Contact form error:", error);
         window.location.href = `mailto:toilanguoisaigonofficial@gmail.com?subject=Liên hệ từ ${encodeURIComponent(name)}&body=${encodeURIComponent(`Tên: ${name}\nEmail: ${email}\n\n${message}`)}`;
         return;
       }

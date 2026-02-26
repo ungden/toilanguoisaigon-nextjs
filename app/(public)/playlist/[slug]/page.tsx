@@ -6,17 +6,17 @@ import Image from "next/image";
 import { usePlaylistDetail } from "@/hooks/data/usePlaylistDetail";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  ListMusic,
   MapPin,
   Star,
   Clock,
   ArrowLeft,
-  DollarSign,
-  MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { FALLBACK_IMAGES } from "@/utils/constants";
+import { formatPriceRange } from "@/utils/formatters";
+import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 
 const MOOD_LABELS: Record<string, string> = {
   morning: "Buổi sáng",
@@ -43,12 +43,20 @@ export default function PlaylistDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="aspect-[21/9] w-full rounded-xl" />
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-lg" />
+      <div className="flex-grow container mx-auto px-4 py-8">
+        <Skeleton className="h-64 w-full mb-8" />
+        <Skeleton className="h-8 w-1/2 mb-4" />
+        <Skeleton className="h-4 w-3/4 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="aspect-[4/3] w-full" />
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -57,163 +65,160 @@ export default function PlaylistDetailPage() {
 
   if (error || !playlist) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <ListMusic className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Không tìm thấy playlist</h1>
-        <p className="text-muted-foreground mb-6">
-          Playlist này không tồn tại hoặc đã bị xóa.
-        </p>
-        <Button asChild>
-          <Link href="/playlists">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Xem tất cả playlist
+      <div className="flex-grow container mx-auto px-4 py-8">
+        <div className="text-center py-16">
+          <h1 className="text-2xl font-bold text-vietnam-red-600 mb-4">Không tìm thấy bộ sưu tập</h1>
+          <p className="text-vietnam-blue-600">Bộ sưu tập bạn đang tìm không tồn tại hoặc đã bị xóa.</p>
+          <Link href="/collections" className="text-vietnam-red-600 hover:underline mt-4 inline-block">
+            <ArrowLeft className="h-4 w-4 inline mr-1" />
+            Quay lại danh sách bộ sưu tập
           </Link>
-        </Button>
+        </div>
       </div>
     );
   }
 
+  const locations = playlist.playlist_locations
+    ?.map((pl) => ({ ...pl.locations, ai_note: pl.ai_note, position: pl.position }))
+    .filter(Boolean) || [];
+
   const formattedDate = new Date(playlist.generated_date).toLocaleDateString(
     "vi-VN",
-    { weekday: "long", day: "numeric", month: "long", year: "numeric" }
+    { day: "numeric", month: "long", year: "numeric" }
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Back link */}
-      <Link
-        href="/playlists"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Tất cả playlist
-      </Link>
-
-      {/* Hero */}
-      <div className="relative aspect-[21/9] overflow-hidden rounded-2xl mb-8">
-        <Image
-          src={playlist.cover_image_url || FALLBACK_IMAGES.collectionHero}
-          alt={playlist.title}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority
+    <div className="flex flex-col bg-white">
+      {/* Hero Section - matches collection detail style */}
+      <section className="relative py-16 bg-vietnam-red-600">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{ backgroundImage: `url('${playlist.cover_image_url || FALLBACK_IMAGES.collectionHero}')` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
-          <div className="flex items-center gap-3 mb-2">
-            {playlist.emoji && (
-              <span className="text-4xl drop-shadow-lg">{playlist.emoji}</span>
-            )}
-            {playlist.mood && (
-              <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm border-white/30">
-                {MOOD_LABELS[playlist.mood] || playlist.mood}
-              </Badge>
-            )}
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-lg">
-            {playlist.title}
-          </h1>
-          <div className="mt-2 flex items-center gap-4 text-sm text-white/80">
-            <span className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              {playlist.location_count} địa điểm
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {formattedDate}
-            </span>
-          </div>
-          {playlist.description && (
-            <p className="mt-3 text-white/90 max-w-2xl text-sm sm:text-base">
-              {playlist.description}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Location list - numbered like a playlist track list */}
-      <div className="space-y-3">
-        {playlist.playlist_locations?.map((pl, index) => {
-          const loc = pl.locations;
-          if (!loc) return null;
-
-          return (
-            <Link
-              key={`${pl.playlist_id}-${pl.location_id}`}
-              href={`/place/${loc.slug}`}
-              className="group flex items-center gap-4 rounded-xl border p-4 transition-all hover:border-vietnam-red-300 hover:shadow-md hover:bg-accent/30"
-            >
-              {/* Track number */}
-              <div className="flex-shrink-0 w-8 text-center">
-                <span className="text-lg font-bold text-muted-foreground group-hover:text-vietnam-red-600 transition-colors">
-                  {index + 1}
-                </span>
-              </div>
-
-              {/* Image */}
-              <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
-                <Image
-                  src={loc.main_image_url || FALLBACK_IMAGES.location}
-                  alt={loc.name}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-110"
-                  sizes="64px"
-                />
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate group-hover:text-vietnam-red-600 transition-colors">
-                  {loc.name}
-                </h3>
-                <p className="text-sm text-muted-foreground flex items-center gap-1 truncate">
-                  <MapPin className="h-3 w-3 flex-shrink-0" />
-                  {loc.address}
-                </p>
-                {pl.ai_note && (
-                  <p className="text-xs text-vietnam-gold-600 dark:text-vietnam-gold-400 mt-0.5 italic line-clamp-1">
-                    {pl.ai_note}
-                  </p>
-                )}
-              </div>
-
-              {/* Right side info */}
-              <div className="flex-shrink-0 flex items-center gap-3 text-sm text-muted-foreground">
-                {loc.price_range && (
-                  <span className="flex items-center gap-0.5">
-                    <DollarSign className="h-3 w-3" />
-                    {loc.price_range}
-                  </span>
-                )}
-                {loc.average_rating > 0 && (
-                  <span className="flex items-center gap-0.5">
-                    <Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500" />
-                    {loc.average_rating.toFixed(1)}
-                  </span>
-                )}
-                {loc.review_count > 0 && (
-                  <span className="flex items-center gap-0.5">
-                    <MessageSquare className="h-3 w-3" />
-                    {loc.review_count}
-                  </span>
-                )}
-                <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                  {loc.district}
+        <div className="relative container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              {playlist.emoji && (
+                <span className="text-4xl drop-shadow-lg">{playlist.emoji}</span>
+              )}
+              {playlist.mood && (
+                <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm border-white/30">
+                  {MOOD_LABELS[playlist.mood] || playlist.mood}
                 </Badge>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Empty locations */}
-      {(!playlist.playlist_locations || playlist.playlist_locations.length === 0) && (
-        <div className="text-center py-12 text-muted-foreground">
-          <p>Playlist này chưa có địa điểm nào.</p>
+              )}
+              <Badge className="bg-vietnam-gold-500 text-white border-none">
+                <Sparkles className="h-3 w-3 mr-1" />
+                AI gợi ý
+              </Badge>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              {playlist.title}
+            </h1>
+            {playlist.description && (
+              <p className="text-xl md:text-2xl text-white/90 leading-relaxed">
+                {playlist.description}
+              </p>
+            )}
+            <div className="mt-8 flex items-center justify-center gap-6 text-white/80">
+              <span className="text-vietnam-gold-400 font-semibold">
+                {locations.length} địa điểm được AI tuyển chọn
+              </span>
+              <span className="flex items-center gap-1 text-sm">
+                <Clock className="h-4 w-4" />
+                {formattedDate}
+              </span>
+            </div>
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* Locations Grid - matches collection detail style */}
+      <section className="container mx-auto py-16 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {locations.map((location, index) => {
+            const imagePath = location.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
+            const optimizedImageUrl = imagePath
+              ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
+              : FALLBACK_IMAGES.location;
+
+            return (
+              <Link href={`/place/${location.slug}`} key={location.id || index} className="block group">
+                <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
+                  <div className="relative overflow-hidden">
+                    <Image
+                      src={optimizedImageUrl}
+                      alt={location.name}
+                      className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      width={400}
+                      height={300}
+                      loading="lazy"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-vietnam-red-600 text-white font-bold">
+                        #{index + 1}
+                      </Badge>
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-vietnam-red-600 text-white">
+                        {formatPriceRange(location.price_range)}
+                      </Badge>
+                    </div>
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2">
+                      {location.name}
+                    </h3>
+
+                    <div className="space-y-2 text-sm text-vietnam-blue-600 mb-4">
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>{location.district}</span>
+                      </div>
+
+                      {location.address && (
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0 opacity-0" />
+                          <span className="text-xs text-muted-foreground truncate">{location.address}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {location.average_rating > 0 && (
+                      <div className="flex items-center mb-3">
+                        <Star className="h-4 w-4 text-vietnam-gold-500 fill-vietnam-gold-500 mr-1" />
+                        <span className="text-sm font-medium text-vietnam-blue-700">
+                          {location.average_rating.toFixed(1)} ({location.review_count} đánh giá)
+                        </span>
+                      </div>
+                    )}
+
+                    {/* AI note - unique to playlist items */}
+                    {location.ai_note && (
+                      <div className="mt-3 p-2 rounded-md bg-vietnam-gold-50 dark:bg-vietnam-gold-950/20 border border-vietnam-gold-200 dark:border-vietnam-gold-800">
+                        <p className="text-xs text-vietnam-gold-700 dark:text-vietnam-gold-400 italic flex items-start gap-1">
+                          <Sparkles className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                          {location.ai_note}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+
+        {locations.length === 0 && (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold text-vietnam-blue-800 mb-2">
+              Chưa có địa điểm nào
+            </h3>
+            <p className="text-vietnam-blue-600">
+              Bộ sưu tập này đang được cập nhật thêm địa điểm mới.
+            </p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

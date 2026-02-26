@@ -10,7 +10,6 @@ const fetchLeaderboard = async (): Promise<LeaderboardProfile[]> => {
     .limit(50);
 
   if (error) {
-    console.error('Error fetching leaderboard:', error);
     throw new Error(error.message);
   }
 

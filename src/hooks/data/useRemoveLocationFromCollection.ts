@@ -20,8 +20,7 @@ export const useRemoveLocationFromCollection = () => {
       showSuccess('Đã xóa địa điểm khỏi bộ sưu tập!');
       queryClient.invalidateQueries({ queryKey: ['admin-collection-detail', variables.collectionId] });
     },
-    onError: (error) => {
-      console.error('Error removing location from collection:', error);
+    onError: () => {
       showError('Không thể xóa địa điểm. Vui lòng thử lại.');
     },
   });

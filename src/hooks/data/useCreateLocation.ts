@@ -23,8 +23,7 @@ export const useCreateLocation = () => {
       showSuccess('Tạo địa điểm mới thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-locations'] });
     },
-    onError: (error) => {
-      console.error('Error creating location:', error);
+    onError: () => {
       showError('Không thể tạo địa điểm. Vui lòng thử lại.');
     },
   });

@@ -24,8 +24,7 @@ export const useUpdateBadge = () => {
       showSuccess('Cập nhật huy hiệu thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-badges'] });
     },
-    onError: (error) => {
-      console.error('Error updating badge:', error);
+    onError: () => {
       showError('Không thể cập nhật huy hiệu. Vui lòng thử lại.');
     },
   });

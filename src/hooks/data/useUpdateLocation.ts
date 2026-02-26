@@ -24,8 +24,7 @@ export const useUpdateLocation = () => {
       showSuccess('Cập nhật địa điểm thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-locations'] });
     },
-    onError: (error) => {
-      console.error('Error updating location:', error);
+    onError: () => {
       showError('Không thể cập nhật địa điểm. Vui lòng thử lại.');
     },
   });

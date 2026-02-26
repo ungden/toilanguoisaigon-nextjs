@@ -219,6 +219,22 @@ Custom Tailwind colors defined in `tailwind.config.ts`:
 - CI pipeline (`.github/workflows/ci.yml`)
 - Deleted dead code: AI_RULES.md, dist/, PageMeta.tsx, AdminRoute, ProtectedRoute, AdminLayout
 
+### Playlist → Bộ sưu tập Merge
+- Removed separate "Playlist" nav, listing page, and admin page
+- Unified `/collections` page shows both manual collections and AI playlists
+- Restyled `/playlist/[slug]` detail page to match collection detail style
+- Merged AI generate UI into `/admin/collections`
+- Deleted: PlaylistCard component, usePlaylists hook, /playlists page, /admin/playlists page
+- Updated sitemap to remove /playlists listing entry
+
+### Production Readiness
+- **Admin middleware role check**: Middleware now queries `user_roles` table to verify admin role before allowing `/admin` access (not just auth check)
+- **RLS policies**: SQL migration ready (`supabase/migrations/20260226_rls_policies.sql`) with `is_admin()` helper function and policies for all 14 tables. **Must be applied via Supabase Dashboard SQL Editor before launch.**
+- **Vercel Analytics + Speed Insights**: Integrated in root layout for traffic and Web Vitals monitoring
+- **Console logs cleanup**: Removed all 62 `console.error/log` from app/src (hooks, contexts, pages, utils). Errors are surfaced via toast notifications or React Query error states.
+- **Automated tests**: Vitest configured with tests for `sanitize.ts`, `formatters.ts`, and `constants.ts`
+- **Email SMTP**: Supabase default SMTP is rate-limited and unsuitable for production. Configure custom SMTP (Resend, SendGrid, etc.) via Supabase Dashboard → Auth → Email before launch.
+
 ### Code Audit Fixes
 - JSON.parse try/catch in admin pages
 - Division by zero fix in admin dashboard

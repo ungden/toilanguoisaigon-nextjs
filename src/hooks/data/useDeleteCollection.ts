@@ -19,8 +19,7 @@ export const useDeleteCollection = () => {
       showSuccess('Bộ sưu tập đã được xóa thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
     },
-    onError: (error) => {
-      console.error('Error deleting collection:', error);
+    onError: () => {
       showError('Không thể xóa bộ sưu tập. Vui lòng thử lại.');
     },
   });

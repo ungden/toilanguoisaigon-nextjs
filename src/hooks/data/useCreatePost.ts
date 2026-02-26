@@ -23,8 +23,7 @@ export const useCreatePost = () => {
       showSuccess('Tạo bài viết mới thành công!');
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
     },
-    onError: (error) => {
-      console.error('Error creating post:', error);
+    onError: () => {
       showError('Không thể tạo bài viết. Vui lòng thử lại.');
     },
   });
