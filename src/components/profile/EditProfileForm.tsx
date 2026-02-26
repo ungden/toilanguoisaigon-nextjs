@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth, Profile } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useUpdateProfile } from '@/hooks/data/useUpdateProfile';
 import { showError } from '@/utils/toast';
 
@@ -66,7 +66,7 @@ export function EditProfileForm({ onSuccess }: EditProfileFormProps) {
         avatar_url: data.avatar_url || null,
       });
       onSuccess();
-    } catch (error) {
+    } catch {
       // Error handled by useUpdateProfile hook
     }
   }

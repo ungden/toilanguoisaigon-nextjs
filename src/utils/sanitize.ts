@@ -3,7 +3,8 @@
  * Strips dangerous tags and attributes while preserving safe HTML content.
  */
 
-const ALLOWED_TAGS = new Set([
+/** Allowed tags for reference (enforcement is pattern-based below) */
+const _ALLOWED_TAGS = new Set([
   'p', 'br', 'b', 'i', 'em', 'strong', 'u', 's', 'strike',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'ul', 'ol', 'li',
@@ -14,7 +15,8 @@ const ALLOWED_TAGS = new Set([
   'sub', 'sup', 'mark',
 ]);
 
-const ALLOWED_ATTRS: Record<string, Set<string>> = {
+/** Allowed attributes per tag for reference (enforcement is pattern-based below) */
+const _ALLOWED_ATTRS: Record<string, Set<string>> = {
   a: new Set(['href', 'title', 'target', 'rel']),
   img: new Set(['src', 'alt', 'title', 'width', 'height', 'loading']),
   td: new Set(['colspan', 'rowspan']),

@@ -23,7 +23,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export function Header() {
   const { session, profile, signOut } = useAuth();
-  const router = useRouter();
+  const _router = useRouter();
 
   const getInitials = (name: string | undefined | null, email: string | undefined | null) => {
     if (name) {

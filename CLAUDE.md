@@ -148,10 +148,8 @@ All admin CRUD hooks are properly typed using database interfaces:
 
 1. **`strict: false` in tsconfig.json** - Enabling strict mode would require significant refactoring. Deferred.
 2. **8 `any` types in admin page form handlers** - Low risk, typed by Zod schemas at component level.
-3. **57 console.error/log statements** - Would need a proper logging service to replace. Left as-is.
-4. **Supabase Edge Function TS errors** - Deno runtime, not fixable in project tsconfig.
-5. **No automated tests** - No test framework is set up yet.
-6. **Admin role check is UI-only** - Middleware checks auth but not admin role; Supabase RLS should enforce server-side.
+3. **Supabase Edge Function TS errors** - Deno runtime, not fixable in project tsconfig.
+4. **Custom SMTP not configured** - Supabase default SMTP is rate-limited. Must configure Resend/SendGrid via Supabase Dashboard → Auth → Email before launch.
 
 ## Development Commands
 
