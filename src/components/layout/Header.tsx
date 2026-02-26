@@ -19,7 +19,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
+
 
 export function Header() {
   const { session, profile, signOut } = useAuth();
@@ -106,7 +106,6 @@ export function Header() {
           </SheetContent>
         </Sheet>
         <div className="flex flex-1 items-center justify-end space-x-1">
-          <ThemeToggle />
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

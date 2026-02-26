@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Badge } from '@/types/database';
 
-type CreateBadgeData = Omit<Badge, 'id' | 'created_at'>;
+export type CreateBadgeData = Omit<Badge, 'id' | 'created_at'>;
 
 export const useCreateBadge = () => {
   const queryClient = useQueryClient();

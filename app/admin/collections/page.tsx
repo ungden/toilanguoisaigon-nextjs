@@ -35,14 +35,15 @@ import {
     Eye,
     EyeOff,
     Archive,
+    Pencil,
 } from "lucide-react";
 import { useAdminCollections } from "@/hooks/data/useAdminCollections";
 import { columns } from "@/components/admin/collections/Columns";
 import { CollectionsDataTable } from "@/components/admin/collections/CollectionsDataTable";
-import { CollectionForm } from "@/components/admin/collections/CollectionForm";
+import { CollectionForm, type CollectionFormValues } from "@/components/admin/collections/CollectionForm";
 import { DeleteCollectionDialog } from "@/components/admin/collections/DeleteCollectionDialog";
 import { Collection, Playlist, PlaylistStatus } from "@/types/database";
-import { useCreateCollection } from "@/hooks/data/useCreateCollection";
+import { useCreateCollection, type CreateCollectionData } from "@/hooks/data/useCreateCollection";
 import { useUpdateCollection } from "@/hooks/data/useUpdateCollection";
 import { useDeleteCollection } from "@/hooks/data/useDeleteCollection";
 import {
@@ -52,6 +53,7 @@ import {
     useTogglePlaylistFeatured,
     useDeletePlaylist,
 } from "@/hooks/data/useAdminPlaylists";
+import { PlaylistEditDialog } from "@/components/admin/collections/PlaylistEditDialog";
 
 const MOOD_OPTIONS = [
     { value: "", label: "Tự động (AI chọn)" },
@@ -89,6 +91,7 @@ const AdminCollectionsPage = () => {
     const [count, setCount] = useState("3");
     const [autoPublish, setAutoPublish] = useState(false);
     const [deletingPlaylist, setDeletingPlaylist] = useState<Playlist | null>(null);
+    const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
 
     // Collections hooks
     const { data: collections, isLoading, error } = useAdminCollections();
@@ -130,7 +133,7 @@ const AdminCollectionsPage = () => {
         }
     };
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = (values: CollectionFormValues) => {
         if (editingCollection) {
             updateCollectionMutation.mutate({ id: editingCollection.id, ...values }, {
                 onSuccess: () => {
@@ -139,7 +142,8 @@ const AdminCollectionsPage = () => {
                 },
             });
         } else {
-            createCollectionMutation.mutate(values, {
+            // Zod validates required fields; cast needed because z.infer optional ≠ DB null types
+            createCollectionMutation.mutate(values as unknown as CreateCollectionData, {
                 onSuccess: handleCloseFormDialog,
             });
         }
@@ -427,12 +431,21 @@ const AdminCollectionsPage = () => {
                                                 }`}
                                             />
                                         </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setEditingPlaylist(playlist)}
+                                            title="Chỉnh sửa"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
                                         <Separator orientation="vertical" className="h-6 mx-1" />
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => setDeletingPlaylist(playlist)}
                                             className="text-destructive hover:text-destructive"
+                                            title="Xóa"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
@@ -472,6 +485,13 @@ const AdminCollectionsPage = () => {
                     isPending={deleteCollectionMutation.isPending}
                 />
             )}
+
+            {/* Edit Playlist Dialog */}
+            <PlaylistEditDialog
+                playlist={editingPlaylist}
+                isOpen={!!editingPlaylist}
+                onClose={() => setEditingPlaylist(null)}
+            />
 
             {/* Delete Playlist Dialog */}
             <AlertDialog

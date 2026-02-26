@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { sanitizeHtml } from "@/utils/sanitize";
+import { FALLBACK_IMAGES } from "@/utils/constants";
 
 function SafeBlogContent({ content }: { content: string }) {
   const sanitized = useMemo(() => sanitizeHtml(content), [content]);
@@ -79,7 +80,7 @@ const PostDetailPage = () => {
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={post.profiles?.avatar_url || ''} />
+                    <AvatarImage src={post.profiles?.avatar_url || undefined} />
                     <AvatarFallback>{post.profiles?.full_name?.[0] || 'A'}</AvatarFallback>
                   </Avatar>
                   <span className="font-medium">{post.profiles?.full_name || 'Admin'}</span>
@@ -91,16 +92,14 @@ const PostDetailPage = () => {
               </div>
             </header>
 
-            {post.cover_image_url && (
-              <Image 
-                src={post.cover_image_url} 
-                alt={post.title}
-                className="w-full aspect-video object-cover rounded-lg mb-8 shadow-lg"
-                width={896}
-                height={504}
-                priority
-              />
-            )}
+            <Image 
+              src={post.cover_image_url || FALLBACK_IMAGES.collection} 
+              alt={post.title}
+              className="w-full aspect-video object-cover rounded-lg mb-8 shadow-lg"
+              width={896}
+              height={504}
+              priority
+            />
 
             <SafeBlogContent content={post.content || ''} />
           </article>

@@ -18,7 +18,7 @@ import { showError } from "@/utils/toast";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
-import { FALLBACK_IMAGES, FEATURED_COLLECTIONS } from "@/utils/constants";
+import { FALLBACK_IMAGES, FEATURED_COLLECTIONS, getCategoryArtwork } from "@/utils/constants";
 import { DailyCheckin } from "@/components/gamification/DailyCheckin";
 
 const Index = () => {
@@ -277,7 +277,7 @@ const Index = () => {
               const imagePath = place.main_image_url ? getPathFromSupabaseUrl(place.main_image_url) : null;
               const optimizedImageUrl = imagePath 
                 ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
-                : FALLBACK_IMAGES.location;
+                : getCategoryArtwork(place.name);
               
               return (
                 <Link href={`/place/${place.slug}`} key={place.id} className="block group">

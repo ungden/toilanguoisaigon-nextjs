@@ -15,8 +15,7 @@ export const useUpdateUserRole = () => {
     mutationFn: async ({ userId, role }: UpdateUserRoleArgs) => {
       const { error } = await supabase
         .from('user_roles')
-        .update({ role })
-        .eq('user_id', userId);
+        .upsert({ user_id: userId, role }, { onConflict: 'user_id' });
 
       if (error) throw error;
       return true;

@@ -15,7 +15,8 @@ Nền tảng khám phá ẩm thực và văn hóa Sài Gòn (TP.HCM). Tìm kiế
 | UI Components | shadcn/ui (49 components) + Radix UI primitives |
 | Styling | Tailwind CSS 3 + tailwindcss-animate |
 | Forms | React Hook Form + Zod validation |
-| AI | Google Gemini (via Supabase Edge Function) |
+| Rich Text Editor | TipTap (blog post authoring) |
+| AI | Google Gemini (via Supabase Edge Function + image generation) |
 | Charts | Recharts |
 | Deployment | Vercel |
 | CI | GitHub Actions (lint + typecheck + build) |
@@ -54,16 +55,23 @@ toilanguoisaigon/
 │   ├── admin/                    # Admin dashboard
 │   │   ├── layout.tsx            # Admin layout (sidebar)
 │   │   ├── error.tsx             # Error boundary
-│   │   ├── page.tsx              # Dashboard stats
-│   │   ├── locations/            # CRUD địa điểm
-│   │   ├── posts/                # CRUD bài viết
-│   │   ├── collections/          # CRUD bộ sưu tập
-│   │   ├── reviews/              # Quản lý đánh giá
+│   │   ├── page.tsx              # Dashboard stats + activity feed + top locations
+│   │   ├── locations/            # CRUD địa điểm (with category/tag pickers)
+│   │   ├── posts/                # CRUD bài viết (TipTap rich text editor)
+│   │   ├── collections/          # CRUD bộ sưu tập + playlist editing
+│   │   ├── reviews/              # Quản lý đánh giá (edit + photo view)
 │   │   ├── submissions/          # Duyệt gợi ý từ user
-│   │   ├── users/                # Quản lý người dùng
+│   │   ├── users/                # Quản lý người dùng + role change
+│   │   ├── categories/           # CRUD danh mục (20 food categories)
+│   │   ├── tags/                 # CRUD thẻ tag (33 tags)
+│   │   ├── collection-categories/# CRUD phân loại bộ sưu tập
 │   │   ├── badges/               # CRUD huy hiệu
 │   │   ├── levels/               # CRUD cấp độ XP
-│   │   └── xp-actions/           # Cấu hình điểm XP
+│   │   ├── xp-actions/           # Cấu hình điểm XP
+│   │   ├── activity/             # XP logs, check-ins, user badges
+│   │   ├── analytics/            # District distribution, monthly stats
+│   │   ├── saved-locations/      # Most-saved locations ranking
+│   │   └── import-maps/          # Google Maps import via Gemini
 │   └── auth/
 │       └── callback/             # Supabase auth callback
 ├── middleware.ts                  # Supabase session + route protection
@@ -74,7 +82,7 @@ toilanguoisaigon/
 │   │   ├── seo/                  # JsonLd (structured data)
 │   │   ├── search/               # SearchResultCard
 │   │   ├── collections/          # MysteryCard, MysteryLocationCards
-│   │   ├── admin/                # AdminSidebar, LocationForm
+│   │   ├── admin/                # AdminSidebar, DataTablePagination, entity CRUD components
 │   │   ├── auth/                 # (empty - dead code removed)
 │   │   ├── profile/              # Profile components
 │   │   ├── leaderboard/          # Leaderboard components
@@ -82,7 +90,7 @@ toilanguoisaigon/
 │   │   └── providers.tsx         # QueryClient + ThemeProvider + Toaster
 │   ├── contexts/
 │   │   └── AuthContext.tsx        # Auth state (session, profile, role) + race condition guard
-│   ├── hooks/data/               # 50 React Query hooks (CRUD cho mọi entity)
+│   ├── hooks/data/               # 60+ React Query hooks (CRUD cho mọi entity)
 │   ├── integrations/supabase/
 │   │   └── client.ts             # Lazy singleton proxy (backward compat)
 │   ├── lib/
@@ -157,9 +165,9 @@ npm run lint       # ESLint check
 | `collections` | Bộ sưu tập (curated lists) |
 | `collection_categories` | Phân loại bộ sưu tập |
 | `collection_locations` | Many-to-many: collections <-> locations |
-| `categories` | Danh mục địa điểm |
-| `tags` | Tags cho địa điểm |
-| `location_categories` | Many-to-many: locations <-> categories |
+| `categories` | 20 danh mục ẩm thực (Phở, Bún, Cơm, Cà phê, etc.) |
+| `tags` | 33 thẻ tag (ăn sáng, bình dân, Michelin, pet-friendly, etc.) |
+| `location_categories` | Many-to-many: locations <-> categories (890/890 = 100%) |
 | `location_tags` | Many-to-many: locations <-> tags |
 | `posts` | Blog posts |
 | `saved_locations` | User bookmarks |

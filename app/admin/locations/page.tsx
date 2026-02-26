@@ -9,11 +9,13 @@ import { LocationsDataTable } from "@/components/admin/locations/LocationsDataTa
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { LocationForm } from "@/components/admin/locations/LocationForm";
+import { LocationForm, LocationFormValues } from "@/components/admin/locations/LocationForm";
 import { Location } from "@/types/database";
 import { useCreateLocation } from "@/hooks/data/useCreateLocation";
 import { useUpdateLocation } from "@/hooks/data/useUpdateLocation";
 import { useDeleteLocation } from "@/hooks/data/useDeleteLocation";
+import { useSaveLocationCategories } from "@/hooks/data/useSaveLocationCategories";
+import { useSaveLocationTags } from "@/hooks/data/useSaveLocationTags";
 import { DeleteLocationDialog } from "@/components/admin/locations/DeleteLocationDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { showError } from "@/utils/toast";
@@ -27,6 +29,8 @@ const AdminLocationsPage = () => {
     const createLocationMutation = useCreateLocation();
     const updateLocationMutation = useUpdateLocation();
     const deleteLocationMutation = useDeleteLocation();
+    const saveCategories = useSaveLocationCategories();
+    const saveTags = useSaveLocationTags();
 
     const handleOpenFormDialog = (location: Location | null = null) => {
         setEditingLocation(location);
@@ -54,7 +58,7 @@ const AdminLocationsPage = () => {
         }
     };
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (values: LocationFormValues) => {
         let imageUrl = editingLocation?.main_image_url || '';
 
         if (values.image_file && values.image_file.length > 0) {
@@ -77,21 +81,39 @@ const AdminLocationsPage = () => {
             imageUrl = urlData.publicUrl;
         }
 
+        // Extract category/tag IDs before processing
+        const categoryIds = values.categoryIds || [];
+        const tagIds = values.tagIds || [];
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { image_file, categoryIds: _c, tagIds: _t, ...rest } = values;
         const processedValues = {
-            ...values,
+            ...rest,
             main_image_url: imageUrl,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
             opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { showError('Giờ mở cửa không phải JSON hợp lệ.'); return null; } })() : null,
         };
-        delete processedValues.image_file;
+
+        const saveCategoryAndTags = (locationId: string) => {
+            saveCategories.mutate({ locationId, categoryIds });
+            saveTags.mutate({ locationId, tagIds });
+        };
 
         if (editingLocation) {
-            updateLocationMutation.mutate({ id: editingLocation.id, ...processedValues }, {
-                onSuccess: handleCloseFormDialog,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- processedValues is a partial shape from form; Supabase handles missing columns
+            updateLocationMutation.mutate({ id: editingLocation.id, ...processedValues } as any, {
+                onSuccess: () => {
+                    saveCategoryAndTags(editingLocation.id);
+                    handleCloseFormDialog();
+                },
             });
         } else {
-            createLocationMutation.mutate(processedValues, {
-                onSuccess: handleCloseFormDialog,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- processedValues is a partial shape from form; Supabase handles missing columns
+            createLocationMutation.mutate(processedValues as any, {
+                onSuccess: (data) => {
+                    if (data?.id) saveCategoryAndTags(data.id);
+                    handleCloseFormDialog();
+                },
             });
         }
     };

@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import * as Icons from "lucide-react"
 
 const Icon = ({ name, className }: { name: string; className?: string }) => {
-  const LucideIcon = (Icons as any)[name];
+  const LucideIcon = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name];
   if (!LucideIcon) return <Award className={className} />;
   return <LucideIcon className={className} />;
 };

@@ -17,6 +17,7 @@ This file provides context for AI assistants working on this codebase. Read this
 - **shadcn/ui** (49 components in `src/components/ui/`)
 - **Tailwind CSS 3** with custom `vietnam-*` color palette
 - **React Hook Form + Zod** for forms
+- **TipTap** rich text editor for blog posts (`@tiptap/react` + extensions)
 - **next-themes** for dark mode
 - **ESLint 9** flat config (`eslint.config.mjs`)
 
@@ -37,7 +38,7 @@ Almost all pages are `"use client"` (25/29). This is intentional - the app relie
 `@/*` maps to `./src/*` (configured in `tsconfig.json`). Always use `@/` imports, never relative paths like `../../`.
 
 ### State management
-- **React Query** for all server state (50 hooks in `src/hooks/data/`)
+- **React Query** for all server state (60+ hooks in `src/hooks/data/`)
 - **AuthContext** (`src/contexts/AuthContext.tsx`) for auth state (session, user, profile, role)
 - No Redux, Zustand, or other state libraries
 
@@ -101,9 +102,10 @@ Mutations use `useMutation` + `queryClient.invalidateQueries()` + toast notifica
 ## Admin Hooks Typing
 
 All admin CRUD hooks are properly typed using database interfaces:
-- Create hooks: `Omit<Entity, 'id' | 'created_at' | ...>`
+- Create hooks: `Omit<Entity, 'id' | 'created_at' | ...>` (exported as `Create*Data` types)
 - Update hooks: `{ id: string } & Partial<Omit<Entity, 'id' | 'created_at' | ...>>`
-- 8 remaining `any` usages are in admin page form handlers (`values: any` from react-hook-form) - these are typed by the Zod schema at the component level.
+- All form handlers are typed with exported Zod-inferred types (e.g., `BadgeFormValues`, `PostFormValues`)
+- **0 `any` usages remaining** — all 30 `no-explicit-any` warnings have been resolved
 
 ## Image Handling
 
@@ -147,9 +149,8 @@ All admin CRUD hooks are properly typed using database interfaces:
 ## Known Limitations / Deferred Items
 
 1. **`strict: false` in tsconfig.json** - Enabling strict mode would require significant refactoring. Deferred.
-2. **8 `any` types in admin page form handlers** - Low risk, typed by Zod schemas at component level.
-3. **Supabase Edge Function TS errors** - Deno runtime, not fixable in project tsconfig.
-4. **Custom SMTP not configured** - Supabase default SMTP is rate-limited. Must configure Resend/SendGrid via Supabase Dashboard → Auth → Email before launch.
+2. **Supabase Edge Function TS errors** - Deno runtime, not fixable in project tsconfig.
+3. **Custom SMTP not configured** - Supabase default SMTP is rate-limited. Must configure Resend/SendGrid via Supabase Dashboard → Auth → Email before launch.
 
 ## Development Commands
 
@@ -260,3 +261,74 @@ Custom Tailwind colors defined in `tailwind.config.ts`:
 - **Daily check-in UI**: Homepage banner + profile page, streak tracking, streak bonus XP
 - **Profile page**: Badges display, XP history tab, daily check-in widget
 - **AuthContext**: Added `refreshProfile()` to update XP/level in real-time after actions
+
+### UI/Image Optimization
+- **Avatar fix**: Fixed `src=""` → `undefined` in 4 files to prevent broken image flash
+- **Dark mode hidden**: Removed ThemeToggle from Header, forced light theme via `forcedTheme="light"`
+- **Collection hero**: Uses own `cover_image_url` instead of always fallback; replaced CSS `backgroundImage` with `next/Image fill`
+- **Playlist hero**: Same CSS bg → `next/Image` optimization
+- **Gallery layout**: Single image gets full-width hero instead of awkward grid; "Xem tất cả ảnh" only shown when >2 images
+- **Blog detail fallback**: Shows fallback image when `cover_image_url` is null (was hiding cover entirely)
+- **Category artwork**: 12 AI-generated watercolor illustrations (phở, bún, cơm, bánh mì, cà phê, ốc, lẩu, chè, hủ tiếu, chay, nhậu, default) stored in Supabase Storage `location-images/category-artwork/`
+- **Smart fallback**: `getCategoryArtwork(locationName)` matches location names to food categories via keywords; falls back to default Saigon scene
+- **Artwork message**: Places without real photos show overlay: "Chúng tôi muốn giữ sự bất ngờ để trải nghiệm của bạn được trọn vẹn"
+- **Review photo upload**: `image_urls` column on reviews, `review-images` storage bucket, upload UI (up to 5 photos, 5MB each), photo display in review cards with lightbox
+
+### Comprehensive Admin Panel
+- **New CRUD pages**: Categories (`/admin/categories`), Tags (`/admin/tags`), Collection Categories (`/admin/collection-categories`) — full create/read/update/delete with forms, data tables, delete confirmation
+- **Enhanced Dashboard**: Additional stat cards (total XP, daily check-ins, saved locations), recent activity feed (reviews + submissions timeline), quick action buttons, top 5 locations by reviews
+- **Activity page** (`/admin/activity`): 3-tab view — XP logs, daily check-ins, user badges earned — with user avatars and formatted dates
+- **Analytics page** (`/admin/analytics`): Location distribution by district, reviews/registrations by month, top 10 reviewers
+- **Saved Locations page** (`/admin/saved-locations`): Ranked table of most-saved locations
+- **Review moderation**: Edit reviews (rating + comment), view review photos with lightbox navigation
+- **Playlist editing**: Edit title, description, cover image, mood, emoji for AI playlists
+- **Grouped sidebar**: Navigation organized into 5 groups (Tổng quan, Nội dung, Phân loại, Gamification, Quản trị) with section headers
+- **Bug fix**: `useUpdateUserRole` changed from `.update()` to `.upsert()` to handle new users without existing role rows
+- **Admin pages**: 20 total (was 11) — `/admin`, `/admin/locations`, `/admin/import-maps`, `/admin/users`, `/admin/posts`, `/admin/collections`, `/admin/reviews`, `/admin/submissions`, `/admin/levels`, `/admin/xp-actions`, `/admin/badges`, `/admin/categories`, `/admin/tags`, `/admin/collection-categories`, `/admin/activity`, `/admin/analytics`, `/admin/saved-locations`
+
+### Categories, Tags & Data Enrichment (Phase 7A)
+- **20 food categories** seeded: Phở, Bún, Cơm, Bánh mì, Cà phê, Ốc & Hải sản, Lẩu & Nướng, Chè & Tráng miệng, Hủ tiếu & Mì, Chay, Nhậu & Bia, Bánh canh, Cháo, Bánh cuốn, Xôi, Gỏi cuốn & Nem, Nhà hàng, Kem & Gelato, Nước uống & Sinh tố, Món quốc tế
+- **33 tags** seeded: meal times (ăn sáng/trưa/tối/khuya), styles (bình dân, sang trọng, vỉa hè), features (wifi, máy lạnh, giao hàng, đậu xe), dietary (thuần chay, không gluten), cuisines (Huế, Hà Nội, miền Tây, Hoa, Nhật, Hàn, Thái, Ấn Độ, Ý), special (Michelin, view đẹp, pet-friendly)
+- **890/890 locations categorized** (100%) via Vietnamese keyword matching against location names
+- Junction tables `location_categories` and `location_tags` populated
+- Scripts: `scripts/seed-categories-tags.py`, `scripts/patch-unmatched-categories.py`
+
+### Location Form Improvements (Phase 7B)
+- **Category multi-select** added to admin LocationForm (Popover + Command + Badge UI)
+- **Tag multi-select** added with the same pattern
+- Both selectors pre-load existing assignments when editing a location
+- New hooks: `useLocationCategories`, `useLocationTags`, `useSaveLocationCategories`, `useSaveLocationTags`
+- On create/update, junction table rows are saved automatically
+
+### Rich Text Blog Editor (Phase 7C)
+- **TipTap WYSIWYG editor** replaces raw HTML `<Textarea>` in PostForm
+- Installed: `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-image`, `@tiptap/extension-link`, `@tiptap/extension-placeholder`, `@tiptap/extension-underline`, `@tiptap/extension-text-align`
+- Full toolbar: bold, italic, underline, strikethrough, code, H2/H3, bullet/ordered lists, blockquote, code block, horizontal rule, text alignment (left/center/right), link (add/remove), image (URL), undo/redo
+- AI "Tạo dàn ý" button still works (injects HTML content into the editor)
+- CSS for TipTap added to `app/globals.css`
+- Component: `src/components/admin/posts/RichTextEditor.tsx`
+- Dialog widened to `sm:max-w-4xl` for editor space
+
+### Admin Table Pagination (Phase 7D)
+- **Shared `DataTablePagination` component** (`src/components/admin/DataTablePagination.tsx`) with:
+  - Total row count display ("Tổng cộng X bản ghi")
+  - Page size selector (10/20/50/100)
+  - Page indicator ("Trang X / Y")
+  - First/Previous/Next/Last page buttons with icons
+- Applied to **all 11 admin data tables**: locations, reviews, users, posts, collections, submissions, badges, levels, categories, tags, collection-categories
+- Removed unused Button imports from all data tables
+
+### ESLint Cleanup (Phase 7E)
+- Fixed **all 30** `@typescript-eslint/no-explicit-any` warnings → **0 warnings remaining**
+- Exported Zod-inferred types (`*FormValues`) from 8 form components
+- Exported `Create*Data` types from 6 create hooks
+- Properly typed admin form handlers, Supabase query results, icon maps, column helpers
+- Fixed 4 `@typescript-eslint/no-unused-vars` warnings (error boundary params, unused imports)
+
+### Collection Cover Images (Phase 7F)
+- **18/18 watercolor cover images** generated via Gemini AI
+- Each cover is a unique landscape composition matching the collection's theme (e.g., midnight food stalls for "Sài Gòn Không Ngủ", garden cafe for "Xanh Mướt Mắt")
+- Uploaded to Supabase Storage at `location-images/collection-covers/{slug}.png`
+- `cover_image_url` updated in DB for all 18 collections (replaced generic Unsplash images)
+- Script: `scripts/generate-collection-covers.py`
+- Local copies in `scripts/collection-covers-output/`

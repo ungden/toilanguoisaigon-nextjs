@@ -14,7 +14,7 @@ import {
   ArrowLeft,
   Sparkles,
 } from "lucide-react";
-import { FALLBACK_IMAGES } from "@/utils/constants";
+import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 
@@ -90,10 +90,13 @@ export default function PlaylistDetailPage() {
   return (
     <div className="flex flex-col bg-white">
       {/* Hero Section - matches collection detail style */}
-      <section className="relative py-16 bg-vietnam-red-600">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url('${playlist.cover_image_url || FALLBACK_IMAGES.collectionHero}')` }}
+      <section className="relative py-16 bg-vietnam-red-600 overflow-hidden">
+        <Image
+          src={playlist.cover_image_url || FALLBACK_IMAGES.collectionHero}
+          alt={playlist.title}
+          fill
+          className="object-cover opacity-20"
+          priority
         />
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
@@ -139,7 +142,7 @@ export default function PlaylistDetailPage() {
             const imagePath = location.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
             const optimizedImageUrl = imagePath
               ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
-              : FALLBACK_IMAGES.location;
+              : getCategoryArtwork(location.name);
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id || index} className="block group">

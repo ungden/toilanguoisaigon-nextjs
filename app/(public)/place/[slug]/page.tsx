@@ -44,7 +44,7 @@ import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Location, ReviewWithProfile } from '@/types/database';
-import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
+import { formatPriceRange } from "@/utils/formatters";
 import { useEffect, useState } from "react";
 import { showError, showSuccess } from "@/utils/toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -68,7 +68,7 @@ import { useUnsaveLocation } from "@/hooks/data/useUnsaveLocation";
 import { useAwardXp } from "@/hooks/data/useAwardXp";
 import { useBadgeEvaluator } from "@/hooks/data/useBadgeEvaluator";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
-import { FALLBACK_IMAGES } from "@/utils/constants";
+import { getCategoryArtwork, ARTWORK_MESSAGE } from "@/utils/constants";
 
 interface LocationWithReviews extends Location {
   reviews: ReviewWithProfile[];
@@ -118,8 +118,8 @@ const fetchLocationDetail = async (slug: string, userId?: string): Promise<Locat
   const combinedData: LocationWithReviews = {
     ...locationData,
     reviews: (reviewsResult.data as ReviewWithProfile[]) || [],
-    location_categories: (categoriesResult.data as any[]) || [],
-    location_tags: (tagsResult.data as any[]) || [],
+    location_categories: (categoriesResult.data as unknown as { categories: { name: string; slug: string } }[]) || [],
+    location_tags: (tagsResult.data as unknown as { tags: { name: string; slug: string } }[]) || [],
     isSaved
   };
 
@@ -152,6 +152,9 @@ const PlaceDetailPage = () => {
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewSort, setReviewSort] = useState('newest');
+  const [reviewPhotos, setReviewPhotos] = useState<File[]>([]);
+  const [reviewPhotosPreviews, setReviewPhotosPreviews] = useState<string[]>([]);
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
   
   const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
     queryKey: ['location-detail', slug, user?.id],
@@ -171,8 +174,23 @@ const PlaceDetailPage = () => {
   const awardXpMutation = useAwardXp();
   const evaluateBadges = useBadgeEvaluator();
 
+  const uploadReviewPhotos = async (files: File[], userId: string): Promise<string[]> => {
+    const urls: string[] = [];
+    for (const file of files) {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('review-images')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (uploadError) throw uploadError;
+      const { data: publicData } = supabase.storage.from('review-images').getPublicUrl(path);
+      urls.push(publicData.publicUrl);
+    }
+    return urls;
+  };
+
   const submitReviewMutation = useMutation({
-    mutationFn: async ({ rating, comment }: { rating: number; comment: string }) => {
+    mutationFn: async ({ rating, comment, photos }: { rating: number; comment: string; photos: File[] }) => {
       if (!user || !place) throw new Error('User not authenticated or place not found');
       
       // Check for duplicate review
@@ -186,6 +204,14 @@ const PlaceDetailPage = () => {
       if (existingReview) {
         throw new Error('DUPLICATE_REVIEW');
       }
+
+      // Upload photos if any
+      let imageUrls: string[] = [];
+      if (photos.length > 0) {
+        setIsUploadingPhotos(true);
+        imageUrls = await uploadReviewPhotos(photos, user.id);
+        setIsUploadingPhotos(false);
+      }
       
       const { data, error } = await supabase
         .from('reviews')
@@ -193,7 +219,8 @@ const PlaceDetailPage = () => {
           location_id: place.id,
           user_id: user.id,
           rating,
-          comment: comment.trim() || null
+          comment: comment.trim() || null,
+          image_urls: imageUrls,
         })
         .select()
         .single();
@@ -205,6 +232,10 @@ const PlaceDetailPage = () => {
       showSuccess('Đánh giá của bạn đã được gửi thành công! +25 XP');
       setReviewText('');
       setReviewRating(5);
+      // Clean up photo previews
+      reviewPhotosPreviews.forEach(url => URL.revokeObjectURL(url));
+      setReviewPhotos([]);
+      setReviewPhotosPreviews([]);
       queryClient.invalidateQueries({ queryKey: ['location-detail', slug] });
       // Award XP for creating review
       if (user) {
@@ -215,6 +246,7 @@ const PlaceDetailPage = () => {
       }
     },
     onError: (error: Error) => {
+      setIsUploadingPhotos(false);
       if (error.message === 'DUPLICATE_REVIEW') {
         showError('Bạn đã đánh giá địa điểm này rồi. Mỗi người chỉ được đánh giá một lần.');
       } else {
@@ -229,6 +261,31 @@ const PlaceDetailPage = () => {
     }
   }, [error]);
 
+  const handleReviewPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (reviewPhotos.length + files.length > 5) {
+      showError('Tối đa 5 ảnh cho mỗi đánh giá.');
+      return;
+    }
+    // Validate file sizes (5MB max each)
+    const oversized = files.find(f => f.size > 5 * 1024 * 1024);
+    if (oversized) {
+      showError('Mỗi ảnh không được vượt quá 5MB.');
+      return;
+    }
+    const newPhotos = [...reviewPhotos, ...files];
+    setReviewPhotos(newPhotos);
+    // Create preview URLs
+    const newPreviews = files.map(f => URL.createObjectURL(f));
+    setReviewPhotosPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeReviewPhoto = (index: number) => {
+    URL.revokeObjectURL(reviewPhotosPreviews[index]);
+    setReviewPhotos(prev => prev.filter((_, i) => i !== index));
+    setReviewPhotosPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmitReview = () => {
     if (!user) {
       showError('Vui lòng đăng nhập để viết đánh giá.');
@@ -242,7 +299,8 @@ const PlaceDetailPage = () => {
 
     submitReviewMutation.mutate({
       rating: reviewRating,
-      comment: reviewText
+      comment: reviewText,
+      photos: reviewPhotos,
     });
   };
 
@@ -279,9 +337,9 @@ const PlaceDetailPage = () => {
     }
   };
 
-  const getOptimizedImageUrls = (rawUrls: string[]) => {
+  const getOptimizedImageUrls = (rawUrls: string[], locationName: string) => {
     if (!rawUrls || rawUrls.length === 0) {
-      const fallback = FALLBACK_IMAGES.location;
+      const fallback = getCategoryArtwork(locationName);
       return [{ original: fallback, grid: fallback, full: fallback, thumb: fallback }];
     }
     return rawUrls.map(url => {
@@ -317,7 +375,8 @@ const PlaceDetailPage = () => {
   }
 
   const rawImages = [place.main_image_url, ...(place.gallery_urls || [])].filter(Boolean) as string[];
-  const images = getOptimizedImageUrls(rawImages);
+  const isUsingArtwork = rawImages.length === 0;
+  const images = getOptimizedImageUrls(rawImages, place.name);
   const selectedImage = images[selectedImageIndex];
 
   const categories = place.location_categories?.map(lc => lc.categories) || [];
@@ -339,7 +398,7 @@ const PlaceDetailPage = () => {
     return 0;
   });
 
-  const openingHoursData = place.opening_hours as any;
+  const openingHoursData = place.opening_hours as Record<string, string> | null;
   const daysOfWeek = [{ key: 'monday', label: 'Thứ 2' },{ key: 'tuesday', label: 'Thứ 3' },{ key: 'wednesday', label: 'Thứ 4' },{ key: 'thursday', label: 'Thứ 5' },{ key: 'friday', label: 'Thứ 6' },{ key: 'saturday', label: 'Thứ 7' },{ key: 'sunday', label: 'Chủ nhật' }];
   const todayJsIndex = new Date().getDay();
   const todayIndex = todayJsIndex === 0 ? 6 : todayJsIndex - 1;
@@ -350,17 +409,47 @@ const PlaceDetailPage = () => {
     <div className="flex flex-col bg-white">
       <div className="flex-grow container mx-auto px-4 py-8">
         <Button variant="ghost" className="mb-4 text-vietnam-blue-600 hover:text-vietnam-red-600 hover:bg-vietnam-red-50 -ml-2" onClick={() => router.back()}><ArrowLeft className="h-4 w-4 mr-2" />Quay lại</Button>
-        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 h-64 md:h-96 mb-8">
-          <div className="col-span-1 md:col-span-2 row-span-2">
+        {images.length === 1 ? (
+          /* Single image — full-width hero */
+          <div className="relative h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
             <Dialog>
-              <DialogTrigger asChild><div className="relative cursor-pointer group"><Image src={selectedImage.grid} alt={place.name} className="w-full h-full object-cover rounded-lg group-hover:brightness-90 transition-all" width={600} height={600} priority /><div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all rounded-lg flex items-center justify-center"><Camera className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" /></div></div></DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh]"><DialogHeader><DialogTitle>{place.name}</DialogTitle></DialogHeader><div className="flex flex-col items-center"><Image src={selectedImage.full} alt={place.name} className="max-w-full max-h-[70vh] object-contain rounded-lg" width={1280} height={800} /><div className="flex gap-2 mt-4 overflow-x-auto">{images.map((img, index) => (<Image key={index} src={img.thumb} alt={`${place.name} ${index + 1}`} className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${selectedImageIndex === index ? 'border-vietnam-red-600' : 'border-transparent'}`} width={100} height={100} onClick={() => setSelectedImageIndex(index)} />))}</div></div></DialogContent>
+              <DialogTrigger asChild>
+                <div className="relative cursor-pointer group w-full h-full">
+                  <Image src={selectedImage.grid} alt={place.name} className="w-full h-full object-cover group-hover:brightness-90 transition-all" width={1200} height={600} priority />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                    <Camera className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh]">
+                <DialogHeader><DialogTitle>{place.name}</DialogTitle></DialogHeader>
+                <div className="flex flex-col items-center">
+                  <Image src={selectedImage.full} alt={place.name} className="max-w-full max-h-[70vh] object-contain rounded-lg" width={1280} height={800} />
+                </div>
+              </DialogContent>
             </Dialog>
+            {isUsingArtwork && (
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3">
+                <p className="text-white text-sm italic text-center">{ARTWORK_MESSAGE}</p>
+              </div>
+            )}
           </div>
-          {images.length > 1 && (<div className="col-span-1 row-span-1"><Image src={images[1].grid} alt={place.name} className="w-full h-full object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={600} height={300} onClick={() => setSelectedImageIndex(1)} /></div>)}
-          {images.length > 2 && (<div className="col-span-1 row-span-1"><Image src={images[2].grid} alt={place.name} className="w-full h-full object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={600} height={300} onClick={() => setSelectedImageIndex(2)} /></div>)}
-          <div className="col-span-1 md:col-span-2 row-span-1"><div className="w-full h-full bg-muted rounded-lg flex items-center justify-center"><Dialog><DialogTrigger asChild><Button variant="outline"><Camera className="h-4 w-4 mr-2" />Xem tất cả ảnh ({images.length})</Button></DialogTrigger><DialogContent className="max-w-4xl max-h-[90vh]"><DialogHeader><DialogTitle>Thư viện ảnh - {place.name}</DialogTitle></DialogHeader><div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">{images.map((img, index) => (<Image key={index} src={img.grid} alt={`${place.name} ${index + 1}`} className="w-full aspect-square object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={400} height={400} onClick={() => setSelectedImageIndex(index)} />))}</div></DialogContent></Dialog></div></div>
-        </div>
+        ) : (
+          /* Multiple images — grid layout */
+          <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 h-64 md:h-96 mb-8">
+            <div className="col-span-1 md:col-span-2 row-span-2">
+              <Dialog>
+                <DialogTrigger asChild><div className="relative cursor-pointer group"><Image src={selectedImage.grid} alt={place.name} className="w-full h-full object-cover rounded-lg group-hover:brightness-90 transition-all" width={600} height={600} priority /><div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all rounded-lg flex items-center justify-center"><Camera className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" /></div></div></DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh]"><DialogHeader><DialogTitle>{place.name}</DialogTitle></DialogHeader><div className="flex flex-col items-center"><Image src={selectedImage.full} alt={place.name} className="max-w-full max-h-[70vh] object-contain rounded-lg" width={1280} height={800} /><div className="flex gap-2 mt-4 overflow-x-auto">{images.map((img, index) => (<Image key={index} src={img.thumb} alt={`${place.name} ${index + 1}`} className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${selectedImageIndex === index ? 'border-vietnam-red-600' : 'border-transparent'}`} width={100} height={100} onClick={() => setSelectedImageIndex(index)} />))}</div></div></DialogContent>
+              </Dialog>
+            </div>
+            {images.length > 1 && (<div className="col-span-1 row-span-1"><Image src={images[1].grid} alt={place.name} className="w-full h-full object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={600} height={300} onClick={() => setSelectedImageIndex(1)} /></div>)}
+            {images.length > 2 && (<div className="col-span-1 row-span-1"><Image src={images[2].grid} alt={place.name} className="w-full h-full object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={600} height={300} onClick={() => setSelectedImageIndex(2)} /></div>)}
+            {images.length > 2 && (
+              <div className="col-span-1 md:col-span-2 row-span-1"><div className="w-full h-full bg-muted rounded-lg flex items-center justify-center"><Dialog><DialogTrigger asChild><Button variant="outline"><Camera className="h-4 w-4 mr-2" />Xem tất cả ảnh ({images.length})</Button></DialogTrigger><DialogContent className="max-w-4xl max-h-[90vh]"><DialogHeader><DialogTitle>Thư viện ảnh - {place.name}</DialogTitle></DialogHeader><div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">{images.map((img, index) => (<Image key={index} src={img.grid} alt={`${place.name} ${index + 1}`} className="w-full aspect-square object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={400} height={400} onClick={() => setSelectedImageIndex(index)} />))}</div></DialogContent></Dialog></div></div>
+            )}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
@@ -418,17 +507,50 @@ const PlaceDetailPage = () => {
                     </CardContent>
                   </Card>
                 )}
-                {tags.length > 0 && (<div><h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Tiện ích & Đặc điểm</h3><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{tags.map((tag) => {const iconMap: Record<string, any> = { 'wifi': Wifi, 'parking': Car, 'card-payment': CreditCard, 'group': Users, 'kid-friendly': Baby, 'pet-friendly': Dog }; const IconComp = iconMap[tag.slug] || Utensils; return (<div key={tag.slug} className="flex items-center text-vietnam-blue-700"><IconComp className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>{tag.name}</span></div>);})}</div></div>)}
+                {tags.length > 0 && (<div><h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Tiện ích & Đặc điểm</h3><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{tags.map((tag) => {const iconMap: Record<string, React.ComponentType<{ className?: string }>> = { 'wifi': Wifi, 'parking': Car, 'card-payment': CreditCard, 'group': Users, 'kid-friendly': Baby, 'pet-friendly': Dog }; const IconComp = iconMap[tag.slug] || Utensils; return (<div key={tag.slug} className="flex items-center text-vietnam-blue-700"><IconComp className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>{tag.name}</span></div>);})}</div></div>)}
                 <Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600 flex items-center"><MapPin className="h-5 w-5 mr-2" />Vị trí trên bản đồ</CardTitle></CardHeader><CardContent className="space-y-4">{place.latitude && place.longitude ? (<><div className="h-64 rounded-lg overflow-hidden"><iframe title={`Bản đồ ${place.name}`} width="100%" height="100%" style={{ border: 0 }} loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${place.longitude - 0.005}%2C${place.latitude - 0.003}%2C${place.longitude + 0.005}%2C${place.latitude + 0.003}&layer=mapnik&marker=${place.latitude}%2C${place.longitude}`} /></div><Button className="btn-vietnam" asChild><a href={`https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`} target="_blank" rel="noopener noreferrer"><Navigation className="h-4 w-4 mr-2" />Chỉ đường</a></Button></>) : (<><div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center"><p className="text-gray-500">Chưa có tọa độ cho địa điểm này</p></div><Button className="btn-vietnam" asChild><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address + ', ' + place.district + ', TP.HCM')}`} target="_blank" rel="noopener noreferrer"><Navigation className="h-4 w-4 mr-2" />Tìm trên Google Maps</a></Button></>)}</CardContent></Card>
               </TabsContent>
               <TabsContent value="reviews" className="space-y-6 pt-6" id="review-section">
                 {totalReviews > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Tổng quan đánh giá</CardTitle></CardHeader><CardContent><div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="text-center"><div className="text-4xl font-bold text-vietnam-blue-800 mb-2">{place.average_rating.toFixed(1)}</div><div className="flex justify-center mb-2">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-5 w-5 ${i < Math.round(place.average_rating) ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div><p className="text-vietnam-blue-600">{totalReviews} đánh giá</p></div><div className="space-y-2">{ratingDistribution.map(({ rating, count, percentage }) => (<div key={rating} className="flex items-center gap-2"><span className="text-sm w-8">{rating} ⭐</span><Progress value={percentage} className="flex-1 h-2" /><span className="text-sm text-vietnam-blue-600 w-8">{count}</span></div>))}</div></div></CardContent></Card>)}
-                {user && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Viết đánh giá</CardTitle></CardHeader><CardContent className="space-y-4"><div><label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Đánh giá của bạn</label><div className="flex gap-1">{[1, 2, 3, 4, 5].map((star) => (<Star key={star} className={`h-6 w-6 cursor-pointer transition-colors ${star <= reviewRating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200 hover:fill-vietnam-gold-300 hover:text-vietnam-gold-300'}`} onClick={() => setReviewRating(star)} />))}</div></div><div><label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Chia sẻ trải nghiệm của bạn</label><Textarea placeholder="Hãy chia sẻ những gì bạn thích về địa điểm này..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} className="min-h-[100px]" /></div><Button onClick={handleSubmitReview} disabled={submitReviewMutation.isPending || reviewText.trim().length < 10} className="btn-vietnam">{submitReviewMutation.isPending ? 'Đang gửi...' : 'Gửi đánh giá'}</Button></CardContent></Card>)}
-                <div><div className="flex justify-between items-center mb-4"><h3 className="text-xl font-semibold text-vietnam-red-600">Đánh giá từ cộng đồng</h3><Select value={reviewSort} onValueChange={setReviewSort}><SelectTrigger className="w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Mới nhất</SelectItem><SelectItem value="oldest">Cũ nhất</SelectItem><SelectItem value="highest">Điểm cao nhất</SelectItem><SelectItem value="lowest">Điểm thấp nhất</SelectItem></SelectContent></Select></div>{sortedReviews.length > 0 ? (<div className="space-y-6">{sortedReviews.map(review => (<Card key={review.id} className="border-vietnam-red-100"><CardContent className="p-6"><div className="flex items-start gap-4"><Avatar className="h-10 w-10"><AvatarImage src={review.profiles?.avatar_url || undefined} /><AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700">{review.profiles?.full_name?.[0] || 'U'}</AvatarFallback></Avatar><div className="flex-grow"><div className="flex items-center justify-between mb-2"><div><p className="font-semibold text-vietnam-blue-800">{review.profiles?.full_name || 'Người dùng ẩn danh'}</p><div className="flex items-center gap-2 text-sm text-vietnam-blue-600"><div className="flex">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div><span>·</span><span>{new Date(review.created_at).toLocaleDateString('vi-VN')}</span></div></div><div className="flex gap-1"><Button variant="ghost" size="sm" aria-label="Hữu ích"><ThumbsUp className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Báo cáo"><Flag className="h-4 w-4" /></Button></div></div>{review.comment && (<p className="text-vietnam-blue-700 leading-relaxed">{review.comment}</p>)}</div></div></CardContent></Card>))}</div>) : (<div className="text-center py-8"><MessageSquare className="h-12 w-12 text-vietnam-blue-300 mx-auto mb-4" /><p className="text-vietnam-blue-600">Chưa có đánh giá nào. Hãy là người đầu tiên!</p></div>)}</div>
+                {user && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Viết đánh giá</CardTitle></CardHeader><CardContent className="space-y-4"><div><label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Đánh giá của bạn</label><div className="flex gap-1">{[1, 2, 3, 4, 5].map((star) => (<Star key={star} className={`h-6 w-6 cursor-pointer transition-colors ${star <= reviewRating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200 hover:fill-vietnam-gold-300 hover:text-vietnam-gold-300'}`} onClick={() => setReviewRating(star)} />))}</div></div><div><label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Chia sẻ trải nghiệm của bạn</label><Textarea placeholder="Hãy chia sẻ những gì bạn thích về địa điểm này..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} className="min-h-[100px]" /></div>
+                      {/* Photo upload */}
+                      <div>
+                        <label className="text-sm font-medium text-vietnam-blue-800 mb-2 block">Thêm ảnh (tối đa 5)</label>
+                        <div className="flex flex-wrap gap-3">
+                          {reviewPhotosPreviews.map((preview, idx) => (
+                            <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-vietnam-red-200">
+                              <Image src={preview} alt={`Ảnh ${idx + 1}`} fill className="object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => removeReviewPhoto(idx)}
+                                className="absolute top-0 right-0 bg-red-500 text-white rounded-bl-lg w-5 h-5 flex items-center justify-center text-xs font-bold hover:bg-red-600"
+                                aria-label={`Xóa ảnh ${idx + 1}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                          {reviewPhotos.length < 5 && (
+                            <label className="w-20 h-20 rounded-lg border-2 border-dashed border-vietnam-blue-300 flex flex-col items-center justify-center cursor-pointer hover:border-vietnam-red-400 hover:bg-vietnam-red-50 transition-colors">
+                              <Camera className="h-5 w-5 text-vietnam-blue-400" />
+                              <span className="text-xs text-vietnam-blue-400 mt-1">Thêm ảnh</span>
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple
+                                onChange={handleReviewPhotoChange}
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                      <Button onClick={handleSubmitReview} disabled={submitReviewMutation.isPending || isUploadingPhotos || reviewText.trim().length < 10} className="btn-vietnam">{isUploadingPhotos ? 'Đang tải ảnh...' : submitReviewMutation.isPending ? 'Đang gửi...' : 'Gửi đánh giá'}</Button></CardContent></Card>)}
+                <div><div className="flex justify-between items-center mb-4"><h3 className="text-xl font-semibold text-vietnam-red-600">Đánh giá từ cộng đồng</h3><Select value={reviewSort} onValueChange={setReviewSort}><SelectTrigger className="w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Mới nhất</SelectItem><SelectItem value="oldest">Cũ nhất</SelectItem><SelectItem value="highest">Điểm cao nhất</SelectItem><SelectItem value="lowest">Điểm thấp nhất</SelectItem></SelectContent></Select></div>{sortedReviews.length > 0 ? (<div className="space-y-6">{sortedReviews.map(review => (<Card key={review.id} className="border-vietnam-red-100"><CardContent className="p-6"><div className="flex items-start gap-4"><Avatar className="h-10 w-10"><AvatarImage src={review.profiles?.avatar_url || undefined} /><AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700">{review.profiles?.full_name?.[0] || 'U'}</AvatarFallback></Avatar><div className="flex-grow"><div className="flex items-center justify-between mb-2"><div><p className="font-semibold text-vietnam-blue-800">{review.profiles?.full_name || 'Người dùng ẩn danh'}</p><div className="flex items-center gap-2 text-sm text-vietnam-blue-600"><div className="flex">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div><span>·</span><span>{new Date(review.created_at).toLocaleDateString('vi-VN')}</span></div></div><div className="flex gap-1"><Button variant="ghost" size="sm" aria-label="Hữu ích"><ThumbsUp className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Báo cáo"><Flag className="h-4 w-4" /></Button></div></div>{review.comment && (<p className="text-vietnam-blue-700 leading-relaxed">{review.comment}</p>)}{review.image_urls && review.image_urls.length > 0 && (<div className="flex flex-wrap gap-2 mt-3">{review.image_urls.map((imgUrl, imgIdx) => (<Dialog key={imgIdx}><DialogTrigger asChild><Image src={imgUrl} alt={`Ảnh đánh giá ${imgIdx + 1}`} className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={80} height={80} /></DialogTrigger><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Ảnh từ {review.profiles?.full_name || 'Người dùng'}</DialogTitle></DialogHeader><Image src={imgUrl} alt={`Ảnh đánh giá ${imgIdx + 1}`} className="w-full max-h-[70vh] object-contain rounded-lg" width={800} height={600} /></DialogContent></Dialog>))}</div>)}</div></div></CardContent></Card>))}</div>) : (<div className="text-center py-8"><MessageSquare className="h-12 w-12 text-vietnam-blue-300 mx-auto mb-4" /><p className="text-vietnam-blue-600">Chưa có đánh giá nào. Hãy là người đầu tiên!</p></div>)}</div>
               </TabsContent>
             </Tabs>
           </div>
-          <div className="lg:col-span-1"><div className="sticky top-20 space-y-6"><Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader><CardContent className="space-y-3">{user ? (<Button className="w-full btn-vietnam" onClick={() => { const el = document.getElementById('review-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>) : (<Button asChild className="w-full btn-vietnam"><Link href="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>)}<Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50" onClick={handleToggleSave} disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}><Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />{place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}</Button><Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button></CardContent></Card>{similarPlaces && similarPlaces.length > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader><CardContent className="space-y-4">{similarPlaces.map((similarPlace) => { const imagePath = similarPlace.main_image_url ? getPathFromSupabaseUrl(similarPlace.main_image_url) : null; const optimizedImageUrl = imagePath ? getTransformedImageUrl(imagePath, { width: 100, height: 100 }) : FALLBACK_IMAGES.location; return (<Link key={similarPlace.id} href={`/place/${similarPlace.slug}`} className="block group"><div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors"><Image src={optimizedImageUrl} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" width={100} height={100} /><div className="flex-grow min-w-0"><p className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</p><p className="text-sm text-vietnam-blue-600">{similarPlace.district}</p>{similarPlace.average_rating > 0 && (<div className="flex items-center text-sm"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}</div></div></Link>); })}</CardContent></Card>)}</div></div>
+          <div className="lg:col-span-1"><div className="sticky top-20 space-y-6"><Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader><CardContent className="space-y-3">{user ? (<Button className="w-full btn-vietnam" onClick={() => { const el = document.getElementById('review-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>) : (<Button asChild className="w-full btn-vietnam"><Link href="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>)}<Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50" onClick={handleToggleSave} disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}><Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />{place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}</Button><Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button></CardContent></Card>{similarPlaces && similarPlaces.length > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader><CardContent className="space-y-4">{similarPlaces.map((similarPlace) => { const imagePath = similarPlace.main_image_url ? getPathFromSupabaseUrl(similarPlace.main_image_url) : null; const optimizedImageUrl = imagePath ? getTransformedImageUrl(imagePath, { width: 100, height: 100 }) : getCategoryArtwork(similarPlace.name); return (<Link key={similarPlace.id} href={`/place/${similarPlace.slug}`} className="block group"><div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors"><Image src={optimizedImageUrl} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" width={100} height={100} /><div className="flex-grow min-w-0"><p className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</p><p className="text-sm text-vietnam-blue-600">{similarPlace.district}</p>{similarPlace.average_rating > 0 && (<div className="flex items-center text-sm"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}</div></div></Link>); })}</CardContent></Card>)}</div></div>
         </div>
       </div>
     </div>

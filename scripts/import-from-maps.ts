@@ -332,9 +332,15 @@ async function insertLocations(
       phone_number: loc.phone_number,
       opening_hours: loc.opening_hours as unknown,
       price_range: loc.price_range,
-      status: "draft",
-      average_rating: 0,
-      review_count: 0,
+      status: "published",
+      average_rating: loc.google_rating || 0,
+      review_count: loc.google_review_count || 0,
+      google_maps_uri: loc.google_maps_uri,
+      google_place_id: loc.google_place_id,
+      google_rating: loc.google_rating,
+      google_review_count: loc.google_review_count,
+      google_review_summary: loc.google_review_summary,
+      google_highlights: loc.google_highlights,
     } as never);
 
     if (error) {

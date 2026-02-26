@@ -10,7 +10,7 @@ import { columns } from "@/components/admin/submissions/Columns";
 import { SubmissionsDataTable } from "@/components/admin/submissions/SubmissionsDataTable";
 import { LocationSubmission } from "@/types/database";
 import { useUpdateSubmissionStatus } from "@/hooks/data/useUpdateSubmissionStatus";
-import { LocationForm } from "@/components/admin/locations/LocationForm";
+import { LocationForm, type LocationFormValues } from "@/components/admin/locations/LocationForm";
 import { useCreateLocation } from "@/hooks/data/useCreateLocation";
 
 interface SubmissionWithProfile extends LocationSubmission {
@@ -48,13 +48,14 @@ const AdminSubmissionsPage = () => {
         }
     };
 
-    const handleLocationFormSubmit = (values: any) => {
+    const handleLocationFormSubmit = (values: LocationFormValues) => {
         const processedValues = {
             ...values,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
             opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { return null; } })() : null,
         };
-        createLocationMutation.mutate(processedValues, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- processedValues is a partial shape from submission form; Supabase handles missing columns
+        createLocationMutation.mutate(processedValues as any, {
             onSuccess: () => {
                 setIsCreatingLocation(false);
                 handleCloseView();
@@ -125,6 +126,7 @@ const AdminSubmissionsPage = () => {
                         <DialogDescription>Kiểm tra và bổ sung thông tin để xuất bản địa điểm.</DialogDescription>
                     </DialogHeader>
                     <LocationForm
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- locationInitialData is partial Location for pre-filling form from submission
                         location={locationInitialData as any}
                         onSubmit={handleLocationFormSubmit}
                         isPending={createLocationMutation.isPending}

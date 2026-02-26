@@ -9,7 +9,7 @@ import { LevelsDataTable } from "@/components/admin/levels/LevelsDataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LevelForm } from "@/components/admin/levels/LevelForm";
+import { LevelForm, type LevelFormValues } from "@/components/admin/levels/LevelForm";
 import { Level } from "@/types/database";
 import { useCreateLevel } from "@/hooks/data/useCreateLevel";
 import { useUpdateLevel } from "@/hooks/data/useUpdateLevel";
@@ -52,13 +52,14 @@ const AdminLevelsPage = () => {
         }
     };
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = (values: LevelFormValues) => {
         if (editingLevel) {
             updateLevelMutation.mutate({ level: editingLevel.level, ...values }, {
                 onSuccess: handleCloseFormDialog,
             });
         } else {
-            createLevelMutation.mutate(values, {
+            // Zod validates required fields; cast needed because z.infer optional ≠ DB null types
+            createLevelMutation.mutate(values as unknown as Level, {
                 onSuccess: handleCloseFormDialog,
             });
         }

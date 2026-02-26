@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Collection, Location, CollectionCategory } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
-import { FALLBACK_IMAGES } from "@/utils/constants";
+import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
 import Image from "next/image";
 
 interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
@@ -95,8 +95,14 @@ const CollectionDetailPage = () => {
   return (
     <div className="flex flex-col bg-white">
       {/* Hero Section */}
-      <section className="relative py-16 bg-vietnam-red-600">
-        <div className={`absolute inset-0 bg-cover bg-center opacity-20`} style={{ backgroundImage: `url('${FALLBACK_IMAGES.collectionHero}')` }}></div>
+      <section className="relative py-16 bg-vietnam-red-600 overflow-hidden">
+        <Image
+          src={collection.cover_image_url || FALLBACK_IMAGES.collectionHero}
+          alt={collection.title}
+          fill
+          className="object-cover opacity-20"
+          priority
+        />
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
             {collection.collection_categories && (
@@ -126,7 +132,7 @@ const CollectionDetailPage = () => {
             const imagePath = location.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
             const optimizedImageUrl = imagePath 
               ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
-              : FALLBACK_IMAGES.location;
+              : getCategoryArtwork(location.name);
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id} className="block group">

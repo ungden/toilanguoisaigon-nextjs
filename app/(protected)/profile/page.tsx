@@ -30,7 +30,7 @@ const ProfilePage = () => {
                 <Card className="w-full md:w-80 md:sticky top-24">
                     <CardHeader className="items-center text-center">
                         <Avatar className="h-24 w-24 mb-4">
-                            <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User Avatar'} />
+                            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User Avatar'} />
                             <AvatarFallback className="text-3xl">{getInitials(profile?.full_name)}</AvatarFallback>
                         </Avatar>
                         <div className="flex items-center gap-2">

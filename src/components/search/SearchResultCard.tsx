@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Location } from "@/types/database";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
-import { FALLBACK_IMAGES } from "@/utils/constants";
+import { getCategoryArtwork } from "@/utils/constants";
 
 interface SearchResultCardProps {
   place: Location;
@@ -15,7 +15,7 @@ export function SearchResultCard({ place }: SearchResultCardProps) {
   const imagePath = place.main_image_url ? getPathFromSupabaseUrl(place.main_image_url) : null;
   const optimizedImageUrl = imagePath 
     ? getTransformedImageUrl(imagePath, { width: 400, height: 400 }) 
-    : FALLBACK_IMAGES.location;
+    : getCategoryArtwork(place.name);
 
   return (
     <Link href={`/place/${place.slug}`} className="block">

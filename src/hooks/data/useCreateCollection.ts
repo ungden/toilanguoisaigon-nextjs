@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Collection } from '@/types/database';
 
-type CreateCollectionData = Omit<Collection, 'id' | 'created_at' | 'collection_categories'>;
+export type CreateCollectionData = Omit<Collection, 'id' | 'created_at' | 'collection_categories'>;
 
 export const useCreateCollection = () => {
   const queryClient = useQueryClient();

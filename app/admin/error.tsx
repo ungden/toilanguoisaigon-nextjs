@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, RotateCw } from "lucide-react";
 
 export default function AdminError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };

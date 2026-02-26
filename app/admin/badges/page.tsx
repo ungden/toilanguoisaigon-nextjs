@@ -9,9 +9,9 @@ import { BadgesDataTable } from "@/components/admin/badges/BadgesDataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BadgeForm } from "@/components/admin/badges/BadgeForm";
+import { BadgeForm, type BadgeFormValues } from "@/components/admin/badges/BadgeForm";
 import { Badge } from "@/types/database";
-import { useCreateBadge } from "@/hooks/data/useCreateBadge";
+import { useCreateBadge, type CreateBadgeData } from "@/hooks/data/useCreateBadge";
 import { useUpdateBadge } from "@/hooks/data/useUpdateBadge";
 import { useDeleteBadge } from "@/hooks/data/useDeleteBadge";
 import { DeleteBadgeDialog } from "@/components/admin/badges/DeleteBadgeDialog";
@@ -52,13 +52,14 @@ const AdminBadgesPage = () => {
         }
     };
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = (values: BadgeFormValues) => {
         if (editingBadge) {
             updateBadgeMutation.mutate({ id: editingBadge.id, ...values }, {
                 onSuccess: handleCloseFormDialog,
             });
         } else {
-            createBadgeMutation.mutate(values, {
+            // Zod validates required fields; cast needed because z.infer optional ≠ DB null types
+            createBadgeMutation.mutate(values as unknown as CreateBadgeData, {
                 onSuccess: handleCloseFormDialog,
             });
         }

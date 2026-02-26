@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useGeminiAssistant } from '@/hooks/data/useGeminiAssistant';
 import { showError } from '@/utils/toast';
+import { RichTextEditor } from './RichTextEditor';
 
 const postFormSchema = z.object({
   title: z.string().min(3, { message: 'Tiêu đề phải có ít nhất 3 ký tự.' }),
@@ -22,7 +23,7 @@ const postFormSchema = z.object({
   status: z.enum(['draft', 'published']),
 });
 
-type PostFormValues = z.infer<typeof postFormSchema>;
+export type PostFormValues = z.infer<typeof postFormSchema>;
 
 interface PostFormProps {
   post?: Post | null;
@@ -119,13 +120,19 @@ export function PostForm({ post, onSubmit, isPending, onClose }: PostFormProps) 
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
-                <FormLabel>Nội dung (Hỗ trợ HTML)</FormLabel>
+                <FormLabel>Nội dung</FormLabel>
                 <Button type="button" variant="outline" size="sm" onClick={() => handleAIAssist(outlineAssistant, 'generate_post_outline')} disabled={outlineAssistant.isPending}>
                   {outlineAssistant.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />}
                   Tạo dàn ý
                 </Button>
               </div>
-              <FormControl><Textarea placeholder="Viết nội dung của bạn ở đây..." {...field} className="min-h-[200px]" /></FormControl>
+              <FormControl>
+                <RichTextEditor
+                  content={field.value || ''}
+                  onChange={(html) => field.onChange(html)}
+                  placeholder="Bắt đầu viết nội dung bài viết..."
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

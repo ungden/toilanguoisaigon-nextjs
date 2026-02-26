@@ -14,6 +14,6 @@ function getClient() {
 // Proxy object that lazily initializes the Supabase client on first property access
 export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
   get(_target, prop) {
-    return (getClient() as any)[prop];
+    return (getClient() as unknown as Record<string, unknown>)[prop as string];
   },
 });

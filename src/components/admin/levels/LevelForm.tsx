@@ -14,7 +14,7 @@ const levelFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type LevelFormValues = z.infer<typeof levelFormSchema>;
+export type LevelFormValues = z.infer<typeof levelFormSchema>;
 
 interface LevelFormProps {
   level?: Level | null;

@@ -6,12 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Badge } from '@/components/ui/badge';
 import { Location, PriceRange, LocationStatus } from '@/types/database';
 import { slugify } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, ChevronsUpDown, Check, X } from 'lucide-react';
 import { useGeminiAssistant } from '@/hooks/data/useGeminiAssistant';
 import { showError } from '@/utils/toast';
+import { useAdminCategories } from '@/hooks/data/useAdminCategories';
+import { useAdminTags } from '@/hooks/data/useAdminTags';
+import { useLocationCategories } from '@/hooks/data/useLocationCategories';
+import { useLocationTags } from '@/hooks/data/useLocationTags';
+import { cn } from '@/lib/utils';
 
 const locationFormSchema = z.object({
   name: z.string().min(3, { message: 'Tên phải có ít nhất 3 ký tự.' }),
@@ -28,7 +36,10 @@ const locationFormSchema = z.object({
   status: z.enum(['draft', 'published', 'rejected']),
 });
 
-type LocationFormValues = z.infer<typeof locationFormSchema>;
+export type LocationFormValues = z.infer<typeof locationFormSchema> & {
+  categoryIds?: number[];
+  tagIds?: number[];
+};
 
 interface LocationFormProps {
   location?: Location | null;
@@ -39,8 +50,29 @@ interface LocationFormProps {
 
 export function LocationForm({ location, onSubmit, isPending, onClose }: LocationFormProps) {
   const [preview, setPreview] = useState<string | null>(location?.main_image_url || null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
+  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
 
-  const form = useForm<LocationFormValues>({
+  // Fetch all categories & tags for the selectors
+  const { data: allCategories = [] } = useAdminCategories();
+  const { data: allTags = [] } = useAdminTags();
+
+  // Fetch existing category/tag assignments when editing
+  const { data: existingCategoryIds } = useLocationCategories(location?.id);
+  const { data: existingTagIds } = useLocationTags(location?.id);
+
+  // Initialize selected values from existing data
+  useEffect(() => {
+    if (existingCategoryIds) setSelectedCategoryIds(existingCategoryIds);
+  }, [existingCategoryIds]);
+
+  useEffect(() => {
+    if (existingTagIds) setSelectedTagIds(existingTagIds);
+  }, [existingTagIds]);
+
+  const form = useForm<z.infer<typeof locationFormSchema>>({
     resolver: zodResolver(locationFormSchema),
     defaultValues: {
       name: location?.name || '',
@@ -83,13 +115,155 @@ export function LocationForm({ location, onSubmit, isPending, onClose }: Locatio
     }
   }, [watchedName, form]);
 
+  const handleFormSubmit = (values: z.infer<typeof locationFormSchema>) => {
+    onSubmit({
+      ...values,
+      categoryIds: selectedCategoryIds,
+      tagIds: selectedTagIds,
+    });
+  };
+
+  const toggleCategory = (catId: number) => {
+    setSelectedCategoryIds(prev =>
+      prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId]
+    );
+  };
+
+  const toggleTag = (tagId: number) => {
+    setSelectedTagIds(prev =>
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    );
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
         <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Tên địa điểm</FormLabel> <FormControl><Input placeholder="Ví dụ: Phở Hòa Pasteur" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug (URL)</FormLabel> <FormControl><Input placeholder="vi-du-pho-hoa-pasteur" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="address" render={({ field }) => ( <FormItem> <FormLabel>Địa chỉ</FormLabel> <FormControl><Input placeholder="260C Pasteur, Phường 8..." {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="district" render={({ field }) => ( <FormItem> <FormLabel>Quận</FormLabel> <FormControl><Input placeholder="Quận 3" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+
+        {/* Category Multi-Select */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Danh mục</label>
+          <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                role="combobox"
+                aria-expanded={categoryPopoverOpen}
+                className="w-full justify-between font-normal"
+              >
+                {selectedCategoryIds.length > 0
+                  ? `${selectedCategoryIds.length} danh mục đã chọn`
+                  : 'Chọn danh mục...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Tìm danh mục..." />
+                <CommandList>
+                  <CommandEmpty>Không tìm thấy danh mục.</CommandEmpty>
+                  <CommandGroup>
+                    {allCategories.map(cat => (
+                      <CommandItem
+                        key={cat.id}
+                        value={cat.name}
+                        onSelect={() => toggleCategory(cat.id)}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", selectedCategoryIds.includes(cat.id) ? "opacity-100" : "opacity-0")} />
+                        {cat.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {selectedCategoryIds.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {selectedCategoryIds.map(cid => {
+                const cat = allCategories.find(c => c.id === cid);
+                return cat ? (
+                  <Badge key={cid} variant="secondary" className="gap-1">
+                    {cat.name}
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(cid)}
+                      className="ml-1 rounded-full hover:bg-muted"
+                      aria-label={`Xóa ${cat.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ) : null;
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Tag Multi-Select */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Thẻ tag</label>
+          <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                role="combobox"
+                aria-expanded={tagPopoverOpen}
+                className="w-full justify-between font-normal"
+              >
+                {selectedTagIds.length > 0
+                  ? `${selectedTagIds.length} thẻ đã chọn`
+                  : 'Chọn thẻ tag...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Tìm thẻ tag..." />
+                <CommandList>
+                  <CommandEmpty>Không tìm thấy thẻ tag.</CommandEmpty>
+                  <CommandGroup>
+                    {allTags.map(tag => (
+                      <CommandItem
+                        key={tag.id}
+                        value={tag.name}
+                        onSelect={() => toggleTag(tag.id)}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", selectedTagIds.includes(tag.id) ? "opacity-100" : "opacity-0")} />
+                        {tag.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {selectedTagIds.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {selectedTagIds.map(tid => {
+                const tag = allTags.find(t => t.id === tid);
+                return tag ? (
+                  <Badge key={tid} variant="outline" className="gap-1">
+                    {tag.name}
+                    <button
+                      type="button"
+                      onClick={() => toggleTag(tid)}
+                      className="ml-1 rounded-full hover:bg-muted"
+                      aria-label={`Xóa ${tag.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ) : null;
+              })}
+            </div>
+          )}
+        </div>
         
         <FormField
           control={form.control}

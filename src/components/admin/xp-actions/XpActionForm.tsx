@@ -12,7 +12,7 @@ const xpActionFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type XpActionFormValues = z.infer<typeof xpActionFormSchema>;
+export type XpActionFormValues = z.infer<typeof xpActionFormSchema>;
 
 interface XpActionFormProps {
   action: XpAction;

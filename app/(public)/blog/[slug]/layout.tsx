@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const description = post.excerpt?.slice(0, 160) || `Đọc bài viết "${post.title}" trên Tôi là người Sài Gòn.`;
-  const authorName = (post.profiles as any)?.full_name || "Tôi là người Sài Gòn";
+  const authorName = (post.profiles as unknown as { full_name: string | null } | null)?.full_name || "Tôi là người Sài Gòn";
 
   return {
     title: post.title,

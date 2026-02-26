@@ -22,7 +22,7 @@ const collectionFormSchema = z.object({
   category_id: z.coerce.number().optional().nullable(),
 });
 
-type CollectionFormValues = z.infer<typeof collectionFormSchema>;
+export type CollectionFormValues = z.infer<typeof collectionFormSchema>;
 
 interface CollectionFormProps {
   collection?: Collection | null;

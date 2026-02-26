@@ -40,3 +40,9 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Generated scripts output (images already uploaded to Supabase)
+scripts/artwork-output/
+scripts/collection-covers-output/
+scripts/debug-*.txt
+scripts/queries-*.txt

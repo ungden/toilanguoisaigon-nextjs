@@ -13,7 +13,7 @@ const badgeFormSchema = z.object({
   icon_name: z.string().optional(),
 });
 
-type BadgeFormValues = z.infer<typeof badgeFormSchema>;
+export type BadgeFormValues = z.infer<typeof badgeFormSchema>;
 
 interface BadgeFormProps {
   badge?: Badge | null;

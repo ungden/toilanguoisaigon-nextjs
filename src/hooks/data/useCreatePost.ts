@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Post } from '@/types/database';
 
-type CreatePostData = Omit<Post, 'id' | 'created_at' | 'updated_at' | 'profiles'>;
+export type CreatePostData = Omit<Post, 'id' | 'created_at' | 'updated_at' | 'profiles'>;
 
 export const useCreatePost = () => {
   const queryClient = useQueryClient();

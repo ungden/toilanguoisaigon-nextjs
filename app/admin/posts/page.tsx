@@ -9,9 +9,9 @@ import { PostsDataTable } from "@/components/admin/posts/PostsDataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { PostForm } from "@/components/admin/posts/PostForm";
+import { PostForm, type PostFormValues } from "@/components/admin/posts/PostForm";
 import { Post } from "@/types/database";
-import { useCreatePost } from "@/hooks/data/useCreatePost";
+import { useCreatePost, type CreatePostData } from "@/hooks/data/useCreatePost";
 import { useUpdatePost } from "@/hooks/data/useUpdatePost";
 import { useDeletePost } from "@/hooks/data/useDeletePost";
 import { DeletePostDialog } from "@/components/admin/posts/DeletePostDialog";
@@ -54,13 +54,14 @@ const AdminPostsPage = () => {
         }
     };
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = (values: PostFormValues) => {
         if (editingPost) {
             updatePostMutation.mutate({ id: editingPost.id, ...values }, {
                 onSuccess: handleCloseFormDialog,
             });
         } else {
-            createPostMutation.mutate({ ...values, author_id: user?.id }, {
+            // Zod validates required fields; cast needed because z.infer optional ≠ DB null types
+            createPostMutation.mutate({ ...values, author_id: user?.id } as unknown as CreatePostData, {
                 onSuccess: handleCloseFormDialog,
             });
         }
@@ -102,7 +103,7 @@ const AdminPostsPage = () => {
             </Card>
 
             <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-                <DialogContent className="sm:max-w-3xl">
+                <DialogContent className="sm:max-w-4xl max-h-[90vh]">
                     <DialogHeader>
                         <DialogTitle>{editingPost ? 'Chỉnh sửa bài viết' : 'Tạo bài viết mới'}</DialogTitle>
                         <DialogDescription>

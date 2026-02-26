@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { cn } from '@/lib/utils';
-import { FALLBACK_IMAGES } from '@/utils/constants';
+import { getCategoryArtwork } from '@/utils/constants';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 
 interface MysteryCardProps {
@@ -21,7 +21,7 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
   const imagePath = location?.main_image_url ? getPathFromSupabaseUrl(location.main_image_url) : null;
   const optimizedImageUrl = imagePath
     ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
-    : FALLBACK_IMAGES.location;
+    : getCategoryArtwork(location?.name || '');
 
   const handleCardClick = () => {
     if (isFlippable && !isRevealed) {

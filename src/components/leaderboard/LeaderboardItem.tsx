@@ -42,7 +42,7 @@ export function LeaderboardItem({ profile, rank }: LeaderboardItemProps) {
       </div>
       <div className="flex items-center gap-4 flex-1 ml-4">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={profile.avatar_url || ''} alt={profile.full_name || 'User'} />
+          <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || 'User'} />
           <AvatarFallback className="text-lg">{getInitials(profile.full_name)}</AvatarFallback>
         </Avatar>
         <div className="flex-1">

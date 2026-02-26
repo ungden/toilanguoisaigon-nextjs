@@ -66,7 +66,7 @@ const BlogPage = () => {
                     <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-4 border-t">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={post.profiles?.avatar_url || ''} />
+                          <AvatarImage src={post.profiles?.avatar_url || undefined} />
                           <AvatarFallback>{post.profiles?.full_name?.[0] || 'A'}</AvatarFallback>
                         </Avatar>
                         <span>{post.profiles?.full_name || 'Admin'}</span>

@@ -30,6 +30,60 @@ export const FEATURED_COLLECTIONS: readonly FeaturedCollection[] = [
   { title: 'Check-in Sống Ảo Triệu Like' },
 ];
 
+/**
+ * Category-based artwork fallback images (AI-generated watercolor illustrations).
+ * Used when a location has no real photos.
+ */
+export const CATEGORY_ARTWORK = {
+  'pho': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/pho.png',
+  'bun': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/bun.png',
+  'com': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/com.png',
+  'banh-mi': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/banh-mi.png',
+  'cafe': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/cafe.png',
+  'oc': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/oc.png',
+  'lau': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/lau.png',
+  'che': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/che.png',
+  'hu-tieu': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/hu-tieu.png',
+  'chay': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/chay.png',
+  'nhau': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/nhau.png',
+  'default': 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/category-artwork/default.png',
+} as const;
+
+/**
+ * Keyword map to match location names to category artwork.
+ * Keys are category slugs, values are arrays of Vietnamese keywords (lowercased).
+ */
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  'pho': ['phở', 'pho'],
+  'bun': ['bún', 'bun'],
+  'com': ['cơm', 'com tấm', 'cơm tấm', 'com tam'],
+  'banh-mi': ['bánh mì', 'banh mi', 'bánh mỳ'],
+  'cafe': ['cà phê', 'cafe', 'coffee', 'cà fê', 'ca phe', 'caffe', 'cappuccino'],
+  'oc': ['ốc', 'oc ', 'ghẹ', 'cua', 'hải sản', 'seafood'],
+  'lau': ['lẩu', 'lau', 'hotpot', 'nướng'],
+  'che': ['chè', 'che ', 'kem', 'bánh', 'dessert', 'sinh tố', 'trà sữa', 'nước ép'],
+  'hu-tieu': ['hủ tiếu', 'hủ tíu', 'hu tieu', 'mì ', 'mi gia'],
+  'chay': ['chay', 'vegetarian', 'zen'],
+  'nhau': ['nhậu', 'bia', 'beer', 'quán nhậu'],
+};
+
+/**
+ * Get the best artwork fallback URL for a location based on its name.
+ * Matches location name keywords to food categories, falls back to default.
+ */
+export function getCategoryArtwork(locationName: string): string {
+  const name = locationName.toLowerCase();
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (keywords.some(kw => name.includes(kw))) {
+      return CATEGORY_ARTWORK[category as keyof typeof CATEGORY_ARTWORK];
+    }
+  }
+  return CATEGORY_ARTWORK.default;
+}
+
+/** Message shown when a location uses artwork instead of real photos */
+export const ARTWORK_MESSAGE = 'Chúng tôi muốn giữ sự bất ngờ để trải nghiệm của bạn được trọn vẹn';
+
 /** Site configuration */
 export const SITE_CONFIG = {
   name: 'Tôi là người Sài Gòn',

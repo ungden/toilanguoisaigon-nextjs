@@ -7,7 +7,7 @@ import { columns } from "@/components/admin/xp-actions/Columns";
 import { XpActionsDataTable } from "@/components/admin/xp-actions/XpActionsDataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { XpActionForm } from "@/components/admin/xp-actions/XpActionForm";
+import { XpActionForm, type XpActionFormValues } from "@/components/admin/xp-actions/XpActionForm";
 import { XpAction } from "@/types/database";
 import { useUpdateXpAction } from "@/hooks/data/useUpdateXpAction";
 
@@ -28,7 +28,7 @@ const AdminXpActionsPage = () => {
         setEditingAction(null);
     };
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = (values: XpActionFormValues) => {
         if (editingAction) {
             updateXpActionMutation.mutate({ action_name: editingAction.action_name, ...values }, {
                 onSuccess: handleCloseFormDialog,
