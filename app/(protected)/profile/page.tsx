@@ -4,11 +4,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, User, MessageSquare } from "lucide-react";
+import { ShieldCheck, User, MessageSquare, History } from "lucide-react";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserReviewsList } from "@/components/profile/UserReviewsList";
 import { ProfileGamification } from "@/components/profile/ProfileGamification";
+import { ProfileBadges } from "@/components/profile/ProfileBadges";
+import { XpHistory } from "@/components/profile/XpHistory";
+import { DailyCheckin } from "@/components/gamification/DailyCheckin";
 
 const ProfilePage = () => {
     const { user, profile, role } = useAuth();
@@ -46,18 +49,31 @@ const ProfilePage = () => {
                     </CardContent>
                 </Card>
 
-                {/* Right Content - Tabs */}
+                {/* Right Content */}
                 <div className="flex-1 space-y-6">
+                    {/* Daily Check-in */}
+                    <DailyCheckin />
+
+                    {/* Gamification Stats */}
                     {profile && <ProfileGamification profile={profile} />}
+
+                    {/* Badges */}
+                    {user && <ProfileBadges userId={user.id} />}
+
+                    {/* Tabs */}
                     <Tabs defaultValue="reviews" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="reviews">
                                 <MessageSquare className="h-4 w-4 mr-2" />
-                                Đánh giá của tôi
+                                Đánh giá
+                            </TabsTrigger>
+                            <TabsTrigger value="xp-history">
+                                <History className="h-4 w-4 mr-2" />
+                                Lịch sử XP
                             </TabsTrigger>
                             <TabsTrigger value="settings">
                                 <User className="h-4 w-4 mr-2" />
-                                Thông tin cá nhân
+                                Cá nhân
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="reviews" className="mt-6">
@@ -70,6 +86,9 @@ const ProfilePage = () => {
                                     <UserReviewsList />
                                 </CardContent>
                             </Card>
+                        </TabsContent>
+                        <TabsContent value="xp-history" className="mt-6">
+                            {user && <XpHistory userId={user.id} />}
                         </TabsContent>
                         <TabsContent value="settings" className="mt-6">
                             <Card>

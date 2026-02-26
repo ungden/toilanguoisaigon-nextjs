@@ -157,6 +157,55 @@ export interface Badge {
   created_at: string;
 }
 
+// ─── Gamification (XP logs, user badges, daily check-ins) ────────────────
+
+export interface UserXpLog {
+  id: number;
+  user_id: string;
+  action_name: string;
+  xp_value: number;
+  metadata: Json;
+  created_at: string;
+}
+
+export interface UserBadge {
+  id: number;
+  user_id: string;
+  badge_id: number;
+  awarded_at: string;
+}
+
+export interface UserBadgeWithDetails extends UserBadge {
+  badges: Badge;
+}
+
+export interface DailyCheckin {
+  id: number;
+  user_id: string;
+  checkin_date: string;
+  streak: number;
+  created_at: string;
+}
+
+export interface AwardXpResult {
+  xp_awarded: number;
+  new_xp: number;
+  old_level: number;
+  new_level: number;
+  leveled_up: boolean;
+  error?: string;
+}
+
+export interface DailyCheckinResult {
+  already_checked_in: boolean;
+  streak?: number;
+  xp_awarded?: number;
+  checkin_date: string;
+  new_xp?: number;
+  new_level?: number;
+  leveled_up?: boolean;
+}
+
 // ─── Playlists (AI-generated daily food playlists) ───────────────────────
 
 export type PlaylistStatus = "draft" | "published" | "archived";

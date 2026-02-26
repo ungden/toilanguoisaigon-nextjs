@@ -249,3 +249,14 @@ Custom Tailwind colors defined in `tailwind.config.ts`:
 - Aria-labels for accessibility (social links, buttons)
 - ESLint flat config (TypeScript + React Hooks rules)
 - signOut error handling in AuthContext
+
+### Gamification System
+- **DB tables**: `user_xp_logs`, `user_badges`, `daily_checkins` with RLS policies
+- **DB functions**: `award_xp(user_id, action_name, metadata)` — atomic XP award + auto level-up; `daily_checkin(user_id)` — check-in + streak + XP
+- **XP actions**: `CREATE_REVIEW` (25), `SAVE_LOCATION` (3), `SUBMIT_LOCATION` (10), `DAILY_CHECKIN` (10), `CHECKIN_STREAK_BONUS` (5/day)
+- **10 badges** seeded with criteria: review count, saved count, submission count, streak milestones, level milestones
+- **Hooks**: `useAwardXp`, `useDailyCheckin`, `useCheckinStatus`, `useCheckinHistory`, `useUserBadges`, `useXpHistory`, `useBadgeEvaluator`
+- **XP wired into actions**: Review submission (+25 XP), save location (+3 XP), submit location (+10 XP)
+- **Daily check-in UI**: Homepage banner + profile page, streak tracking, streak bonus XP
+- **Profile page**: Badges display, XP history tab, daily check-in widget
+- **AuthContext**: Added `refreshProfile()` to update XP/level in real-time after actions

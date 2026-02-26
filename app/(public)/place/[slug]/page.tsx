@@ -65,6 +65,8 @@ import {
 } from "@/components/ui/select";
 import { useSaveLocation } from "@/hooks/data/useSaveLocation";
 import { useUnsaveLocation } from "@/hooks/data/useUnsaveLocation";
+import { useAwardXp } from "@/hooks/data/useAwardXp";
+import { useBadgeEvaluator } from "@/hooks/data/useBadgeEvaluator";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { FALLBACK_IMAGES } from "@/utils/constants";
 
@@ -166,6 +168,8 @@ const PlaceDetailPage = () => {
 
   const saveLocationMutation = useSaveLocation();
   const unsaveLocationMutation = useUnsaveLocation();
+  const awardXpMutation = useAwardXp();
+  const evaluateBadges = useBadgeEvaluator();
 
   const submitReviewMutation = useMutation({
     mutationFn: async ({ rating, comment }: { rating: number; comment: string }) => {
@@ -198,10 +202,17 @@ const PlaceDetailPage = () => {
       return data;
     },
     onSuccess: () => {
-      showSuccess('Đánh giá của bạn đã được gửi thành công!');
+      showSuccess('Đánh giá của bạn đã được gửi thành công! +25 XP');
       setReviewText('');
       setReviewRating(5);
       queryClient.invalidateQueries({ queryKey: ['location-detail', slug] });
+      // Award XP for creating review
+      if (user) {
+        awardXpMutation.mutate(
+          { userId: user.id, actionName: 'CREATE_REVIEW', metadata: { location_slug: slug } },
+          { onSuccess: () => evaluateBadges.mutate(user.id) }
+        );
+      }
     },
     onError: (error: Error) => {
       if (error.message === 'DUPLICATE_REVIEW') {

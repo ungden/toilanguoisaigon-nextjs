@@ -19,6 +19,7 @@ import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
 import { FALLBACK_IMAGES, FEATURED_COLLECTIONS } from "@/utils/constants";
+import { DailyCheckin } from "@/components/gamification/DailyCheckin";
 
 const Index = () => {
   const router = useRouter();
@@ -137,6 +138,11 @@ const Index = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Daily Check-in Banner */}
+      <section className="container mx-auto px-4 -mt-8 relative z-10">
+        <DailyCheckin />
       </section>
 
       {/* Mystery Box Section */}
