@@ -145,6 +145,18 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+Cho các Python scripts (`scripts/`), cần thêm:
+
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_ACCESS_TOKEN=your-personal-access-token
+SUPABASE_PROJECT_REF=your-project-ref
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+> **QUAN TRONG:** KHONG BAO GIO hardcode secret/key/token vao source code. Luon dung environment variables.
+
 ### Chạy development
 
 ```bash
@@ -193,9 +205,23 @@ npm run lint       # ESLint check
 
 ## Scripts
 
+### Development
+
 ```bash
 npm run dev       # Next.js dev server
 npm run build     # Production build (typecheck included)
 npm run start     # Start production server
 npm run lint      # ESLint (app/ + src/)
+npx vitest run    # Chay test (50 tests, 3 files)
 ```
+
+### Python Scripts (one-time data tasks)
+
+Cac script nay can environment variables (xem phan Environment Variables). Chay bang `python3 scripts/<file>.py`.
+
+| Script | Mo ta |
+|--------|-------|
+| `seed-categories-tags.py` | Seed 20 categories + 33 tags, auto-assign 711 locations |
+| `patch-unmatched-categories.py` | Mo rong keyword matching, gan them 144 locations (tong 855) |
+| `generate-category-artwork.py` | Tao 12 watercolor artwork qua Gemini AI, upload len Supabase Storage |
+| `generate-collection-covers.py` | Tao 18 watercolor cover cho collections, upload + update DB |

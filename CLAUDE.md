@@ -128,6 +128,7 @@ All admin CRUD hooks are properly typed using database interfaces:
 
 ## Security
 
+- **NEVER hardcode secrets, API keys, or tokens in source code.** All credentials must use environment variables (`process.env` in TS, `os.environ` in Python). This includes Supabase keys, Gemini API keys, and personal access tokens.
 - Blog HTML content is sanitized via `sanitizeHtml()` before rendering with `dangerouslySetInnerHTML`
 - Duplicate review prevention (checks existing review before insert)
 - Environment variables validated at runtime in all 3 Supabase client files
@@ -151,6 +152,28 @@ All admin CRUD hooks are properly typed using database interfaces:
 1. **`strict: false` in tsconfig.json** - Enabling strict mode would require significant refactoring. Deferred.
 2. **Supabase Edge Function TS errors** - Deno runtime, not fixable in project tsconfig.
 3. **Custom SMTP not configured** - Supabase default SMTP is rate-limited. Must configure Resend/SendGrid via Supabase Dashboard → Auth → Email before launch.
+
+## Python Scripts
+
+One-time data scripts in `scripts/` use environment variables for all credentials:
+
+```bash
+# Required env vars for scripts:
+export SUPABASE_URL="https://your-project.supabase.co"
+export SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+export SUPABASE_ACCESS_TOKEN="your-personal-access-token"
+export SUPABASE_PROJECT_REF="your-project-ref"
+export GEMINI_API_KEY="your-gemini-api-key"
+```
+
+| Script | Purpose |
+|--------|---------|
+| `seed-categories-tags.py` | Seed 20 categories + 33 tags + auto-assign locations via keyword matching |
+| `patch-unmatched-categories.py` | Expanded keywords to catch remaining unmatched locations |
+| `generate-category-artwork.py` | Generate 12 watercolor category artwork via Gemini AI → Supabase Storage |
+| `generate-collection-covers.py` | Generate 18 collection covers via Gemini AI → Supabase Storage + update DB |
+
+**When writing new scripts, always read credentials from `os.environ`, never hardcode them.**
 
 ## Development Commands
 
