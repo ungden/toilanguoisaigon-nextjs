@@ -5,7 +5,7 @@ import { Post } from '../../types/database';
 const fetchPost = async (slug: string): Promise<Post | null> => {
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles:author_id(full_name, avatar_url)')
+    .select('*, profiles(full_name, avatar_url)')
     .eq('slug', slug)
     .eq('status', 'published')
     .single();
