@@ -155,7 +155,7 @@ SUPABASE_PROJECT_REF=your-project-ref
 GEMINI_API_KEY=your-gemini-api-key
 ```
 
-> **QUAN TRONG:** KHONG BAO GIO hardcode secret/key/token vao source code. Luon dung environment variables.
+> **QUAN TRỌNG:** KHÔNG BAO GIỜ hardcode secret/key/token vào source code. Luôn dùng environment variables.
 
 ### Chạy development
 
@@ -212,16 +212,16 @@ npm run dev       # Next.js dev server
 npm run build     # Production build (typecheck included)
 npm run start     # Start production server
 npm run lint      # ESLint (app/ + src/)
-npx vitest run    # Chay test (50 tests, 3 files)
+npx vitest run    # Chạy test (50 tests, 3 files)
 ```
 
 ### Python Scripts (one-time data tasks)
 
-Cac script nay can environment variables (xem phan Environment Variables). Chay bang `python3 scripts/<file>.py`.
+Các script này cần environment variables (xem phần Environment Variables). Chạy bằng `python3 scripts/<file>.py`.
 
-| Script | Mo ta |
+| Script | Mô tả |
 |--------|-------|
-| `seed-categories-tags.py` | Seed 20 categories + 33 tags, auto-assign 711 locations |
-| `patch-unmatched-categories.py` | Mo rong keyword matching, gan them 144 locations (tong 855) |
-| `generate-category-artwork.py` | Tao 12 watercolor artwork qua Gemini AI, upload len Supabase Storage |
-| `generate-collection-covers.py` | Tao 18 watercolor cover cho collections, upload + update DB |
+| `seed-categories-tags.py` | Seed 20 danh mục + 33 tags, tự gán 711 địa điểm |
+| `patch-unmatched-categories.py` | Mở rộng keyword matching, gán thêm 144 địa điểm (tổng 855) |
+| `generate-category-artwork.py` | Tạo 12 watercolor artwork qua Gemini AI, upload lên Supabase Storage |
+| `generate-collection-covers.py` | Tạo 18 watercolor cover cho bộ sưu tập, upload + cập nhật DB |
