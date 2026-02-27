@@ -81,6 +81,7 @@ const fetchLocationDetail = async (slug: string, userId?: string): Promise<Locat
     .from('locations')
     .select('*')
     .eq('slug', slug)
+    .eq('status', 'published')
     .single();
 
   if (locationError || !locationData) {
@@ -155,6 +156,11 @@ const PlaceDetailPage = () => {
   const [reviewPhotos, setReviewPhotos] = useState<File[]>([]);
   const [reviewPhotosPreviews, setReviewPhotosPreviews] = useState<string[]>([]);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+
+  // Reset selectedImageIndex when navigating to a different place
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [slug]);
   
   const { data: place, isLoading, error } = useQuery<LocationWithReviews | null, Error>({
     queryKey: ['location-detail', slug, user?.id],

@@ -67,11 +67,11 @@ describe('formatOpeningHours', () => {
     expect(formatOpeningHours(hours)).toBe('Mở cửa 24h');
   });
 
-  it('falls back to monday if today is not found', () => {
+  it('returns "Chưa cập nhật" if today is not found (no longer falls back to Monday)', () => {
     // Mock Sunday (day=0) 
     dateSpy.mockReturnValue(0);
     const hours = { monday: '10:00 - 20:00' };
-    expect(formatOpeningHours(hours)).toBe('10:00 - 20:00');
+    expect(formatOpeningHours(hours)).toBe('Chưa cập nhật');
   });
 
   it('returns "Chưa cập nhật" when no hours data matches', () => {

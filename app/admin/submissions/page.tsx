@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -43,8 +44,9 @@ const AdminSubmissionsPage = () => {
 
     const handleApproveAndCreate = () => {
         if (viewingSubmission) {
-            updateStatusMutation.mutate({ submissionId: viewingSubmission.id, status: 'approved' });
-            setIsCreatingLocation(true);
+            updateStatusMutation.mutate({ submissionId: viewingSubmission.id, status: 'approved' }, {
+                onSuccess: () => setIsCreatingLocation(true),
+            });
         }
     };
 
@@ -52,8 +54,10 @@ const AdminSubmissionsPage = () => {
         const processedValues = {
             ...values,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
-            opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { return null; } })() : null,
+            opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { toast.error('Giờ mở cửa không phải JSON hợp lệ.'); return undefined; } })() : null,
         };
+        // Abort form submit if JSON was invalid
+        if (processedValues.opening_hours === undefined) return;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- processedValues is a partial shape from submission form; Supabase handles missing columns
         createLocationMutation.mutate(processedValues as any, {
             onSuccess: () => {

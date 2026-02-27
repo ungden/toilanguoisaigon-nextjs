@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Location } from '@/types/database';
 
-// Định nghĩa cấu trúc chính xác của một hàng được trả về từ truy vấn select
-// Giả định 'locations (*)' trả về một mảng, ngay cả khi chỉ có một mục
+// Supabase PostgREST trả về object (không phải array) cho quan hệ many-to-one
+// saved_locations.location_id → locations.id là many-to-one
 type SavedLocationQueryResult = {
   location_id: string;
   user_id: string;
   created_at: string;
-  locations: Location[]; // Đã thay đổi thành mảng Location
+  locations: Location | null;
 };
 
 const fetchSavedLocations = async (userId: string): Promise<Location[]> => {
@@ -28,12 +28,11 @@ const fetchSavedLocations = async (userId: string): Promise<Location[]> => {
     throw new Error(error.message);
   }
 
-  // Ép kiểu dữ liệu một cách tường minh thành mảng của kiểu đã định nghĩa
-  const typedData = data as SavedLocationQueryResult[] | null;
+  const typedData = data as unknown as SavedLocationQueryResult[] | null;
 
   return (typedData || [])
-    .map((item) => item.locations?.[0]) // Truy cập phần tử đầu tiên của mảng locations
-    .filter(Boolean) as Location[]; // Lọc bỏ null/undefined và ép kiểu thành Location[]
+    .map((item) => item.locations)
+    .filter(Boolean) as Location[];
 };
 
 export const useSavedLocations = (userId: string | undefined) => {

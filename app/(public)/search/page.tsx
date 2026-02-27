@@ -106,7 +106,7 @@ function SearchContent() {
         </div>
 
         {/* Pagination */}
-        {results && results.length > 0 && (
+        {(results && results.length > 0 || page > 0) && (
           <div className="flex justify-center items-center gap-4 mt-8">
             <Button
               variant="outline"
@@ -118,7 +118,7 @@ function SearchContent() {
             <span className="text-sm text-vietnam-blue-600">Trang {page + 1}</span>
             <Button
               variant="outline"
-              disabled={results.length < pageSize}
+              disabled={!results || results.length < pageSize}
               onClick={() => setPage((p) => p + 1)}
             >
               Trang sau

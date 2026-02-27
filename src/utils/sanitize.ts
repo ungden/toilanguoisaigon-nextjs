@@ -1,10 +1,10 @@
 /**
- * Basic HTML sanitizer to prevent XSS attacks.
- * Strips dangerous tags and attributes while preserving safe HTML content.
+ * HTML sanitizer using DOMPurify to prevent XSS attacks.
+ * Uses allowlist approach (only safe tags/attributes pass through).
  */
+import DOMPurify from 'dompurify';
 
-/** Allowed tags for reference (enforcement is pattern-based below) */
-const _ALLOWED_TAGS = new Set([
+const ALLOWED_TAGS = [
   'p', 'br', 'b', 'i', 'em', 'strong', 'u', 's', 'strike',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'ul', 'ol', 'li',
@@ -13,56 +13,31 @@ const _ALLOWED_TAGS = new Set([
   'table', 'thead', 'tbody', 'tr', 'th', 'td',
   'hr', 'span', 'div', 'figure', 'figcaption',
   'sub', 'sup', 'mark',
-]);
+];
 
-/** Allowed attributes per tag for reference (enforcement is pattern-based below) */
-const _ALLOWED_ATTRS: Record<string, Set<string>> = {
-  a: new Set(['href', 'title', 'target', 'rel']),
-  img: new Set(['src', 'alt', 'title', 'width', 'height', 'loading']),
-  td: new Set(['colspan', 'rowspan']),
-  th: new Set(['colspan', 'rowspan', 'scope']),
-  '*': new Set(['class', 'id']),
-};
-
-const DANGEROUS_PATTERNS = [
-  /javascript\s*:/gi,
-  /vbscript\s*:/gi,
-  /data\s*:[^image]/gi,
-  /on\w+\s*=/gi,
-  /<script[\s>]/gi,
-  /<\/script>/gi,
-  /<iframe[\s>]/gi,
-  /<\/iframe>/gi,
-  /<object[\s>]/gi,
-  /<\/object>/gi,
-  /<embed[\s>]/gi,
-  /<\/embed>/gi,
-  /<form[\s>]/gi,
-  /<\/form>/gi,
-  /<input[\s>]/gi,
-  /<button[\s>]/gi,
-  /<style[\s>]/gi,
-  /<\/style>/gi,
-  /<link[\s>]/gi,
-  /<meta[\s>]/gi,
-  /<base[\s>]/gi,
+const ALLOWED_ATTR = [
+  'href', 'title', 'target', 'rel',
+  'src', 'alt', 'width', 'height', 'loading',
+  'colspan', 'rowspan', 'scope',
+  'class', 'id',
 ];
 
 export function sanitizeHtml(html: string): string {
   if (!html) return '';
 
-  let sanitized = html;
-
-  // Remove dangerous patterns
-  for (const pattern of DANGEROUS_PATTERNS) {
-    sanitized = sanitized.replace(pattern, '');
-  }
-
-  // Remove event handlers (onclick, onload, onerror, etc.)
-  sanitized = sanitized.replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, '');
+  const clean = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS,
+    ALLOWED_ATTR,
+    ALLOW_DATA_ATTR: false,
+    ADD_ATTR: ['target'],
+    FORBID_TAGS: [
+      'script', 'style', 'iframe', 'object', 'embed', 'form', 'input',
+      'button', 'select', 'textarea', 'meta', 'link', 'base', 'svg', 'math',
+    ],
+  });
 
   // Ensure all links with target="_blank" have rel="noopener noreferrer"
-  sanitized = sanitized.replace(
+  return clean.replace(
     /(<a\s[^>]*target\s*=\s*["']_blank["'][^>]*)>/gi,
     (match) => {
       if (!/rel\s*=/i.test(match)) {
@@ -71,6 +46,4 @@ export function sanitizeHtml(html: string): string {
       return match;
     }
   );
-
-  return sanitized;
 }

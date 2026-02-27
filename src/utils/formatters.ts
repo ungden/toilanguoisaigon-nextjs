@@ -16,6 +16,7 @@ export const formatOpeningHours = (openingHours: unknown) => {
   const today = new Date().getDay();
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   
-  const todayHours = hours[days[today]] || hours.monday;
-  return todayHours === '24h' ? 'Mở cửa 24h' : todayHours || 'Chưa cập nhật';
+  const todayHours = hours[days[today]];
+  if (!todayHours) return 'Chưa cập nhật';
+  return todayHours === '24h' ? 'Mở cửa 24h' : todayHours;
 };

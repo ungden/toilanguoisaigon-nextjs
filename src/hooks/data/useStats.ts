@@ -14,6 +14,10 @@ const fetchStats = async (): Promise<SiteStats> => {
     supabase.from('collections').select('id', { count: 'exact', head: true }),
   ]);
 
+  if (locationsResult.error) throw new Error(locationsResult.error.message);
+  if (reviewsResult.error) throw new Error(reviewsResult.error.message);
+  if (collectionsResult.error) throw new Error(collectionsResult.error.message);
+
   return {
     locationCount: locationsResult.count || 0,
     reviewCount: reviewsResult.count || 0,

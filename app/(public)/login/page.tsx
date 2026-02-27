@@ -4,19 +4,23 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const LoginPage = () => {
+function LoginContent() {
   const { session } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo') || '/';
+  const authError = searchParams.get('error');
 
   useEffect(() => {
     if (session) {
-      router.push('/');
+      router.push(redirectTo);
     }
-  }, [session, router]);
+  }, [session, router, redirectTo]);
 
   if (session) {
     return null;
@@ -30,6 +34,15 @@ const LoginPage = () => {
             <CardTitle className="text-2xl">Chào mừng trở lại!</CardTitle>
             <CardDescription>Đăng nhập hoặc tạo tài khoản để khám phá Sài Gòn</CardDescription>
           </CardHeader>
+          {authError === 'auth' && (
+            <div className="px-6 pb-2">
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Đăng nhập thất bại. Vui lòng thử lại.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
           <CardContent>
             <Auth
               supabaseClient={supabase}
@@ -66,6 +79,25 @@ const LoginPage = () => {
         </Card>
       </div>
     </div>
+  );
+}
+
+const LoginPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Chào mừng trở lại!</CardTitle>
+              <CardDescription>Đang tải...</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 };
 

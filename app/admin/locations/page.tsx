@@ -91,8 +91,11 @@ const AdminLocationsPage = () => {
             ...rest,
             main_image_url: imageUrl,
             gallery_urls: values.gallery_urls ? values.gallery_urls.split('\n').filter(Boolean) : null,
-            opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { showError('Giờ mở cửa không phải JSON hợp lệ.'); return null; } })() : null,
+            opening_hours: values.opening_hours ? (() => { try { return JSON.parse(values.opening_hours); } catch { showError('Giờ mở cửa không phải JSON hợp lệ.'); return undefined; } })() : null,
         };
+
+        // Abort form submit if JSON was invalid
+        if (processedValues.opening_hours === undefined) return;
 
         const saveCategoryAndTags = (locationId: string) => {
             saveCategories.mutate({ locationId, categoryIds });

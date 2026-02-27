@@ -8,7 +8,8 @@ const fetchAdminPosts = async (): Promise<Post[]> => {
     .select(`
       *,
       profiles (
-        full_name
+        full_name,
+        avatar_url
       )
     `)
     .order('created_at', { ascending: false });

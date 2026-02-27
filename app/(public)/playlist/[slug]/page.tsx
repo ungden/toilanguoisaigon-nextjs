@@ -79,8 +79,8 @@ export default function PlaylistDetailPage() {
   }
 
   const locations = playlist.playlist_locations
-    ?.map((pl) => ({ ...pl.locations, ai_note: pl.ai_note, position: pl.position }))
-    .filter(Boolean) || [];
+    ?.filter((pl) => pl.locations != null)
+    .map((pl) => ({ ...pl.locations, ai_note: pl.ai_note, position: pl.position })) || [];
 
   const formattedDate = new Date(playlist.generated_date).toLocaleDateString(
     "vi-VN",

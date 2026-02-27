@@ -7,7 +7,8 @@ const fetchPosts = async (): Promise<Post[]> => {
     .from('posts')
     .select('*, profiles(full_name, avatar_url)')
     .eq('status', 'published')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(20);
 
   if (error) {
     throw new Error(`Database error: ${error.message}`);

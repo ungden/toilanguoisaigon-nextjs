@@ -14,11 +14,11 @@ import { XpHistory } from "@/components/profile/XpHistory";
 import { DailyCheckin } from "@/components/gamification/DailyCheckin";
 
 const ProfilePage = () => {
-    const { user, profile, role } = useAuth();
+    const { user, profile, role, refreshProfile } = useAuth();
 
     const getInitials = (name: string | undefined | null) => {
         if (name) {
-            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+            return name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase();
         }
         return user?.email?.[0].toUpperCase() || 'U';
     }
@@ -97,7 +97,7 @@ const ProfilePage = () => {
                                     <p className="text-muted-foreground">Cập nhật thông tin hiển thị công khai của bạn.</p>
                                 </CardHeader>
                                 <CardContent>
-                                    <EditProfileForm onSuccess={() => {}} />
+                                    <EditProfileForm onSuccess={() => refreshProfile()} />
                                 </CardContent>
                             </Card>
                         </TabsContent>

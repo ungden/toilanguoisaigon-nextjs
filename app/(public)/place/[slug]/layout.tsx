@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from("locations")
     .select("name, description, district, address, main_image_url, average_rating, review_count")
     .eq("slug", slug)
+    .eq("status", "published")
     .single();
 
   if (!place) {

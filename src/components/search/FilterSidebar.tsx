@@ -28,7 +28,10 @@ const districtOptions = [
 ];
 
 const categoryOptions = [
-  "Nhà hàng", "Quán ăn", "Café", "Trà sữa", "Bar/Pub", "Ăn vặt/Vỉa hè",
+  "Phở", "Bún", "Cơm", "Bánh mì", "Cà phê", "Ốc & Hải sản",
+  "Lẩu & Nướng", "Chè & Tráng miệng", "Hủ tiếu & Mì", "Chay",
+  "Nhậu & Bia", "Bánh canh", "Cháo", "Bánh cuốn", "Xôi",
+  "Gỏi cuốn & Nem", "Nhà hàng", "Kem & Gelato", "Nước uống & Sinh tố", "Món quốc tế",
 ];
 
 const priceRangeOptions = [

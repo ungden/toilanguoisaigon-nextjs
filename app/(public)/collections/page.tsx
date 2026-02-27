@@ -52,19 +52,19 @@ const fetchPublishedPlaylists = async (): Promise<Playlist[]> => {
 
 const MOOD_LABELS: Record<string, string> = {
   morning: "Buổi sáng",
-  lunch: "Buổi trưa",
-  dinner: "Buổi tối",
-  "late-night": "Ăn khuya",
+  lunch: "Bữa trưa",
+  dinner: "Bữa tối",
+  "late-night": "Đêm khuya",
   "rainy-day": "Ngày mưa",
   weekend: "Cuối tuần",
   "date-night": "Hẹn hò",
   family: "Gia đình",
-  budget: "Bình dân",
-  premium: "Cao cấp",
-  adventure: "Phiêu lưu",
+  budget: "Tiết kiệm",
+  premium: "Sang chảnh",
+  adventure: "Khám phá",
   comfort: "Comfort food",
   healthy: "Healthy",
-  "street-food": "Street food",
+  "street-food": "Đường phố",
   seasonal: "Theo mùa",
 };
 

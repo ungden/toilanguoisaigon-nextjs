@@ -35,7 +35,7 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
         locations (*)
       )
     `)
-    .ilike('slug', slug)
+    .eq('slug', slug)
     .single();
 
   if (error) {
