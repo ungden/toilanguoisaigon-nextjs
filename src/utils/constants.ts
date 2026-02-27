@@ -23,10 +23,7 @@ interface FeaturedCollection {
  * Order matters – first entry appears first.
  */
 export const FEATURED_COLLECTIONS: readonly FeaturedCollection[] = [
-  {
-    title: 'Michelin Sài Gòn 2025',
-    overrideImage: 'https://assets.dyad.ai/michelin-saigon-2025.png',
-  },
+  { title: 'Michelin Sài Gòn 2025' },
   { title: 'Check-in Sống Ảo Triệu Like' },
 ];
 
