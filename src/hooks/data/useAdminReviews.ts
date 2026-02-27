@@ -7,7 +7,7 @@ const fetchAdminReviews = async (): Promise<ReviewWithProfileAndLocation[]> => {
     .from('reviews')
     .select(`
       *,
-      profiles (full_name, avatar_url),
+      profiles!fk_reviews_user_profile (full_name, avatar_url),
       locations (name, slug)
     `)
     .order('created_at', { ascending: false });

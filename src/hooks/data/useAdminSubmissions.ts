@@ -14,7 +14,7 @@ const fetchAdminSubmissions = async (): Promise<SubmissionWithProfile[]> => {
     .from('location_submissions')
     .select(`
       *,
-      profiles (
+      profiles!fk_submissions_user_profile (
         full_name,
         email
       )

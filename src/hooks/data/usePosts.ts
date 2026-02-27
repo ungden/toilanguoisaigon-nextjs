@@ -5,7 +5,7 @@ import { Post } from '../../types/database';
 const fetchPosts = async (): Promise<Post[]> => {
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles(full_name, avatar_url)')
+    .select('*, profiles!fk_posts_author_profile(full_name, avatar_url)')
     .eq('status', 'published')
     .order('created_at', { ascending: false })
     .limit(20);

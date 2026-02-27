@@ -13,7 +13,7 @@ export interface AdminUserBadge {
 const fetchAdminUserBadges = async (): Promise<AdminUserBadge[]> => {
   const { data, error } = await supabase
     .from('user_badges')
-    .select('*, profiles(full_name, avatar_url), badges(name, icon_name)')
+    .select('*, profiles!fk_user_badges_user_profile(full_name, avatar_url), badges(name, icon_name)')
     .order('awarded_at', { ascending: false })
     .limit(100);
 

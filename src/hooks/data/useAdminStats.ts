@@ -63,13 +63,13 @@ const fetchAdminStats = async (): Promise<AdminStats> => {
     // Recent 5 reviews for activity feed
     supabase
       .from('reviews')
-      .select('id, created_at, profiles(full_name), locations(name)')
+      .select('id, created_at, profiles!fk_reviews_user_profile(full_name), locations(name)')
       .order('created_at', { ascending: false })
       .limit(5),
     // Recent 5 submissions for activity feed
     supabase
       .from('location_submissions')
-      .select('id, created_at, name, profiles(full_name)')
+      .select('id, created_at, name, profiles!fk_submissions_user_profile(full_name)')
       .order('created_at', { ascending: false })
       .limit(5),
   ]);

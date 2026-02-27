@@ -13,7 +13,7 @@ export interface AdminCheckin {
 const fetchAdminCheckins = async (): Promise<AdminCheckin[]> => {
   const { data, error } = await supabase
     .from('daily_checkins')
-    .select('*, profiles(full_name, avatar_url)')
+    .select('*, profiles!fk_checkins_user_profile(full_name, avatar_url)')
     .order('created_at', { ascending: false })
     .limit(100);
 

@@ -91,7 +91,7 @@ const fetchLocationDetail = async (slug: string, userId?: string): Promise<Locat
   const [reviewsResult, categoriesResult, tagsResult] = await Promise.all([
     supabase
       .from('reviews')
-      .select('*, profiles(full_name, avatar_url)')
+      .select('*, profiles!fk_reviews_user_profile(full_name, avatar_url)')
       .eq('location_id', locationData.id)
       .order('created_at', { ascending: false }),
     supabase

@@ -77,7 +77,7 @@ const fetchAdminAnalytics = async (): Promise<AdminAnalytics> => {
       .order('created_at', { ascending: false }),
     supabase
       .from('reviews')
-      .select('user_id, profiles(full_name, avatar_url)'),
+      .select('user_id, profiles!fk_reviews_user_profile(full_name, avatar_url)'),
   ]);
 
   // District counts

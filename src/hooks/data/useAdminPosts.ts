@@ -7,7 +7,7 @@ const fetchAdminPosts = async (): Promise<Post[]> => {
     .from('posts')
     .select(`
       *,
-      profiles (
+      profiles!fk_posts_author_profile (
         full_name,
         avatar_url
       )

@@ -14,7 +14,7 @@ export interface AdminXpLog {
 const fetchAdminXpLogs = async (): Promise<AdminXpLog[]> => {
   const { data, error } = await supabase
     .from('user_xp_logs')
-    .select('*, profiles(full_name, avatar_url)')
+    .select('*, profiles!fk_xp_logs_user_profile(full_name, avatar_url)')
     .order('created_at', { ascending: false })
     .limit(100);
 
