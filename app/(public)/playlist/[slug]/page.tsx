@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePlaylistDetail } from "@/hooks/data/usePlaylistDetail";
@@ -42,6 +43,7 @@ export default function PlaylistDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
   const { data: playlist, isLoading, error } = usePlaylistDetail(slug);
+  const [imageFailed, setImageFailed] = useState(false);
 
   if (isLoading) {
     return (
@@ -94,11 +96,12 @@ export default function PlaylistDetailPage() {
       {/* Hero Section - matches collection detail style */}
       <section className="relative py-16 bg-vietnam-red-600 overflow-hidden">
         <Image
-          src={playlist.cover_image_url || FALLBACK_IMAGES.collectionHero}
+          src={imageFailed ? FALLBACK_IMAGES.hero : (playlist.cover_image_url || FALLBACK_IMAGES.collectionHero)}
           alt={playlist.title}
           fill
           className="object-cover opacity-20"
           priority
+          onError={() => setImageFailed(true)}
         />
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">

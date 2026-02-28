@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Star, Clock, ArrowRight, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Collection, Location, CollectionCategory, CollectionLocation } from '@/types/database';
@@ -49,6 +50,7 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
 
 const CollectionDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [imageFailed, setImageFailed] = useState(false);
   
   const { data: collection, isLoading, error } = useQuery<CollectionWithLocations | null, Error>({
     queryKey: ['collection-detail', slug],
@@ -103,11 +105,12 @@ const CollectionDetailPage = () => {
       {/* Hero Section */}
       <section className="relative py-16 bg-vietnam-red-600 overflow-hidden">
         <Image
-          src={collection.cover_image_url || FALLBACK_IMAGES.collectionHero}
+          src={imageFailed ? FALLBACK_IMAGES.hero : (collection.cover_image_url || FALLBACK_IMAGES.collectionHero)}
           alt={collection.title}
           fill
           className="object-cover opacity-20"
           priority
+          onError={() => setImageFailed(true)}
         />
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
