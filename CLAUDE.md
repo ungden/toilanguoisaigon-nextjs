@@ -370,3 +370,10 @@ Custom Tailwind colors defined in `tailwind.config.ts`:
 - Setup `pg_cron` scheduling for daily orchestrator Edge Function (`daily-cron`).
 - Created `daily-location-crawl` to crawl Google Maps for new locations automatically.
 - Created `enrich-submission` to use AI for extracting Google Maps metadata from pending user submissions.
+
+### Advanced Map & UI Enhancements (Phase 9)
+- **Nearby Feature (/nearby)**: Implemented Leaflet map with OpenStreetMap (no Google API cost). Added GPS geolocation to find user's position. Used Supabase RPC `get_nearby_locations` with Haversine formula to compute distances directly in Postgres.
+- **Location Detail Map**: Replaced iframe map with interactive Leaflet map component (`PlaceMap`). Added distance calculation from user's current location with a prominent badge.
+- **Card UI Overhaul**: Upgraded Collection and Location cards to increase CTR. Removed all "AI generated" labels to present as human-curated. Added location counts to collection cards. Added category badges, formatted price ranges, review snippets, and hover effects.
+- **Automated AI Covers**: Wrote a Python script (`scripts/generate-missing-covers.py`) to automatically detect missing collection covers, generate watercolor images via Gemini, crop white borders via ImageMagick, add the `toilanguoisaigon.com` watermark, and upload to Supabase. Hooked it up to GitHub Actions to run daily at 6:15 AM UTC.
+- **Fallback Handling**: Fixed broken Unsplash image links and added robust `onError` fallbacks for all `next/image` components.

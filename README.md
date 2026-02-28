@@ -192,8 +192,9 @@ npm run lint       # ESLint check
 
 - **Khám phá**: Homepage với hero, mystery cards, collections, trending locations, blog
 - **Tìm kiếm**: Full-text search, category filter, pagination
-- **Chi tiết địa điểm**: Gallery, map (OpenStreetMap), reviews, similar places, save/share
-- **Bộ sưu tập**: Curated lists grouped by category, featured collections pinned
+- **Quanh đây (Nearby)**: Tìm kiếm các địa điểm gần vị trí của bạn trên bản đồ tương tác (Leaflet + OpenStreetMap) với tính toán khoảng cách tự động bằng GPS
+- **Chi tiết địa điểm**: Interactive map, tính khoảng cách, reviews, gallery, similar places, save/share
+- **Bộ sưu tập**: Curated lists grouped by category, tính năng tự động tạo bộ sưu tập bằng AI hàng ngày với ảnh cover tự động
 - **Blog**: Rich content with sanitized HTML, author info, cover images
 - **Gamification**: XP system, levels, badges, leaderboard
 - **Admin**: Full CRUD dashboard cho locations, posts, collections, reviews, users, badges, levels, xp-actions, submissions
