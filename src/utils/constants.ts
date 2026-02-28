@@ -2,14 +2,25 @@
  * Shared constants used across the application.
  */
 
+/** Supabase Storage base URL for brand assets */
+const BRAND_BASE = 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/public/location-images/brand';
+
 /** Fallback images when no image is available */
 export const FALLBACK_IMAGES = {
   location: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop',
   collection: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop',
   hero: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=2070&auto=format&fit=crop',
   collectionHero: 'https://images.unsplash.com/photo-1531697111548-0c45f24911da?q=80&w=2070&auto=format&fit=crop',
-  /** OG image variant with 1200w for social sharing */
-  og: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=1200&auto=format&fit=crop',
+  /** OG image — self-hosted Saigon watercolor on Supabase Storage */
+  og: `${BRAND_BASE}/og-image.png`,
+} as const;
+
+/** Brand assets hosted on Supabase Storage */
+export const BRAND_ASSETS = {
+  /** Logo icon 512x512 — source for favicons */
+  logo: `${BRAND_BASE}/logo-512.png`,
+  /** Mystery card back — Saigon-themed tarot watercolor */
+  mysteryCardBack: `${BRAND_BASE}/mystery-card-back.png`,
 } as const;
 
 interface FeaturedCollection {
@@ -23,8 +34,8 @@ interface FeaturedCollection {
  * Order matters – first entry appears first.
  */
 export const FEATURED_COLLECTIONS: readonly FeaturedCollection[] = [
-  { title: 'Michelin Sài Gòn 2025' },
   { title: 'Check-in Sống Ảo Triệu Like' },
+  { title: 'Vỉa Hè Tinh Hoa' },
 ];
 
 /**

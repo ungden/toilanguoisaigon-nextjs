@@ -132,20 +132,7 @@ COLLECTION_RULES = {
         "name_keywords": ["pet", "dog", "cat", "thú cưng"],
         "limit": 15,
     },
-    # 17: Michelin Sài Gòn 2024
-    "michelin-saigon-2024": {
-        "tag_slugs": ["michelin"],
-        "name_keywords": ["michelin"],
-        "min_rating": 4.0,
-        "limit": 30,
-    },
-    # 18: Michelin Sài Gòn 2025
-    "michelin-saigon-2025": {
-        "tag_slugs": ["michelin"],
-        "name_keywords": ["michelin"],
-        "min_rating": 4.0,
-        "limit": 30,
-    },
+    # Michelin collections removed — data was not authentic (no verified Michelin locations in DB)
 }
 
 

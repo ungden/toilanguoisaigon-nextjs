@@ -7,8 +7,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { cn } from '@/lib/utils';
-import { getCategoryArtwork } from '@/utils/constants';
-import { HelpCircle, ArrowRight } from 'lucide-react';
+import { getCategoryArtwork, BRAND_ASSETS } from '@/utils/constants';
+import { ArrowRight } from 'lucide-react';
 
 interface MysteryCardProps {
   location: Location | null;
@@ -38,15 +38,23 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
         )}
         onClick={handleCardClick}
       >
-        {/* Card Back (Hidden) */}
+        {/* Card Back (Hidden) — Saigon-themed tarot artwork */}
         <div className="absolute w-full h-full backface-hidden">
           <Card className={cn(
-            "w-full h-full flex flex-col items-center justify-center text-center p-4 bg-vietnam-blue-100 border-vietnam-blue-300 border-2 border-dashed",
-            isFlippable ? "cursor-pointer hover:bg-vietnam-blue-200 hover:border-vietnam-red-400 transition-all" : "opacity-60 cursor-not-allowed"
+            "w-full h-full overflow-hidden border-2 border-vietnam-gold-400 relative group",
+            isFlippable ? "cursor-pointer hover:border-vietnam-red-400 hover:shadow-lg transition-all" : "opacity-60 cursor-not-allowed"
           )}>
-            <HelpCircle className="h-16 w-16 text-vietnam-blue-500 mb-4" />
-            <h3 className="text-xl font-bold text-vietnam-blue-800">Địa điểm bí ẩn</h3>
-            <p className="text-vietnam-blue-600">Nhấp để khám phá!</p>
+            <Image
+              src={BRAND_ASSETS.mysteryCardBack}
+              alt="Lá bài bí ẩn"
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col items-center justify-end p-4 text-center">
+              <h3 className="text-xl font-bold text-white drop-shadow-lg">Địa điểm bí ẩn</h3>
+              <p className="text-vietnam-gold-200 text-sm drop-shadow">Nhấp để khám phá!</p>
+            </div>
           </Card>
         </div>
 

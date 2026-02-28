@@ -116,16 +116,7 @@ COLLECTIONS = {
         "title": "Pet Friendly",
         "prompt": STYLE_PREFIX + "A charming pet-friendly cafe in Saigon. A cute dog and cat near a table with coffee and cake. Garden setting with plants. Pet owner relaxing. Warm and playful atmosphere.",
     },
-    "michelin-saigon-2024": {
-        "id": 17,
-        "title": "Michelin 2024",
-        "prompt": STYLE_PREFIX + "A prestigious Saigon restaurant kitchen scene. A Vietnamese chef plating an exquisite dish. Steam, copper pots, fresh ingredients. The artistry of Michelin-level Vietnamese cuisine.",
-    },
-    "michelin-saigon-2025": {
-        "id": 18,
-        "title": "Michelin 2025",
-        "prompt": STYLE_PREFIX + "A beautifully arranged Michelin-starred Vietnamese tasting menu. Multiple small plates of innovative Vietnamese dishes on a dark wooden table. Artistic and modern presentation.",
-    },
+    # Michelin collections removed — data was not authentic
 }
 
 

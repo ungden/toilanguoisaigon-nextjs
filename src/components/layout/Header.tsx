@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bookmark, LogOut, Star, Send } from "lucide-react";
+import { Menu, User, Bookmark, LogOut, Send } from "lucide-react";
+import Image from "next/image";
+import { BRAND_ASSETS } from "@/utils/constants";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -41,7 +43,13 @@ export function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-8 flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Star className="h-8 w-8 text-vietnam-red-600 fill-vietnam-red-600" />
+              <Image
+                src={BRAND_ASSETS.logo}
+                alt="Tôi là người Sài Gòn"
+                width={36}
+                height={36}
+                className="rounded-md"
+              />
               <div className="flex flex-col">
                 <span className="font-bold text-lg text-vietnam-red-600">
                   Tôi là người Sài Gòn
@@ -92,7 +100,13 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="pr-0 bg-white">
             <Link href="/" className="flex items-center space-x-2 mb-6">
-              <Star className="h-6 w-6 text-vietnam-red-600 fill-vietnam-red-600" />
+              <Image
+                src={BRAND_ASSETS.logo}
+                alt="Tôi là người Sài Gòn"
+                width={28}
+                height={28}
+                className="rounded-md"
+              />
               <span className="font-bold text-vietnam-red-600">Tôi là người Sài Gòn</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
