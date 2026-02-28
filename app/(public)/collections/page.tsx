@@ -36,6 +36,7 @@ const DEFAULT_MOOD_STYLE = { gradient: "from-vietnam-red-500 to-vietnam-red-700"
 // ─── AI Collection Card ──────────────────────────────────────────────────
 
 function AICollectionCard({ collection }: { collection: Collection }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const moodStyle = MOOD_STYLES[collection.mood || ""] || DEFAULT_MOOD_STYLE;
   const formattedDate = collection.generated_date
     ? new Date(collection.generated_date).toLocaleDateString("vi-VN", {
@@ -44,19 +45,30 @@ function AICollectionCard({ collection }: { collection: Collection }) {
       })
     : null;
 
+  const imagePath = (!imageFailed && collection.cover_image_url) ? getPathFromSupabaseUrl(collection.cover_image_url) : null;
+  const optimizedImageUrl = imagePath
+    ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
+    : FALLBACK_IMAGES.collection;
+
   return (
     <Link href={`/collection/${collection.slug}`} className="block group">
       <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
-        {/* Gradient + Emoji instead of image */}
-        <div className={`relative aspect-[4/3] bg-gradient-to-br ${moodStyle.gradient} flex items-center justify-center overflow-hidden`}>
-          <span className="text-6xl md:text-7xl drop-shadow-lg group-hover:scale-125 transition-transform duration-500">
-            {collection.emoji || "🍽️"}
-          </span>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+        <div className="relative overflow-hidden aspect-[4/3] w-full">
+          <Image
+            src={optimizedImageUrl}
+            alt={collection.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+          
           {/* Mood badge */}
           {moodStyle.label && (
             <div className="absolute top-3 left-3">
-              <Badge className="bg-white/20 text-white backdrop-blur-sm border-white/30 text-xs">
+              <Badge className="bg-white/20 text-white backdrop-blur-sm border-white/30 text-xs shadow-sm">
                 {moodStyle.label}
               </Badge>
             </div>
@@ -71,7 +83,7 @@ function AICollectionCard({ collection }: { collection: Collection }) {
           {/* Date */}
           {formattedDate && (
             <div className="absolute bottom-3 left-3">
-              <span className="text-xs text-white/80 flex items-center gap-1 backdrop-blur-sm bg-black/20 px-2 py-0.5 rounded">
+              <span className="text-xs text-white/90 flex items-center gap-1 backdrop-blur-sm bg-black/20 px-2 py-0.5 rounded font-medium">
                 <Calendar className="h-3 w-3" />
                 {formattedDate}
               </span>
