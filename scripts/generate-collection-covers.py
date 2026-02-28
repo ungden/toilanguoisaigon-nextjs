@@ -220,14 +220,22 @@ def main():
 
         print(f"  Generated {len(image_bytes):,} bytes")
 
-        # Save locally
+        # Save locally and process with ImageMagick
         if args.save_local:
             local_dir = "scripts/collection-covers-output"
             os.makedirs(local_dir, exist_ok=True)
-            local_path = os.path.join(local_dir, f"{slug}.png")
+            local_path = os.path.join(local_dir, f"{slug}-orig.png")
             with open(local_path, "wb") as f:
                 f.write(image_bytes)
-            print(f"  Saved locally: {local_path}")
+            
+            fixed_path = os.path.join(local_dir, f"{slug}.png")
+            os.system(f"magick {local_path} -fuzz 10% -trim +repage -resize 1024x768^ -gravity center -extent 1024x768 -gravity southeast -pointsize 24 -fill \"rgba(255,255,255,0.6)\" -annotate +20+20 \"toilanguoisaigon.com\" {fixed_path}")
+            
+            # Read back processed bytes
+            with open(fixed_path, "rb") as f:
+                image_bytes = f.read()
+                
+            print(f"  Processed and saved locally: {fixed_path}")
 
         # Upload to Supabase
         storage_path = f"{FOLDER}/{slug}.png"

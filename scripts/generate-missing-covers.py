@@ -104,7 +104,9 @@ if resp.status_code == 200:
             print("Processing image with ImageMagick...")
             subprocess.run([
                 "magick", tmp_orig, "-fuzz", "10%", "-trim", "+repage", 
-                "-resize", "1024x768^", "-gravity", "center", "-extent", "1024x768", tmp_fixed
+                "-resize", "1024x768^", "-gravity", "center", "-extent", "1024x768", 
+                "-gravity", "southeast", "-pointsize", "24", "-fill", "rgba(255,255,255,0.6)", "-annotate", "+20+20", "toilanguoisaigon.com",
+                tmp_fixed
             ], check=True)
             
             with open(tmp_fixed, "rb") as f:
