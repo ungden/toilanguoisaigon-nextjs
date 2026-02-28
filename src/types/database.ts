@@ -86,6 +86,25 @@ export interface CollectionCategory {
   created_at: string;
 }
 
+export type CollectionStatus = "draft" | "published" | "archived";
+
+export type CollectionMood =
+  | "morning"
+  | "lunch"
+  | "dinner"
+  | "late-night"
+  | "rainy-day"
+  | "weekend"
+  | "date-night"
+  | "family"
+  | "budget"
+  | "premium"
+  | "adventure"
+  | "comfort"
+  | "healthy"
+  | "street-food"
+  | "seasonal";
+
 export interface Collection {
   id: number;
   category_id: number | null;
@@ -94,7 +113,34 @@ export interface Collection {
   slug: string;
   cover_image_url: string | null;
   created_at: string;
+  updated_at: string | null;
+  // AI-specific fields (only populated when source='ai')
+  mood: CollectionMood | null;
+  emoji: string | null;
+  status: CollectionStatus | null;
+  is_featured: boolean | null;
+  generated_date: string | null;
+  ai_context: string | null;
+  source: "manual" | "ai" | null;
   collection_categories?: CollectionCategory | null;
+}
+
+export interface CollectionLocation {
+  collection_id: number;
+  location_id: string;
+  position: number | null;
+  ai_note: string | null;
+}
+
+export interface CollectionWithLocations extends Collection {
+  collection_locations: Array<
+    CollectionLocation & {
+      locations: Pick<
+        Location,
+        'id' | 'name' | 'slug' | 'address' | 'district' | 'main_image_url' | 'average_rating' | 'review_count' | 'price_range'
+      >;
+    }
+  >;
 }
 
 export interface Category {
@@ -207,58 +253,7 @@ export interface DailyCheckinResult {
   leveled_up?: boolean;
 }
 
-// ─── Playlists (AI-generated daily food playlists) ───────────────────────
-
-export type PlaylistStatus = "draft" | "published" | "archived";
-
-export type PlaylistMood =
-  | "morning"
-  | "lunch"
-  | "dinner"
-  | "late-night"
-  | "rainy-day"
-  | "weekend"
-  | "date-night"
-  | "family"
-  | "budget"
-  | "premium"
-  | "adventure"
-  | "comfort"
-  | "healthy"
-  | "street-food"
-  | "seasonal";
-
-export interface Playlist {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  cover_image_url: string | null;
-  mood: PlaylistMood | null;
-  emoji: string | null;
-  status: PlaylistStatus;
-  is_featured: boolean;
-  generated_date: string; // YYYY-MM-DD, ngày playlist được tạo
-  ai_context: string | null; // prompt/context AI dùng để tạo playlist
-  location_count: number;
-}
-
-export interface PlaylistLocation {
-  playlist_id: string;
-  location_id: string;
-  position: number; // thứ tự trong playlist
-  ai_note: string | null; // ghi chú AI cho location này trong playlist
-}
-
-export interface PlaylistWithLocations extends Playlist {
-  playlist_locations: Array<
-    PlaylistLocation & {
-      locations: Pick<
-        Location,
-        'id' | 'name' | 'slug' | 'address' | 'district' | 'main_image_url' | 'average_rating' | 'review_count' | 'price_range'
-      >;
-    }
-  >;
-}
+// Legacy aliases for backward compatibility (playlist → collection merge)
+export type PlaylistStatus = CollectionStatus;
+export type PlaylistMood = CollectionMood;
+export type Playlist = Collection;

@@ -78,9 +78,9 @@ export default function PlaylistDetailPage() {
     );
   }
 
-  const locations = playlist.playlist_locations
-    ?.filter((pl) => pl.locations != null)
-    .map((pl) => ({ ...pl.locations, ai_note: pl.ai_note, position: pl.position })) || [];
+  const locations = playlist.collection_locations
+    ?.filter((cl) => cl.locations != null)
+    .map((cl) => ({ ...cl.locations, ai_note: cl.ai_note, position: cl.position })) || [];
 
   const formattedDate = new Date(playlist.generated_date).toLocaleDateString(
     "vi-VN",

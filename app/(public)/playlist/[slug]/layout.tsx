@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient();
 
   const { data: playlist } = await supabase
-    .from("playlists")
-    .select("title, description, cover_image_url, emoji, mood, generated_date, location_count")
+    .from("collections")
+    .select("title, description, cover_image_url, emoji, mood, generated_date")
     .eq("slug", slug)
     .eq("status", "published")
     .single();
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${playlist.emoji || ""} ${playlist.title}`.trim();
   const description =
     playlist.description ||
-    `Bộ sưu tập ẩm thực ${playlist.title} - ${playlist.location_count} địa điểm được AI gợi ý tại Sài Gòn.`;
+    `Bộ sưu tập ẩm thực ${playlist.title} - Địa điểm được AI gợi ý tại Sài Gòn.`;
 
   return {
     title,

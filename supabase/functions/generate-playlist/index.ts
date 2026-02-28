@@ -214,27 +214,27 @@ CHỈ trả về JSON, không markdown code block.`;
     }
     const playlistsArray = bestResult;
 
-    // Step 3: Process each playlist and save to DB
-    const createdPlaylists = [];
+    // Step 3: Process each playlist and save to collections table
+    const createdCollections = [];
 
     for (const pl of playlistsArray as Record<string, any>[]) {
       const baseSlug = slugify(pl.title);
       const slug = `${baseSlug}-${today}`;
 
-      // Check if slug exists
-      const { data: existingPlaylist } = await supabase
-        .from("playlists")
+      // Check if slug exists in collections
+      const { data: existingCollection } = await supabase
+        .from("collections")
         .select("id")
         .eq("slug", slug)
         .maybeSingle();
 
-      if (existingPlaylist) {
+      if (existingCollection) {
         continue; // skip duplicate
       }
 
-      // Create playlist
-      const { data: newPlaylist, error: plError } = await supabase
-        .from("playlists")
+      // Create collection with source='ai'
+      const { data: newCollection, error: colError } = await supabase
+        .from("collections")
         .insert({
           title: pl.title,
           slug,
@@ -245,18 +245,18 @@ CHỈ trả về JSON, không markdown code block.`;
           is_featured: false,
           generated_date: today,
           ai_context: `Query: ${mood || "auto"}, Date: ${today}, Day: ${dayOfWeek}`,
-          location_count: 0,
+          source: "ai",
         })
         .select("id")
         .single();
 
-      if (plError || !newPlaylist) {
-        console.error(`Failed to create playlist "${pl.title}":`, plError);
+      if (colError || !newCollection) {
+        console.error(`Failed to create collection "${pl.title}":`, colError);
         continue;
       }
 
-      // Match locations and create playlist_locations
-      const playlistLocations = [];
+      // Match locations and create collection_locations
+      const collectionLocations = [];
       const newLocationsToCreate = [];
 
       for (let i = 0; i < (pl.locations || []).length; i++) {
@@ -268,8 +268,8 @@ CHỈ trả về JSON, không markdown code block.`;
         );
 
         if (matchedExisting) {
-          playlistLocations.push({
-            playlist_id: newPlaylist.id,
+          collectionLocations.push({
+            collection_id: newCollection.id,
             location_id: matchedExisting.id,
             position: i,
             ai_note: loc.description || null,
@@ -296,8 +296,8 @@ CHỈ trả về JSON, không markdown code block.`;
 
         if (existingBySlug) {
           // Already exists with this slug, use it
-          playlistLocations.push({
-            playlist_id: newPlaylist.id,
+          collectionLocations.push({
+            collection_id: newCollection.id,
             location_id: existingBySlug.id,
             position: newLoc.index,
             ai_note: newLoc.data.description || null,
@@ -343,8 +343,8 @@ CHỈ trả về JSON, không markdown code block.`;
           .single();
 
         if (!locCreateErr && createdLoc) {
-          playlistLocations.push({
-            playlist_id: newPlaylist.id,
+          collectionLocations.push({
+            collection_id: newCollection.id,
             location_id: createdLoc.id,
             position: newLoc.index,
             ai_note: newLoc.data.description || null,
@@ -352,24 +352,24 @@ CHỈ trả về JSON, không markdown code block.`;
         }
       }
 
-      // Insert playlist_locations
-      if (playlistLocations.length > 0) {
-        const { error: plLocError } = await supabase
-          .from("playlist_locations")
-          .insert(playlistLocations);
+      // Insert collection_locations
+      if (collectionLocations.length > 0) {
+        const { error: colLocError } = await supabase
+          .from("collection_locations")
+          .insert(collectionLocations);
 
-        if (plLocError) {
-          console.error(`Failed to add locations to playlist:`, plLocError);
+        if (colLocError) {
+          console.error(`Failed to add locations to collection:`, colLocError);
         }
       }
 
-      createdPlaylists.push({
-        id: newPlaylist.id,
+      createdCollections.push({
+        id: newCollection.id,
         title: pl.title,
         slug,
         mood: pl.mood,
         emoji: pl.emoji,
-        location_count: playlistLocations.length,
+        location_count: collectionLocations.length,
         new_locations_created: newLocationsToCreate.length,
       });
     }
@@ -377,8 +377,8 @@ CHỈ trả về JSON, không markdown code block.`;
     return new Response(
       JSON.stringify({
         success: true,
-        playlists: createdPlaylists,
-        total: createdPlaylists.length,
+        collections: createdCollections,
+        total: createdCollections.length,
         date: today,
       }),
       {

@@ -8,17 +8,18 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Collection, Location, CollectionCategory } from '@/types/database';
+import { Collection, Location, CollectionCategory, CollectionLocation } from '@/types/database';
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
 import Image from "next/image";
+import { Sparkles } from "lucide-react";
 
 interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
-  collection_locations: {
+  collection_locations: (Pick<CollectionLocation, 'position' | 'ai_note'> & {
     locations: Location;
-  }[];
+  })[];
 }
 
 const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocations | null> => {
@@ -32,6 +33,8 @@ const fetchCollectionDetail = async (slug: string): Promise<CollectionWithLocati
         icon
       ),
       collection_locations (
+        position,
+        ai_note,
         locations (*)
       )
     `)
@@ -90,7 +93,11 @@ const CollectionDetailPage = () => {
     );
   }
 
-  const locations = collection.collection_locations.map(cl => cl.locations).filter(Boolean);
+  const isAI = collection.source === 'ai';
+  const locationsWithNotes = collection.collection_locations
+    .filter(cl => cl.locations != null)
+    .map(cl => ({ ...cl.locations, ai_note: cl.ai_note, position: cl.position }));
+  const locations = locationsWithNotes;
 
   return (
     <div className="flex flex-col bg-white">
@@ -105,11 +112,22 @@ const CollectionDetailPage = () => {
         />
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
-            {collection.collection_categories && (
-              <Badge className="mb-4 bg-vietnam-blue-600 text-white">
-                {collection.collection_categories.name}
-              </Badge>
-            )}
+            <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+              {isAI && collection.emoji && (
+                <span className="text-4xl drop-shadow-lg">{collection.emoji}</span>
+              )}
+              {collection.collection_categories && (
+                <Badge className="bg-vietnam-blue-600 text-white">
+                  {collection.collection_categories.name}
+                </Badge>
+              )}
+              {isAI && (
+                <Badge className="bg-vietnam-gold-500 text-white border-none">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  AI gợi ý
+                </Badge>
+              )}
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
               {collection.title}
             </h1>
@@ -182,6 +200,16 @@ const CollectionDetailPage = () => {
                       <p className="text-sm text-vietnam-blue-600 mt-3 line-clamp-2">
                         {location.description}
                       </p>
+                    )}
+
+                    {/* AI note - shown for AI-generated collections */}
+                    {isAI && location.ai_note && (
+                      <div className="mt-3 p-2 rounded-md bg-vietnam-gold-50 border border-vietnam-gold-200">
+                        <p className="text-xs text-vietnam-gold-700 italic flex items-start gap-1">
+                          <Sparkles className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                          {location.ai_note}
+                        </p>
+                      </div>
                     )}
                   </CardContent>
                 </Card>

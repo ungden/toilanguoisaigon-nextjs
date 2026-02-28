@@ -1,20 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PlaylistWithLocations } from '@/types/database';
+import { CollectionWithLocations } from '@/types/database';
 
 /**
- * Fetch a single playlist with its locations (ordered by position).
+ * Fetch a single AI collection with its locations (ordered by position).
  */
 export const usePlaylistDetail = (slug: string) => {
   return useQuery({
-    queryKey: ['playlist', slug],
+    queryKey: ['collection-detail', slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('playlists')
+        .from('collections')
         .select(`
           *,
-          playlist_locations (
-            playlist_id,
+          collection_locations (
+            collection_id,
             location_id,
             position,
             ai_note,
@@ -37,14 +37,15 @@ export const usePlaylistDetail = (slug: string) => {
 
       if (error) throw error;
 
-      // Sort playlist_locations by position
-      if (data?.playlist_locations) {
-        data.playlist_locations.sort(
-          (a: { position: number }, b: { position: number }) => a.position - b.position
+      // Sort collection_locations by position
+      if (data?.collection_locations) {
+        data.collection_locations.sort(
+          (a: { position: number | null }, b: { position: number | null }) =>
+            (a.position ?? 0) - (b.position ?? 0)
         );
       }
 
-      return data as PlaylistWithLocations;
+      return data as CollectionWithLocations;
     },
     enabled: !!slug,
   });

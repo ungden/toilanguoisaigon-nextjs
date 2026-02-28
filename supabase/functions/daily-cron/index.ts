@@ -4,7 +4,7 @@
  * Runs all daily automated tasks in sequence:
  *   1. Crawl new locations from Google Maps (daily-location-crawl)
  *   2. Enrich pending community submissions (enrich-submission)
- *   3. Generate AI playlists (generate-playlist)
+ *   3. Generate AI collections (generate-playlist)
  *
  * Setup in Supabase SQL Editor:
  *   -- Enable extensions (one-time)
@@ -147,10 +147,10 @@ serve(async (req) => {
       results.push(enrichResult);
     }
 
-    // Task 3: Generate AI playlists
+    // Task 3: Generate AI collections
     if (!skipPlaylist) {
       const playlistResult = await runTask(
-        "Tạo playlist AI",
+        "Tạo bộ sưu tập AI",
         "generate-playlist",
         { count: 3, auto_publish: true }
       );

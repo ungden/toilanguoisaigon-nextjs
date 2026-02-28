@@ -42,7 +42,7 @@ import { columns } from "@/components/admin/collections/Columns";
 import { CollectionsDataTable } from "@/components/admin/collections/CollectionsDataTable";
 import { CollectionForm, type CollectionFormValues } from "@/components/admin/collections/CollectionForm";
 import { DeleteCollectionDialog } from "@/components/admin/collections/DeleteCollectionDialog";
-import { Collection, Playlist, PlaylistStatus } from "@/types/database";
+import { Collection, CollectionStatus } from "@/types/database";
 import { useCreateCollection, type CreateCollectionData } from "@/hooks/data/useCreateCollection";
 import { useUpdateCollection } from "@/hooks/data/useUpdateCollection";
 import { useDeleteCollection } from "@/hooks/data/useDeleteCollection";
@@ -74,7 +74,7 @@ const MOOD_OPTIONS = [
     { value: "seasonal", label: "Theo mùa" },
 ];
 
-const STATUS_LABELS: Record<PlaylistStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+const STATUS_LABELS: Record<CollectionStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
     draft: { label: "Nháp", variant: "secondary" },
     published: { label: "Đã xuất bản", variant: "default" },
     archived: { label: "Lưu trữ", variant: "outline" },
@@ -90,8 +90,8 @@ const AdminCollectionsPage = () => {
     const [selectedMood, setSelectedMood] = useState("");
     const [count, setCount] = useState("3");
     const [autoPublish, setAutoPublish] = useState(false);
-    const [deletingPlaylist, setDeletingPlaylist] = useState<Playlist | null>(null);
-    const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
+    const [deletingPlaylist, setDeletingPlaylist] = useState<Collection | null>(null);
+    const [editingPlaylist, setEditingPlaylist] = useState<Collection | null>(null);
 
     // Collections hooks
     const { data: collections, isLoading, error } = useAdminCollections();
@@ -158,11 +158,11 @@ const AdminCollectionsPage = () => {
         });
     };
 
-    const handleStatusChange = (id: string, status: PlaylistStatus) => {
+    const handleStatusChange = (id: number, status: CollectionStatus) => {
         updateStatusMutation.mutate({ id, status });
     };
 
-    const handleToggleFeatured = (playlist: Playlist) => {
+    const handleToggleFeatured = (playlist: Collection) => {
         toggleFeaturedMutation.mutate({
             id: playlist.id,
             is_featured: !playlist.is_featured,
@@ -291,7 +291,7 @@ const AdminCollectionsPage = () => {
                                 Đã tạo {generateMutation.data.total} bộ sưu tập:
                             </p>
                             <ul className="mt-1 space-y-1">
-                                {generateMutation.data.playlists.map((pl) => (
+                                {generateMutation.data.collections.map((pl) => (
                                     <li key={pl.id} className="text-sm text-green-700 dark:text-green-300">
                                         {pl.emoji} {pl.title} ({pl.location_count} địa điểm
                                         {pl.new_locations_created > 0
@@ -336,7 +336,7 @@ const AdminCollectionsPage = () => {
 
                     <div className="space-y-3">
                         {playlists?.map((playlist) => {
-                            const statusInfo = STATUS_LABELS[playlist.status as PlaylistStatus] || STATUS_LABELS.draft;
+                            const statusInfo = STATUS_LABELS[(playlist.status || 'draft') as CollectionStatus] || STATUS_LABELS.draft;
 
                             return (
                                 <div
@@ -372,7 +372,7 @@ const AdminCollectionsPage = () => {
                                         <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                                             <span className="flex items-center gap-1">
                                                 <MapPin className="h-3 w-3" />
-                                                {playlist.location_count} địa điểm
+                                                Địa điểm
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="h-3 w-3" />

@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { Playlist } from "@/types/database";
+import { Collection } from "@/types/database";
 import { useUpdatePlaylist } from "@/hooks/data/useUpdatePlaylist";
 
 const MOOD_OPTIONS = [
@@ -44,7 +44,7 @@ const MOOD_OPTIONS = [
 ];
 
 interface PlaylistEditDialogProps {
-  playlist: Playlist | null;
+  playlist: Collection | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -75,7 +75,7 @@ export function PlaylistEditDialog({ playlist, isOpen, onClose }: PlaylistEditDi
         title,
         description: description || null,
         cover_image_url: coverImageUrl || null,
-        mood: mood === "none" ? null : (mood as Playlist["mood"]),
+        mood: mood === "none" ? null : (mood as Collection["mood"]),
         emoji: emoji || null,
       },
       { onSuccess: onClose }

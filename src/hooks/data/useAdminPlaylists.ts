@@ -1,29 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Playlist, PlaylistStatus } from '@/types/database';
+import { Collection, CollectionStatus } from '@/types/database';
 import { showSuccess, showError } from '@/utils/toast';
 
 /**
- * Fetch all playlists for admin (all statuses).
+ * Fetch all AI-generated collections for admin (all statuses).
  */
 export const useAdminPlaylists = () => {
   return useQuery({
     queryKey: ['admin-playlists'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('playlists')
+        .from('collections')
         .select('*')
+        .eq('source', 'ai')
         .order('generated_date', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Playlist[];
+      return data as Collection[];
     },
   });
 };
 
 /**
- * Generate new playlists via Gemini AI.
+ * Generate new AI collections via Gemini AI.
  */
 export const useGeneratePlaylist = () => {
   const queryClient = useQueryClient();
@@ -39,8 +40,8 @@ export const useGeneratePlaylist = () => {
 
       return data as {
         success: boolean;
-        playlists: Array<{
-          id: string;
+        collections: Array<{
+          id: number;
           title: string;
           slug: string;
           mood: string;
@@ -54,25 +55,26 @@ export const useGeneratePlaylist = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-playlists'] });
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      showSuccess(`Đã tạo ${data.total} playlist mới!`);
+      queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      showSuccess(`Đã tạo ${data.total} bộ sưu tập AI mới!`);
     },
     onError: (error: Error) => {
-      showError(error.message || 'Không thể tạo playlist. Vui lòng thử lại.');
+      showError(error.message || 'Không thể tạo bộ sưu tập. Vui lòng thử lại.');
     },
   });
 };
 
 /**
- * Update playlist status (publish/archive/draft).
+ * Update collection status (publish/archive/draft).
  */
 export const useUpdatePlaylistStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: PlaylistStatus }) => {
+    mutationFn: async ({ id, status }: { id: number; status: CollectionStatus }) => {
       const { error } = await supabase
-        .from('playlists')
+        .from('collections')
         .update({ status })
         .eq('id', id);
 
@@ -80,8 +82,9 @@ export const useUpdatePlaylistStatus = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-playlists'] });
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      showSuccess('Đã cập nhật trạng thái playlist.');
+      queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      showSuccess('Đã cập nhật trạng thái bộ sưu tập.');
     },
     onError: (error: Error) => {
       showError(error.message);
@@ -90,15 +93,15 @@ export const useUpdatePlaylistStatus = () => {
 };
 
 /**
- * Toggle playlist featured status.
+ * Toggle collection featured status.
  */
 export const useTogglePlaylistFeatured = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, is_featured }: { id: string; is_featured: boolean }) => {
+    mutationFn: async ({ id, is_featured }: { id: number; is_featured: boolean }) => {
       const { error } = await supabase
-        .from('playlists')
+        .from('collections')
         .update({ is_featured })
         .eq('id', id);
 
@@ -106,8 +109,9 @@ export const useTogglePlaylistFeatured = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-playlists'] });
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      showSuccess('Đã cập nhật playlist nổi bật.');
+      queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      showSuccess('Đã cập nhật bộ sưu tập nổi bật.');
     },
     onError: (error: Error) => {
       showError(error.message);
@@ -116,15 +120,22 @@ export const useTogglePlaylistFeatured = () => {
 };
 
 /**
- * Delete a playlist.
+ * Delete an AI collection.
  */
 export const useDeletePlaylist = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
+      // Delete junction rows first
+      const { error: junctionError } = await supabase
+        .from('collection_locations')
+        .delete()
+        .eq('collection_id', id);
+      if (junctionError) throw junctionError;
+
       const { error } = await supabase
-        .from('playlists')
+        .from('collections')
         .delete()
         .eq('id', id);
 
@@ -132,8 +143,9 @@ export const useDeletePlaylist = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-playlists'] });
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
-      showSuccess('Đã xóa playlist.');
+      queryClient.invalidateQueries({ queryKey: ['admin-collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      showSuccess('Đã xóa bộ sưu tập AI.');
     },
     onError: (error: Error) => {
       showError(error.message);
