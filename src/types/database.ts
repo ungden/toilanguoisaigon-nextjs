@@ -55,6 +55,7 @@ export interface Location {
   google_review_summary: string | null; // AI-tổng hợp review từ Google Maps
   google_highlights: string[] | null; // Điểm nổi bật từ reviews (ví dụ: "phở đậm đà", "phục vụ nhanh")
   isSaved?: boolean; // Added for client-side tracking
+  location_categories?: { categories: { name: string } }[]; // Relational data
 }
 
 export interface Review {
@@ -123,6 +124,7 @@ export interface Collection {
   ai_context: string | null;
   source: "manual" | "ai" | null;
   collection_categories?: CollectionCategory | null;
+  location_count?: { count: number }[]; // For count queries, aliased in supabase
 }
 
 export interface CollectionLocation {

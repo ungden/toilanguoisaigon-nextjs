@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Star, Clock } from "lucide-react";
+import { MapPin, Star, Clock, ArrowRight, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,6 @@ import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
 
 interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
   collection_categories: Pick<CollectionCategory, 'name' | 'slug' | 'icon'> | null;
@@ -124,7 +123,7 @@ const CollectionDetailPage = () => {
               {isAI && (
                 <Badge className="bg-vietnam-gold-500 text-white border-none">
                   <Sparkles className="h-3 w-3 mr-1" />
-                  AI gợi ý
+                  Gợi ý đặc biệt
                 </Badge>
               )}
             </div>
@@ -154,7 +153,7 @@ const CollectionDetailPage = () => {
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id} className="block group">
-                <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
+                <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white flex flex-col">
                   <div className="relative overflow-hidden aspect-[4/3] w-full">
                     <Image 
                       src={optimizedImageUrl} 
@@ -164,45 +163,47 @@ const CollectionDetailPage = () => {
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-vietnam-red-600 text-white">
-                        {formatPriceRange(location.price_range)}
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                      <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
+                        {location.district}
                       </Badge>
                     </div>
+                    <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                      <button className="h-8 w-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-vietnam-red-600 hover:text-white transition-colors border border-white/20 shadow-sm" onClick={(e) => { e.preventDefault(); /* TODO: Implement save */ }}>
+                        <Heart className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="flex items-center text-white gap-2">
+                        <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
+                          <Star className="h-3.5 w-3.5 fill-white mr-1 text-white" />
+                          {location.average_rating > 0 ? location.average_rating.toFixed(1) : 'Mới'}
+                        </div>
+                        {location.review_count > 0 && (
+                          <span className="text-xs text-white/90 font-medium drop-shadow-md">
+                            ({location.review_count} đánh giá)
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2">
+                  <CardContent className="p-4 flex flex-col flex-grow">
+                    <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2 line-clamp-1">
                       {location.name}
                     </h3>
                     
-                    <div className="space-y-2 text-sm text-vietnam-blue-600 mb-4">
+                    <div className="space-y-2 text-sm text-vietnam-blue-600 flex-grow">
                       <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>{location.district}</span>
+                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0 text-vietnam-red-500" />
+                        <span className="truncate">{location.address}</span>
                       </div>
                       
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>{formatOpeningHours(location.opening_hours)}</span>
+                        <Clock className="h-4 w-4 mr-2 flex-shrink-0 text-vietnam-red-500" />
+                        <span className="truncate">{formatOpeningHours(location.opening_hours)}</span>
                       </div>
                     </div>
 
-                    {location.average_rating > 0 && (
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-vietnam-gold-500 fill-vietnam-gold-500 mr-1" />
-                        <span className="text-sm font-medium text-vietnam-blue-700">
-                          {location.average_rating.toFixed(1)} ({location.review_count} đánh giá)
-                        </span>
-                      </div>
-                    )}
-
-                    {location.description && (
-                      <p className="text-sm text-vietnam-blue-600 mt-3 line-clamp-2">
-                        {location.description}
-                      </p>
-                    )}
-
-                    {/* AI note - shown for AI-generated collections */}
                     {isAI && location.ai_note && (
                       <div className="mt-3 p-2 rounded-md bg-vietnam-gold-50 border border-vietnam-gold-200">
                         <p className="text-xs text-vietnam-gold-700 italic flex items-start gap-1">
@@ -210,6 +211,24 @@ const CollectionDetailPage = () => {
                           {location.ai_note}
                         </p>
                       </div>
+                    )}
+                    
+                    {location.price_range && (
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                        <span className="text-vietnam-gold-600 font-medium px-2 py-1 bg-vietnam-gold-50 rounded-md text-xs">
+                          {formatPriceRange(location.price_range)}
+                        </span>
+                        <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
+                          Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
+                        </span>
+                      </div>
+                    )}
+                    {!location.price_range && (
+                       <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100">
+                          <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
+                            Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
+                          </span>
+                       </div>
                     )}
                   </CardContent>
                 </Card>

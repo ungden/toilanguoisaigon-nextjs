@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${playlist.emoji || ""} ${playlist.title}`.trim();
   const description =
     playlist.description ||
-    `Bộ sưu tập ẩm thực ${playlist.title} - Địa điểm được AI gợi ý tại Sài Gòn.`;
+    `Bộ sưu tập ẩm thực ${playlist.title} - Địa điểm được tuyển chọn tại Sài Gòn.`;
 
   return {
     title,

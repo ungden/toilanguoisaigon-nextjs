@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles, Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -215,6 +215,9 @@ const Index = () => {
                 const finalSrc = FEATURED_COLLECTIONS.find(fc => fc.title === collection.title)?.overrideImage
                   ?? optimizedImageUrl;
 
+                const countObj = collection.location_count?.[0] as { count: number } | undefined;
+                const locationCount = countObj?.count || 0;
+
                 return (
                   <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
@@ -228,7 +231,7 @@ const Index = () => {
                           loading="lazy"
                           onError={() => handleCollectionImageError(collection.id)}
                         />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
                         {index < 2 && (
                           <div className="absolute top-3 left-3">
                             <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg">
@@ -237,11 +240,22 @@ const Index = () => {
                             </Badge>
                           </div>
                         )}
+                        <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                          <Badge className="bg-white/20 text-white backdrop-blur-md border-white/30 hover:bg-white/30">
+                            Khám phá ngay ➔
+                          </Badge>
+                        </div>
                       </div>
-                      <CardHeader className="bg-white flex-grow">
-                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
+                      <CardHeader className="bg-white flex-grow relative pb-4">
+                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg mb-1">
                           {collection.title}
                         </CardTitle>
+                        {locationCount > 0 && (
+                          <div className="text-xs font-semibold text-vietnam-gold-600 mb-2 flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            Bao gồm {locationCount} địa điểm
+                          </div>
+                        )}
                         <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
                           {collection.description}
                         </CardDescription>
@@ -311,43 +325,70 @@ const Index = () => {
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
                       />
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-vietnam-red-600 text-white text-xs">
+                      <div className="absolute top-3 left-3 flex flex-col gap-2">
+                        <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
                           {place.district}
                         </Badge>
+                        {place.location_categories?.[0]?.categories?.name && (
+                          <Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-vietnam-blue-800 text-[10px] shadow-sm border-white/50 w-fit">
+                            {place.location_categories[0].categories.name}
+                          </Badge>
+                        )}
                       </div>
-                      {place.average_rating > 0 && (
-                        <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-md text-xs flex items-center">
-                          <Star className="h-3 w-3 text-vietnam-gold-400 fill-vietnam-gold-400 mr-1" />
-                          {place.average_rating.toFixed(1)}
+                      <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                        <button className="h-8 w-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-vietnam-red-600 hover:text-white transition-colors border border-white/20 shadow-sm" onClick={(e) => { e.preventDefault(); /* TODO: Implement save */ }}>
+                          <Heart className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="flex items-center text-white gap-2">
+                          <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
+                            <Star className="h-3.5 w-3.5 fill-white mr-1 text-white" />
+                            {place.average_rating > 0 ? place.average_rating.toFixed(1) : 'Mới'}
+                          </div>
+                          {place.review_count > 0 && (
+                            <span className="text-xs text-white/90 font-medium drop-shadow-md">
+                              ({place.review_count} đánh giá)
+                            </span>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
-                    <CardContent className="p-4">
+                    <CardContent className="p-4 flex flex-col flex-grow">
                       <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2 line-clamp-1">
                         {place.name}
                       </h3>
                       
-                      <div className="space-y-2 text-sm text-vietnam-blue-600">
+                      <div className="space-y-2 text-sm text-vietnam-blue-600 flex-grow">
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0 text-vietnam-red-500" />
                           <span className="truncate">{place.address}</span>
                         </div>
                         
-                        {place.price_range && (
-                          <div className="flex items-center">
-                            <span className="text-vietnam-gold-600 font-medium">
-                              {formatPriceRange(place.price_range)}
-                            </span>
-                          </div>
-                        )}
-
-                        {place.review_count > 0 && (
-                          <div className="text-xs text-vietnam-blue-500">
-                            {place.review_count} đánh giá
-                          </div>
+                        {place.google_review_summary && (
+                          <p className="text-sm text-slate-500 italic line-clamp-2 mt-2 leading-relaxed bg-slate-50 p-2 rounded-md border border-slate-100">
+                            &quot;{place.google_review_summary}&quot;
+                          </p>
                         )}
                       </div>
+                      
+                      {place.price_range && (
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                          <span className="text-vietnam-gold-600 font-medium px-2 py-1 bg-vietnam-gold-50 rounded-md text-xs">
+                            {formatPriceRange(place.price_range)}
+                          </span>
+                          <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
+                            Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
+                          </span>
+                        </div>
+                      )}
+                      {!place.price_range && (
+                         <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100">
+                            <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
+                              Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
+                            </span>
+                         </div>
+                      )}
                     </CardContent>
                   </Card>
                 </Link>

@@ -13,6 +13,8 @@ import {
   Clock,
   ArrowLeft,
   Sparkles,
+  ArrowRight,
+  Heart,
 } from "lucide-react";
 import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
 import { formatPriceRange } from "@/utils/formatters";
@@ -111,7 +113,7 @@ export default function PlaylistDetailPage() {
               )}
               <Badge className="bg-vietnam-gold-500 text-white border-none">
                 <Sparkles className="h-3 w-3 mr-1" />
-                AI gợi ý
+                Gợi ý đặc biệt
               </Badge>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -124,7 +126,7 @@ export default function PlaylistDetailPage() {
             )}
             <div className="mt-8 flex items-center justify-center gap-6 text-white/80">
               <span className="text-vietnam-gold-400 font-semibold">
-                {locations.length} địa điểm được AI tuyển chọn
+                {locations.length} địa điểm được tuyển chọn
               </span>
               <span className="flex items-center gap-1 text-sm">
                 <Clock className="h-4 w-4" />
@@ -146,7 +148,7 @@ export default function PlaylistDetailPage() {
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id || index} className="block group">
-                <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
+                <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white flex flex-col">
                   <div className="relative overflow-hidden aspect-[4/3] w-full">
                     <Image
                       src={optimizedImageUrl}
@@ -156,44 +158,44 @@ export default function PlaylistDetailPage() {
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-vietnam-red-600 text-white font-bold">
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                      <Badge className="bg-vietnam-red-600 text-white font-bold text-xs shadow-md border-none px-2 py-1 w-fit">
                         #{index + 1}
                       </Badge>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-vietnam-red-600 text-white">
-                        {formatPriceRange(location.price_range)}
+                      <Badge className="bg-white/90 backdrop-blur-sm text-vietnam-blue-800 text-[10px] shadow-sm border-none w-fit">
+                        {location.district}
                       </Badge>
                     </div>
+                    <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                      <button className="h-8 w-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-vietnam-red-600 hover:text-white transition-colors border border-white/20 shadow-sm" onClick={(e) => { e.preventDefault(); /* TODO: Implement save */ }}>
+                        <Heart className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="flex items-center text-white gap-2">
+                        <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
+                          <Star className="h-3.5 w-3.5 fill-white mr-1 text-white" />
+                          {location.average_rating > 0 ? location.average_rating.toFixed(1) : 'Mới'}
+                        </div>
+                        {location.review_count > 0 && (
+                          <span className="text-xs text-white/90 font-medium drop-shadow-md">
+                            ({location.review_count} đánh giá)
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2">
+                  <CardContent className="p-4 flex flex-col flex-grow">
+                    <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2 line-clamp-1">
                       {location.name}
                     </h3>
 
-                    <div className="space-y-2 text-sm text-vietnam-blue-600 mb-4">
+                    <div className="space-y-2 text-sm text-vietnam-blue-600 flex-grow">
                       <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>{location.district}</span>
+                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0 text-vietnam-red-500" />
+                        <span className="truncate">{location.address}</span>
                       </div>
-
-                      {location.address && (
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0 opacity-0" />
-                          <span className="text-xs text-muted-foreground truncate">{location.address}</span>
-                        </div>
-                      )}
                     </div>
-
-                    {location.average_rating > 0 && (
-                      <div className="flex items-center mb-3">
-                        <Star className="h-4 w-4 text-vietnam-gold-500 fill-vietnam-gold-500 mr-1" />
-                        <span className="text-sm font-medium text-vietnam-blue-700">
-                          {location.average_rating.toFixed(1)} ({location.review_count} đánh giá)
-                        </span>
-                      </div>
-                    )}
 
                     {/* AI note - unique to playlist items */}
                     {location.ai_note && (
@@ -203,6 +205,24 @@ export default function PlaylistDetailPage() {
                           {location.ai_note}
                         </p>
                       </div>
+                    )}
+                    
+                    {location.price_range && (
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                        <span className="text-vietnam-gold-600 font-medium px-2 py-1 bg-vietnam-gold-50 rounded-md text-xs">
+                          {formatPriceRange(location.price_range)}
+                        </span>
+                        <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
+                          Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
+                        </span>
+                      </div>
+                    )}
+                    {!location.price_range && (
+                       <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100">
+                          <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
+                            Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
+                          </span>
+                       </div>
                     )}
                   </CardContent>
                 </Card>

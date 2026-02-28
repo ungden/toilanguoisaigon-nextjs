@@ -11,7 +11,7 @@ export const useCollections = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('collections')
-        .select('*')
+        .select('*, location_count:collection_locations(count)')
         .eq('source', 'manual')
         .order('created_at', { ascending: false });
 
@@ -30,7 +30,7 @@ export const useAICollections = (limit = 12) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('collections')
-        .select('*')
+        .select('*, location_count:collection_locations(count)')
         .eq('source', 'ai')
         .eq('status', 'published')
         .order('generated_date', { ascending: false })

@@ -3,7 +3,7 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, Calendar } from "lucide-react";
+import { Sparkles, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
@@ -61,27 +61,39 @@ function AICollectionCard({ collection }: { collection: Collection }) {
               </Badge>
             </div>
           )}
-          {/* AI badge */}
+          {/* Suggestion badge */}
           <div className="absolute top-3 right-3">
-            <Badge className="bg-vietnam-gold-500/90 text-white border-none backdrop-blur-sm text-xs">
+            <Badge className="bg-vietnam-gold-500/90 text-white border-none backdrop-blur-sm text-xs shadow-sm">
               <Sparkles className="h-3 w-3 mr-1" />
-              AI
+              Gợi ý
             </Badge>
           </div>
           {/* Date */}
           {formattedDate && (
-            <div className="absolute bottom-3 right-3">
+            <div className="absolute bottom-3 left-3">
               <span className="text-xs text-white/80 flex items-center gap-1 backdrop-blur-sm bg-black/20 px-2 py-0.5 rounded">
                 <Calendar className="h-3 w-3" />
                 {formattedDate}
               </span>
             </div>
           )}
+          {/* Discover overlay */}
+          <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+            <Badge className="bg-white/20 text-white backdrop-blur-md border-white/30 hover:bg-white/30">
+              Khám phá ngay ➔
+            </Badge>
+          </div>
         </div>
-        <CardHeader className="bg-white flex-grow py-4">
-          <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-base leading-tight">
+        <CardHeader className="bg-white flex-grow py-4 relative">
+          <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-base leading-tight mb-1">
             {collection.title}
           </CardTitle>
+          {collection.location_count && collection.location_count[0]?.count > 0 && (
+            <div className="text-xs font-semibold text-vietnam-gold-600 mb-2 flex items-center">
+              <MapPin className="h-3 w-3 mr-1" />
+              Bao gồm {collection.location_count[0].count} địa điểm
+            </div>
+          )}
           {collection.description && (
             <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
               {collection.description}
@@ -176,6 +188,9 @@ const CollectionsPage = () => {
 
               const isFeatured = featuredTitles.includes(collection.title);
 
+              const countObj = collection.location_count?.[0] as { count: number } | undefined;
+              const locationCount = countObj?.count || 0;
+
               return (
                 <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
@@ -189,7 +204,7 @@ const CollectionsPage = () => {
                         loading="lazy"
                         onError={() => handleImageError(collection.id)}
                       />
-                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
                       {isFeatured && (
                         <div className="absolute top-3 left-3">
                           <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg">
@@ -198,11 +213,22 @@ const CollectionsPage = () => {
                           </Badge>
                         </div>
                       )}
+                      <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                        <Badge className="bg-white/20 text-white backdrop-blur-md border-white/30 hover:bg-white/30">
+                          Khám phá ngay ➔
+                        </Badge>
+                      </div>
                     </div>
-                    <CardHeader className="bg-white flex-grow">
-                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg">
+                    <CardHeader className="bg-white flex-grow relative pb-4">
+                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg mb-1">
                         {collection.title}
                       </CardTitle>
+                      {locationCount > 0 && (
+                        <div className="text-xs font-semibold text-vietnam-gold-600 mb-2 flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 mr-1"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                          Bao gồm {locationCount} địa điểm
+                        </div>
+                      )}
                       <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
                         {collection.description}
                       </CardDescription>
@@ -226,11 +252,11 @@ const CollectionsPage = () => {
             <div className="flex items-center gap-3 mb-8">
               <Sparkles className="h-6 w-6 text-vietnam-gold-500" />
               <h2 className="text-2xl md:text-3xl font-bold text-vietnam-blue-800">
-                AI gợi ý hôm nay
+                Gợi ý hôm nay
               </h2>
             </div>
             <p className="text-vietnam-blue-600 mb-8 max-w-2xl">
-              Mỗi ngày, AI của chúng tôi tạo ra những bộ sưu tập ẩm thực mới dựa trên chủ đề, thời điểm và xu hướng.
+              Mỗi ngày, chúng tôi tạo ra những bộ sưu tập ẩm thực mới dựa trên chủ đề, thời điểm và xu hướng.
             </p>
 
             {isLoadingAI ? (
