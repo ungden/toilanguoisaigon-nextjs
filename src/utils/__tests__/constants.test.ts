@@ -16,8 +16,8 @@ describe('FALLBACK_IMAGES', () => {
     }
   });
 
-  it('OG image has 1200w for social sharing', () => {
-    expect(FALLBACK_IMAGES.og).toContain('w=1200');
+  it('OG image is the branded saigon watercolor', () => {
+    expect(FALLBACK_IMAGES.og).toContain('og-image.png');
   });
 });
 
