@@ -69,7 +69,7 @@ import { useAwardXp } from "@/hooks/data/useAwardXp";
 import { useBadgeEvaluator } from "@/hooks/data/useBadgeEvaluator";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { getCategoryArtwork, ARTWORK_MESSAGE } from "@/utils/constants";
-import { calculateDistance } from "@/utils/geo";
+import { calculateDistance, formatDistance } from "@/utils/geo";
 import dynamic from 'next/dynamic';
 import { toast } from "sonner";
 
@@ -520,9 +520,7 @@ const PlaceDetailPage = () => {
                         {userLocation ? (
                           <Badge variant="outline" className="bg-vietnam-red-50 text-vietnam-red-700 border-vietnam-red-200 shadow-sm py-1.5 px-3">
                             <Navigation className="h-3.5 w-3.5 mr-1.5" />
-                            Cách bạn {calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude) < 1 
-                              ? `${Math.round(calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude) * 1000)}m` 
-                              : `${calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude).toFixed(1)}km`}
+                            Cách bạn {formatDistance(calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude))}
                           </Badge>
                         ) : (
                           <Button 
@@ -614,13 +612,22 @@ const PlaceDetailPage = () => {
                       </>
                     ) : (
                       <>
-                        <div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center">
-                          <p className="text-gray-500">Chưa có tọa độ cho địa điểm này</p>
+                        <div className="h-64 md:h-80 rounded-lg overflow-hidden relative z-0">
+                          <iframe
+                            title={`Bản đồ ${place.name}`}
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(place.name + ', ' + place.address + ', ' + place.district + ', TP.HCM')}&hl=vi&z=16&output=embed`}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
                         </div>
                         <Button className="btn-vietnam w-full sm:w-auto" asChild>
-                          <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address + ', ' + place.district + ', TP.HCM')}`} target="_blank" rel="noopener noreferrer">
+                          <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ', ' + place.address + ', ' + place.district + ', TP.HCM')}`} target="_blank" rel="noopener noreferrer">
                             <Navigation className="h-4 w-4 mr-2" />
-                            Tìm trên Google Maps
+                            Xem trên Google Maps
                           </a>
                         </Button>
                       </>
