@@ -38,7 +38,7 @@ AS $$
   FROM 
     locations
   WHERE 
-    status = 'approved'
+    status = 'published'
     AND latitude IS NOT NULL
     AND longitude IS NOT NULL
     AND (
