@@ -9,7 +9,7 @@ import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Spark
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useCollections } from "@/hooks/data/useCollections";
 import { useLocations } from "@/hooks/data/useLocations";
 import { usePosts } from "@/hooks/data/usePosts";
@@ -27,6 +27,16 @@ const Index = () => {
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 8 });
   const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
   const { data: stats } = useStats();
+
+  // Track collection images that failed to load so we can swap to fallback
+  const [failedCollectionImages, setFailedCollectionImages] = useState<Set<string | number>>(new Set());
+  const handleCollectionImageError = useCallback((collectionId: string | number) => {
+    setFailedCollectionImages(prev => {
+      const next = new Set(prev);
+      next.add(collectionId);
+      return next;
+    });
+  }, []);
 
   const featuredTitles = useMemo(() => FEATURED_COLLECTIONS.map(fc => fc.title), []);
 
@@ -188,25 +198,26 @@ const Index = () => {
               ))
             ) : sortedCollections && sortedCollections.length > 0 ? (
               sortedCollections.map((collection, index) => {
-                const imagePath = collection.cover_image_url ? getPathFromSupabaseUrl(collection.cover_image_url) : null;
+                const imageFailed = failedCollectionImages.has(collection.id);
+                const imagePath = (!imageFailed && collection.cover_image_url) ? getPathFromSupabaseUrl(collection.cover_image_url) : null;
                 const optimizedImageUrl = imagePath 
                   ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
                   : FALLBACK_IMAGES.collection;
+                const finalSrc = FEATURED_COLLECTIONS.find(fc => fc.title === collection.title)?.overrideImage
+                  ?? optimizedImageUrl;
 
                 return (
                   <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
                       <div className="relative overflow-hidden aspect-[4/3] w-full">
                         <Image 
-                          src={
-                            FEATURED_COLLECTIONS.find(fc => fc.title === collection.title)?.overrideImage
-                              ?? optimizedImageUrl
-                          } 
+                          src={finalSrc}
                           alt={collection.title} 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
+                          onError={() => handleCollectionImageError(collection.id)}
                         />
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         {index < 2 && (
