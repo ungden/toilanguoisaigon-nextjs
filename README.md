@@ -58,7 +58,7 @@ toilanguoisaigon/
 │   │   ├── page.tsx              # Dashboard stats + activity feed + top locations
 │   │   ├── locations/            # CRUD địa điểm (with category/tag pickers)
 │   │   ├── posts/                # CRUD bài viết (TipTap rich text editor)
-│   │   ├── collections/          # CRUD bộ sưu tập + playlist editing
+│   │   ├── collections/          # CRUD bộ sưu tập (manual & AI-generated)
 │   │   ├── reviews/              # Quản lý đánh giá (edit + photo view)
 │   │   ├── submissions/          # Duyệt gợi ý từ user
 │   │   ├── users/                # Quản lý người dùng + role change

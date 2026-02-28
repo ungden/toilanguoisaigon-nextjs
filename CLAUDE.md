@@ -355,3 +355,18 @@ Custom Tailwind colors defined in `tailwind.config.ts`:
 - `cover_image_url` updated in DB for all 18 collections (replaced generic Unsplash images)
 - Script: `scripts/generate-collection-covers.py`
 - Local copies in `scripts/collection-covers-output/`
+
+### Playlist → Collection Merge (Phase 8A)
+- Fully merged `playlists` data into `collections` table (`source='ai'`).
+- Dropped `playlists` and `playlist_locations` tables.
+- Updated `generate-playlist` Edge Function to write to `collections`.
+- Redesigned `/collections` page to split into two sections: "Tuyển chọn bởi đội ngũ" (curated) and "AI gợi ý hôm nay" (AI-generated).
+- AI collection cards use emoji + mood gradient instead of static fallback images.
+- All collection and location card images now use robust `aspect-[4/3]` constraints using Next.js `Image` `fill` prop to prevent layout shifting.
+
+### Brand Assets & Daily Automation (Phase 8B)
+- Generated brand assets via Gemini: logo (phở bowl), OG image (1200x630 watercolor), mystery card back (tarot), and hero banner (16:9).
+- Uploaded assets to Supabase Storage `location-images/brand/` and updated fallback constants.
+- Setup `pg_cron` scheduling for daily orchestrator Edge Function (`daily-cron`).
+- Created `daily-location-crawl` to crawl Google Maps for new locations automatically.
+- Created `enrich-submission` to use AI for extracting Google Maps metadata from pending user submissions.
