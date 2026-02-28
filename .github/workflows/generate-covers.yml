@@ -1,0 +1,54 @@
+name: Generate Collection Covers
+
+on:
+  schedule:
+    # Run daily at 6:15 AM UTC (1:15 PM Vietnam time)
+    # This gives the Supabase daily-cron (which runs at 6:00 AM UTC) 
+    # time to finish creating new collections first.
+    - cron: '15 6 * * *'
+  
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  generate-covers:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+          
+      - name: Install ImageMagick
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          # In Ubuntu 20.04+, ImageMagick v6 is often just 'convert' or 'mogrify'. 
+          # Let's ensure 'magick' command is available by symlinking or using v7.
+          # Or we can just use 'convert' in our script if it's IM v6, but modern Ubuntu has v6 with 'convert'.
+          # Actually, let's install imagemagick and then we can check version.
+          convert -version
+          
+      - name: Modify script for Ubuntu ImageMagick v6 compatibility
+        run: |
+          # Ubuntu usually ships ImageMagick 6, where the command is 'convert' instead of 'magick'
+          sed -i 's/"magick"/"convert"/g' scripts/generate-missing-covers.py
+          
+      - name: Run cover generation script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          python scripts/generate-missing-covers.py
