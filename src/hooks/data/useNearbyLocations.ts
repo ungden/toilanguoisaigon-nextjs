@@ -42,7 +42,6 @@ export const useNearbyLocations = ({
       });
 
       if (error) {
-        console.error('Error fetching nearby locations:', error);
         throw new Error(error.message);
       }
 

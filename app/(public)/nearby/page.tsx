@@ -12,6 +12,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { FALLBACK_IMAGES } from '@/utils/constants';
+import { formatDistance } from '@/utils/geo';
 
 // Dynamic import map to prevent SSR issues with Leaflet
 const NearbyMap = dynamic(() => import('@/components/map/NearbyMap'), {
@@ -238,9 +239,7 @@ export default function NearbyPage() {
                               <span className="truncate max-w-[120px]">{loc.district}</span>
                               <span className="mx-1.5">•</span>
                               <span className="text-vietnam-red-600 font-medium whitespace-nowrap bg-red-50 px-1.5 py-0.5 rounded text-[10px]">
-                                {loc.distance_km < 1 
-                                  ? `${Math.round(loc.distance_km * 1000)}m` 
-                                  : `${loc.distance_km.toFixed(1)}km`}
+                                {formatDistance(loc.distance_km)}
                               </span>
                             </div>
                           </div>

@@ -4,25 +4,13 @@ import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-
-// Fix Leaflet default marker icons in Next.js
-const customMarkerIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-// Custom icon for user location
-const userIcon = new L.DivIcon({
-  className: 'custom-user-marker',
-  html: `<div style="background-color: #ef4444; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8]
-});
+import {
+  locationMarkerIcon,
+  userMarkerIcon,
+  TILE_URL,
+  TILE_ATTRIBUTION,
+  MAP_POPUP_STYLES,
+} from './map-utils';
 
 interface PlaceMapProps {
   latitude: number;
@@ -51,7 +39,7 @@ export default function PlaceMap({ latitude, longitude, name, userLocation }: Pl
     ? L.latLngBounds([
         [latitude, longitude],
         [userLocation.lat, userLocation.lng]
-      ]).pad(0.2) // Add 20% padding around the bounds
+      ]).pad(0.2)
     : undefined;
 
   return (
@@ -63,29 +51,23 @@ export default function PlaceMap({ latitude, longitude, name, userLocation }: Pl
         scrollWheelZoom={true} 
         style={{ height: '100%', width: '100%', zIndex: 0 }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        />
+        <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
         
-        <Marker position={[latitude, longitude]} icon={customMarkerIcon}>
+        <Marker position={[latitude, longitude]} icon={locationMarkerIcon}>
           <Popup>
             <div className="font-semibold text-vietnam-blue-800">{name}</div>
           </Popup>
         </Marker>
 
         {userLocation && (
-          <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userMarkerIcon}>
             <Popup>
               <div className="font-semibold text-vietnam-red-600">Vị trí của bạn</div>
             </Popup>
           </Marker>
         )}
       </MapContainer>
-      <style dangerouslySetInnerHTML={{__html: `
-        .leaflet-popup-content-wrapper { border-radius: 8px; }
-        .leaflet-popup-content { margin: 8px; }
-      `}} />
+      <style dangerouslySetInnerHTML={{ __html: MAP_POPUP_STYLES }} />
     </div>
   );
 }
