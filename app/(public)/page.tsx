@@ -196,16 +196,16 @@ const Index = () => {
                 return (
                   <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
                     <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
-                      <div className="relative overflow-hidden">
+                      <div className="relative overflow-hidden aspect-[4/3] w-full">
                         <Image 
                           src={
                             FEATURED_COLLECTIONS.find(fc => fc.title === collection.title)?.overrideImage
                               ?? optimizedImageUrl
                           } 
                           alt={collection.title} 
-                          className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          width={400}
-                          height={300}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -282,13 +282,13 @@ const Index = () => {
               return (
                 <Link href={`/place/${place.slug}`} key={place.id} className="block group">
                   <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
-                    <div className="relative overflow-hidden">
+                    <div className="relative overflow-hidden aspect-[4/3] w-full">
                       <Image 
                         src={optimizedImageUrl} 
                         alt={place.name} 
-                        className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        width={400}
-                        height={300}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
                       />
                       <div className="absolute top-3 left-3">

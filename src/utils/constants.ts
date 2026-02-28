@@ -9,7 +9,7 @@ const BRAND_BASE = 'https://wsysphytctpgbzoatuzw.supabase.co/storage/v1/object/p
 export const FALLBACK_IMAGES = {
   location: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop',
   collection: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop',
-  hero: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=2070&auto=format&fit=crop',
+  hero: `${BRAND_BASE}/hero.png`,
   collectionHero: 'https://images.unsplash.com/photo-1531697111548-0c45f24911da?q=80&w=2070&auto=format&fit=crop',
   /** OG image — self-hosted Saigon watercolor on Supabase Storage */
   og: `${BRAND_BASE}/og-image.png`,

@@ -94,6 +94,19 @@ ASSETS = {
         "filename": "og-image.png",
         "description": "Open Graph social sharing image (1200x630)",
     },
+    "hero": {
+        "prompt": (
+            OG_STYLE
+            + "A beautiful panoramic Saigon food scene designed specifically for a website hero banner. "
+            "A wide landscape composition (16:9). A bustling, lively Sài Gòn street corner at sunset. "
+            "Warm glowing lights from food stalls, people enjoying street food on small plastic stools, "
+            "steaming pots, a mix of old architecture and modern city vibes in the background. "
+            "The center of the image should have somewhat lower contrast or be slightly darker "
+            "so that white hero text can be overlaid easily. Highly detailed, inviting, watercolor style."
+        ),
+        "filename": "hero.png",
+        "description": "Website hero banner image",
+    },
     "mystery-card": {
         "prompt": (
             MYSTERY_CARD_STYLE

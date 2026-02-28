@@ -147,13 +147,13 @@ export default function PlaylistDetailPage() {
             return (
               <Link href={`/place/${location.slug}`} key={location.id || index} className="block group">
                 <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden aspect-[4/3] w-full">
                     <Image
                       src={optimizedImageUrl}
                       alt={location.name}
-                      className="aspect-[4/3] w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      width={400}
-                      height={300}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
                     <div className="absolute top-4 left-4">
