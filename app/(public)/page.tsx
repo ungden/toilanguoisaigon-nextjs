@@ -122,9 +122,18 @@ const Index = () => {
                     />
                   </div>
                   <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => router.push('/nearby')}
+                    className="h-12 px-6 border-2 border-vietnam-red-600 text-vietnam-red-600 font-semibold rounded-lg hover:bg-vietnam-red-50 transition-all duration-300 flex-shrink-0"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Gần tôi
+                  </Button>
+                  <Button 
                     type="submit" 
                     size="lg" 
-                    className="h-12 px-6 bg-vietnam-red-600 hover:bg-vietnam-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="h-12 px-6 bg-vietnam-red-600 hover:bg-vietnam-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex-shrink-0"
                   >
                     <Search className="h-4 w-4 mr-2" />
                     Tìm kiếm
