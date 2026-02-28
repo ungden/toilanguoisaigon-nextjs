@@ -79,6 +79,7 @@ export default function NearbyPage() {
     if (!userLocation && !locationError && !isLocating) {
       requestLocation();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

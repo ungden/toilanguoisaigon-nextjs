@@ -6,7 +6,6 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { NearbyLocation } from '@/hooks/data/useNearbyLocations';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { FALLBACK_IMAGES } from '@/utils/constants';
 import { Star, MapPin } from 'lucide-react';
