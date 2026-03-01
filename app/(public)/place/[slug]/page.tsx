@@ -70,6 +70,7 @@ import { useUnsaveLocation } from "@/hooks/data/useUnsaveLocation";
 import { useAwardXp } from "@/hooks/data/useAwardXp";
 import { useBadgeEvaluator } from "@/hooks/data/useBadgeEvaluator";
 import { useLikeReview, useUnlikeReview } from "@/hooks/data/useReviewLikes";
+import { useRelatedBlogPosts } from "@/hooks/data/useRelatedBlogPosts";
 import { useUserCollections, useAddToCollection, useCreateUserCollection } from "@/hooks/data/useUserCollections";
 import {
   Popover,
@@ -77,7 +78,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { FolderPlus, Plus, Check, Heart } from "lucide-react";
+import { FolderPlus, Plus, Check, Heart, BookOpen } from "lucide-react";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { getCategoryArtwork, ARTWORK_MESSAGE } from "@/utils/constants";
 import { calculateDistance, formatDistance } from "@/utils/geo";
@@ -237,6 +238,8 @@ const PlaceDetailPage = () => {
   const { data: userCollections } = useUserCollections(user?.id);
   const addToCollection = useAddToCollection();
   const createCollection = useCreateUserCollection();
+
+  const { data: relatedBlogPosts } = useRelatedBlogPosts(slug!);
 
   const [likedReviews, setLikedReviews] = useState<Set<string>>(new Set());
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
@@ -876,7 +879,38 @@ const PlaceDetailPage = () => {
               </TabsContent>
             </Tabs>
           </div>
-          <div className="lg:col-span-1"><div className="sticky top-20 space-y-6"><Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader><CardContent className="space-y-3">{user ? (<Button className="w-full btn-vietnam" onClick={() => { const el = document.getElementById('review-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>) : (<Button asChild className="w-full btn-vietnam"><Link href="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>)}<Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50" onClick={handleToggleSave} disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}><Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />{place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}</Button><Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button>{user && (<Popover open={collectionPopoverOpen} onOpenChange={setCollectionPopoverOpen}><PopoverTrigger asChild><Button variant="outline" className="w-full border-vietnam-gold-600 text-vietnam-gold-700 hover:bg-vietnam-gold-50"><FolderPlus className="h-4 w-4 mr-2" />Thêm vào bộ sưu tập</Button></PopoverTrigger><PopoverContent className="w-72 p-3" align="start"><div className="space-y-2"><p className="text-sm font-semibold text-vietnam-blue-800 mb-2">Chọn bộ sưu tập</p>{userCollections && userCollections.length > 0 ? (<div className="max-h-40 overflow-y-auto space-y-1">{userCollections.map(c => (<Button key={c.id} variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => { handleAddToCollection(c.id); setCollectionPopoverOpen(false); }}><Check className="h-3 w-3 mr-2 text-vietnam-red-600 opacity-0" />{c.title}</Button>))}</div>) : (<p className="text-sm text-slate-500">Chưa có bộ sưu tập nào.</p>)}<div className="border-t pt-2 mt-2"><div className="flex gap-2"><Input placeholder="Tên bộ sưu tập mới..." value={newCollectionTitle} onChange={e => setNewCollectionTitle(e.target.value)} className="h-8 text-sm" onKeyDown={e => { if (e.key === 'Enter') handleCreateAndAdd(); }} /><Button size="sm" className="btn-vietnam h-8 px-2" onClick={handleCreateAndAdd} disabled={!newCollectionTitle.trim() || createCollection.isPending}><Plus className="h-4 w-4" /></Button></div></div></div></PopoverContent></Popover>)}</CardContent></Card>{similarPlaces && similarPlaces.length > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader><CardContent className="space-y-4">{similarPlaces.map((similarPlace) => { const imagePath = similarPlace.main_image_url ? getPathFromSupabaseUrl(similarPlace.main_image_url) : null; const optimizedImageUrl = imagePath ? getTransformedImageUrl(imagePath, { width: 100, height: 100 }) : getCategoryArtwork(similarPlace.name); return (<Link key={similarPlace.id} href={`/place/${similarPlace.slug}`} className="block group"><div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors"><Image src={optimizedImageUrl} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" width={100} height={100} /><div className="flex-grow min-w-0"><p className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</p><p className="text-sm text-vietnam-blue-600">{similarPlace.district}</p>{similarPlace.average_rating > 0 && (<div className="flex items-center text-sm"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}</div></div></Link>); })}</CardContent></Card>)}</div></div>
+          <div className="lg:col-span-1"><div className="sticky top-20 space-y-6"><Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader><CardContent className="space-y-3">{user ? (<Button className="w-full btn-vietnam" onClick={() => { const el = document.getElementById('review-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>) : (<Button asChild className="w-full btn-vietnam"><Link href="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>)}<Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50" onClick={handleToggleSave} disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}><Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />{place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}</Button><Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button>{user && (<Popover open={collectionPopoverOpen} onOpenChange={setCollectionPopoverOpen}><PopoverTrigger asChild><Button variant="outline" className="w-full border-vietnam-gold-600 text-vietnam-gold-700 hover:bg-vietnam-gold-50"><FolderPlus className="h-4 w-4 mr-2" />Thêm vào bộ sưu tập</Button></PopoverTrigger><PopoverContent className="w-72 p-3" align="start"><div className="space-y-2"><p className="text-sm font-semibold text-vietnam-blue-800 mb-2">Chọn bộ sưu tập</p>{userCollections && userCollections.length > 0 ? (<div className="max-h-40 overflow-y-auto space-y-1">{userCollections.map(c => (<Button key={c.id} variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => { handleAddToCollection(c.id); setCollectionPopoverOpen(false); }}><Check className="h-3 w-3 mr-2 text-vietnam-red-600 opacity-0" />{c.title}</Button>))}</div>) : (<p className="text-sm text-slate-500">Chưa có bộ sưu tập nào.</p>)}<div className="border-t pt-2 mt-2"><div className="flex gap-2"><Input placeholder="Tên bộ sưu tập mới..." value={newCollectionTitle} onChange={e => setNewCollectionTitle(e.target.value)} className="h-8 text-sm" onKeyDown={e => { if (e.key === 'Enter') handleCreateAndAdd(); }} /><Button size="sm" className="btn-vietnam h-8 px-2" onClick={handleCreateAndAdd} disabled={!newCollectionTitle.trim() || createCollection.isPending}><Plus className="h-4 w-4" /></Button></div></div></div></PopoverContent></Popover>)}</CardContent></Card>{similarPlaces && similarPlaces.length > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader><CardContent className="space-y-4">{similarPlaces.map((similarPlace) => { const imagePath = similarPlace.main_image_url ? getPathFromSupabaseUrl(similarPlace.main_image_url) : null; const optimizedImageUrl = imagePath ? getTransformedImageUrl(imagePath, { width: 100, height: 100 }) : getCategoryArtwork(similarPlace.name); return (<Link key={similarPlace.id} href={`/place/${similarPlace.slug}`} className="block group"><div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors"><Image src={optimizedImageUrl} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" width={100} height={100} /><div className="flex-grow min-w-0"><p className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</p><p className="text-sm text-vietnam-blue-600">{similarPlace.district}</p>{similarPlace.average_rating > 0 && (<div className="flex items-center text-sm"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}</div></div></Link>); })}</CardContent></Card>)}
+            {relatedBlogPosts && relatedBlogPosts.length > 0 && (
+              <Card className="border-vietnam-red-200">
+                <CardHeader>
+                  <CardTitle className="text-vietnam-red-600 flex items-center">
+                    <BookOpen className="h-5 w-5 mr-2" />
+                    Bài viết liên quan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {relatedBlogPosts.map((post) => (
+                    <Link key={post.id} href={`/blog/${post.slug}`} className="block group">
+                      <div className="flex gap-3 items-start">
+                        {post.cover_image_url && (
+                          <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
+                            <Image src={post.cover_image_url} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          </div>
+                        )}
+                        <div className="flex-grow min-w-0">
+                          <p className="text-sm font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors line-clamp-2">{post.title}</p>
+                          {post.reading_time && (
+                            <p className="text-xs text-vietnam-blue-500 mt-1 flex items-center">
+                              <Clock className="h-3 w-3 mr-1" />{post.reading_time} phút đọc
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            )}</div></div>
         </div>
       </div>
     </div>
