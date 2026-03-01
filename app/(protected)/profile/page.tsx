@@ -34,7 +34,7 @@ const ProfilePage = () => {
                             <AvatarFallback className="text-3xl">{getInitials(profile?.full_name)}</AvatarFallback>
                         </Avatar>
                         <div className="flex items-center gap-2">
-                            <CardTitle className="text-2xl">{profile?.full_name || 'Người dùng mới'}</CardTitle>
+                            <CardTitle className="text-2xl">{profile?.display_name || profile?.full_name || 'Người dùng mới'}</CardTitle>
                             {role === 'admin' && (
                                 <Badge variant="destructive" className="flex items-center gap-1">
                                     <ShieldCheck className="h-3 w-3" />

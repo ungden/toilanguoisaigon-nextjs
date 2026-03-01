@@ -5,6 +5,7 @@ import { showError, showSuccess } from '@/utils/toast';
 interface UpdateProfileArgs {
   id: string;
   full_name: string | null;
+  display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
 }

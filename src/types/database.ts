@@ -15,6 +15,7 @@ export interface Profile {
   id: string;
   email: string;
   full_name: string | null;
+  display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
   created_at: string;
@@ -64,16 +65,17 @@ export interface Location {
   status: LocationStatus;
   average_rating: number;
   review_count: number;
+  is_featured: boolean;
   // Google Maps data (populated by AI import)
   google_maps_uri: string | null;
   google_place_id: string | null;
   google_rating: number | null;
   google_review_count: number | null;
-  google_review_summary: string | null; // AI-tổng hợp review từ Google Maps
-  google_highlights: string[] | null; // Điểm nổi bật từ reviews (ví dụ: "phở đậm đà", "phục vụ nhanh")
-  review_insights: ReviewInsights | null; // Rich review data from Google Search grounding
-  isSaved?: boolean; // Added for client-side tracking
-  location_categories?: { categories: { name: string } }[]; // Relational data
+  google_review_summary: string | null;
+  google_highlights: string[] | null;
+  review_insights: ReviewInsights | null;
+  isSaved?: boolean;
+  location_categories?: { categories: { name: string } }[];
 }
 
 export interface Review {
@@ -201,6 +203,56 @@ export interface LocationSubmission {
   description: string | null;
   notes: string | null;
   status: SubmissionStatus;
+  google_maps_url: string | null;
+  photo_urls: string[] | null;
+  category_id: number | null;
+}
+
+export interface ReviewLike {
+  id: number;
+  review_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface UserCollection {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  cover_image_url: string | null;
+  is_public: boolean;
+  slug: string;
+  created_at: string;
+  updated_at: string;
+  // Relational
+  profiles?: Pick<Profile, 'full_name' | 'display_name' | 'avatar_url'> | null;
+  location_count?: number;
+}
+
+export interface UserCollectionLocation {
+  id: number;
+  collection_id: string;
+  location_id: string;
+  position: number;
+  note: string | null;
+  added_at: string;
+}
+
+export interface UserCollectionWithLocations extends UserCollection {
+  user_collection_locations: Array<
+    UserCollectionLocation & {
+      locations: Pick<
+        Location,
+        'id' | 'name' | 'slug' | 'address' | 'district' | 'main_image_url' | 'average_rating' | 'review_count' | 'price_range'
+      >;
+    }
+  >;
+}
+
+export interface ReviewWithLikes extends ReviewWithProfile {
+  like_count: number;
+  is_liked?: boolean;
 }
 
 export interface Level {

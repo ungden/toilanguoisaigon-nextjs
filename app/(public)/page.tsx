@@ -5,14 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles, Heart } from "lucide-react";
+import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useCollections } from "@/hooks/data/useCollections";
-import { useLocations } from "@/hooks/data/useLocations";
+import { useFeaturedLocations } from "@/hooks/data/useFeaturedLocations";
 import { usePosts } from "@/hooks/data/usePosts";
+import { useRecentReviews } from "@/hooks/data/useRecentReviews";
 import { useStats } from "@/hooks/data/useStats";
 import { showError } from "@/utils/toast";
 import { formatPriceRange, cleanReviewSummary } from "@/utils/formatters";
@@ -24,9 +25,10 @@ import { DailyCheckin } from "@/components/gamification/DailyCheckin";
 const Index = () => {
   const router = useRouter();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
-  const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useLocations({ limit: 8 });
+  const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useFeaturedLocations(8);
   const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
   const { data: stats } = useStats();
+  const { data: recentReviews } = useRecentReviews(6);
 
   // Track collection images that failed to load so we can swap to fallback
   const [failedCollectionImages, setFailedCollectionImages] = useState<Set<string | number>>(new Set());
@@ -288,9 +290,9 @@ const Index = () => {
             <TrendingUp className="h-4 w-4 mr-1" />
             Địa điểm nổi bật
           </Badge>
-          <h2 className="text-4xl font-bold mb-4 text-vietnam-blue-800">Khám phá Sài Gòn</h2>
+          <h2 className="text-4xl font-bold mb-4 text-vietnam-blue-800">Được yêu thích nhất</h2>
           <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-            Những địa điểm ẩm thực được yêu thích nhất, từ quán vỉa hè đến nhà hàng cao cấp
+            Những địa điểm được cộng đồng đánh giá cao nhất, từ quán vỉa hè đến nhà hàng cao cấp
           </p>
         </div>
 
@@ -326,6 +328,12 @@ const Index = () => {
                         loading="lazy"
                       />
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
+                        {place.is_featured && (
+                          <Badge className="bg-vietnam-gold-500 text-white text-xs shadow-md border-none px-2 py-1">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Nổi bật
+                          </Badge>
+                        )}
                         <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
                           {place.district}
                         </Badge>
@@ -335,11 +343,14 @@ const Index = () => {
                           </Badge>
                         )}
                       </div>
-                      <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
-                        <button className="h-8 w-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-vietnam-red-600 hover:text-white transition-colors border border-white/20 shadow-sm" onClick={(e) => { e.preventDefault(); /* TODO: Implement save */ }}>
-                          <Heart className="h-4 w-4" />
-                        </button>
-                      </div>
+                      {place.review_count > 0 && (
+                        <div className="absolute top-3 right-3">
+                          <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md text-white text-xs px-2 py-1 rounded-full border border-white/20">
+                            <MessageSquare className="h-3 w-3" />
+                            {place.review_count}
+                          </div>
+                        </div>
+                      )}
                       <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
                         <div className="flex items-center text-white gap-2">
                           <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
@@ -410,6 +421,73 @@ const Index = () => {
           </Button>
         </div>
       </section>
+
+      {/* Recent Reviews Section */}
+      {recentReviews && recentReviews.length > 0 && (
+        <section className="bg-vietnam-blue-50 py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-vietnam-red-100 text-vietnam-red-700 hover:bg-vietnam-red-200">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                Đánh giá mới nhất
+              </Badge>
+              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Cộng đồng nói gì?</h2>
+              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
+                Đánh giá thật từ những người đã trải nghiệm
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentReviews.map((review) => (
+                <Link href={`/place/${review.locations?.slug}`} key={review.id} className="block group">
+                  <Card className="h-full border-vietnam-blue-200 hover:border-vietnam-red-300 hover:shadow-md transition-all bg-white">
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-10 w-10 rounded-full bg-vietnam-red-100 flex items-center justify-center text-vietnam-red-700 font-bold text-sm flex-shrink-0">
+                          {review.profiles?.full_name?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-vietnam-blue-800 truncate">
+                            {review.profiles?.full_name || 'Ẩn danh'}
+                          </p>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-3 w-3 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-xs text-slate-400 flex-shrink-0">
+                          {new Date(review.created_at).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-vietnam-blue-700 leading-relaxed line-clamp-3 mb-3">
+                          {review.comment}
+                        </p>
+                      )}
+                      <div className="flex items-center text-xs text-vietnam-red-600 font-medium group-hover:text-vietnam-red-700">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {review.locations?.name || 'Địa điểm'}
+                        <ArrowRight className="ml-auto h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
+                <Link href="/reviews">
+                  Xem tất cả đánh giá
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Blog Section - Compact */}
       <section className="container mx-auto py-16 px-4">

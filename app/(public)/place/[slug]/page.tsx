@@ -35,7 +35,6 @@ import {
   Utensils,
   ThumbsUp,
   ThumbsDown,
-  Flag,
   Info,
   ChevronsUpDown,
   Quote,
@@ -70,6 +69,15 @@ import { useSaveLocation } from "@/hooks/data/useSaveLocation";
 import { useUnsaveLocation } from "@/hooks/data/useUnsaveLocation";
 import { useAwardXp } from "@/hooks/data/useAwardXp";
 import { useBadgeEvaluator } from "@/hooks/data/useBadgeEvaluator";
+import { useLikeReview, useUnlikeReview } from "@/hooks/data/useReviewLikes";
+import { useUserCollections, useAddToCollection, useCreateUserCollection } from "@/hooks/data/useUserCollections";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { FolderPlus, Plus, Check, Heart } from "lucide-react";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { getCategoryArtwork, ARTWORK_MESSAGE } from "@/utils/constants";
 import { calculateDistance, formatDistance } from "@/utils/geo";
@@ -224,6 +232,67 @@ const PlaceDetailPage = () => {
   const unsaveLocationMutation = useUnsaveLocation();
   const awardXpMutation = useAwardXp();
   const evaluateBadges = useBadgeEvaluator();
+  const likeReview = useLikeReview();
+  const unlikeReview = useUnlikeReview();
+  const { data: userCollections } = useUserCollections(user?.id);
+  const addToCollection = useAddToCollection();
+  const createCollection = useCreateUserCollection();
+
+  const [likedReviews, setLikedReviews] = useState<Set<string>>(new Set());
+  const [newCollectionTitle, setNewCollectionTitle] = useState('');
+  const [collectionPopoverOpen, setCollectionPopoverOpen] = useState(false);
+
+  // Fetch which reviews the current user has liked
+  useEffect(() => {
+    if (!user || !place) return;
+    const fetchLikes = async () => {
+      const reviewIds = place.reviews.map(r => r.id);
+      if (reviewIds.length === 0) return;
+      const { data } = await supabase
+        .from('review_likes')
+        .select('review_id')
+        .eq('user_id', user.id)
+        .in('review_id', reviewIds);
+      if (data) {
+        setLikedReviews(new Set(data.map(d => d.review_id)));
+      }
+    };
+    fetchLikes();
+  }, [user, place]);
+
+  const handleToggleLike = (reviewId: string) => {
+    if (!user) {
+      showError('Vui lòng đăng nhập để thích đánh giá.');
+      return;
+    }
+    if (likedReviews.has(reviewId)) {
+      setLikedReviews(prev => { const next = new Set(prev); next.delete(reviewId); return next; });
+      unlikeReview.mutate({ reviewId, userId: user.id });
+    } else {
+      setLikedReviews(prev => new Set(prev).add(reviewId));
+      likeReview.mutate({ reviewId, userId: user.id });
+    }
+  };
+
+  const handleAddToCollection = (collectionId: string) => {
+    if (!place) return;
+    addToCollection.mutate({ collectionId, locationId: place.id });
+  };
+
+  const handleCreateAndAdd = () => {
+    if (!user || !place || !newCollectionTitle.trim()) return;
+    createCollection.mutate(
+      { userId: user.id, data: { title: newCollectionTitle.trim() } },
+      {
+        onSuccess: (result) => {
+          if (result?.id) {
+            addToCollection.mutate({ collectionId: result.id, locationId: place.id });
+          }
+          setNewCollectionTitle('');
+        },
+      }
+    );
+  };
 
   const uploadReviewPhotos = async (files: File[], userId: string): Promise<string[]> => {
     const urls: string[] = [];
@@ -509,8 +578,8 @@ const PlaceDetailPage = () => {
             </div>
             {(categories.length > 0 || tags.length > 0) && (<div className="mb-6"><div className="flex flex-wrap gap-2">{categories.map((category) => (<Badge key={category.slug} variant="secondary" className="bg-vietnam-blue-100 text-vietnam-blue-700"><Utensils className="h-3 w-3 mr-1" />{category.name}</Badge>))}{tags.map((tag) => (<Badge key={tag.slug} variant="outline" className="border-vietnam-red-300 text-vietnam-red-600">#{tag.name}</Badge>))}</div></div>)}
             <Separator className="my-6" />
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="overview">Tổng quan</TabsTrigger><TabsTrigger value="reviews">Đánh giá ({totalReviews})</TabsTrigger></TabsList>
+            <Tabs defaultValue="reviews" className="w-full">
+              <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="reviews">Đánh giá ({totalReviews})</TabsTrigger><TabsTrigger value="overview">Tổng quan</TabsTrigger></TabsList>
               <TabsContent value="overview" className="space-y-6 pt-6">
                 <div className="space-y-4 text-lg">
                   <div className="flex items-center justify-between">
@@ -803,11 +872,11 @@ const PlaceDetailPage = () => {
                         </div>
                       </div>
                       <Button onClick={handleSubmitReview} disabled={submitReviewMutation.isPending || isUploadingPhotos || reviewText.trim().length < 10} className="btn-vietnam">{isUploadingPhotos ? 'Đang tải ảnh...' : submitReviewMutation.isPending ? 'Đang gửi...' : 'Gửi đánh giá'}</Button></CardContent></Card>)}
-                <div><div className="flex justify-between items-center mb-4"><h3 className="text-xl font-semibold text-vietnam-red-600">Đánh giá từ cộng đồng</h3><Select value={reviewSort} onValueChange={setReviewSort}><SelectTrigger className="w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Mới nhất</SelectItem><SelectItem value="oldest">Cũ nhất</SelectItem><SelectItem value="highest">Điểm cao nhất</SelectItem><SelectItem value="lowest">Điểm thấp nhất</SelectItem></SelectContent></Select></div>{sortedReviews.length > 0 ? (<div className="space-y-6">{sortedReviews.map(review => (<Card key={review.id} className="border-vietnam-red-100"><CardContent className="p-6"><div className="flex items-start gap-4"><Avatar className="h-10 w-10"><AvatarImage src={review.profiles?.avatar_url || undefined} /><AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700">{review.profiles?.full_name?.[0] || 'U'}</AvatarFallback></Avatar><div className="flex-grow"><div className="flex items-center justify-between mb-2"><div><p className="font-semibold text-vietnam-blue-800">{review.profiles?.full_name || 'Người dùng ẩn danh'}</p><div className="flex items-center gap-2 text-sm text-vietnam-blue-600"><div className="flex">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div><span>·</span><span>{new Date(review.created_at).toLocaleDateString('vi-VN')}</span></div></div><div className="flex gap-1"><Button variant="ghost" size="sm" aria-label="Hữu ích"><ThumbsUp className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Báo cáo"><Flag className="h-4 w-4" /></Button></div></div>{review.comment && (<p className="text-vietnam-blue-700 leading-relaxed">{review.comment}</p>)}{review.image_urls && review.image_urls.length > 0 && (<div className="flex flex-wrap gap-2 mt-3">{review.image_urls.map((imgUrl, imgIdx) => (<Dialog key={imgIdx}><DialogTrigger asChild><Image src={imgUrl} alt={`Ảnh đánh giá ${imgIdx + 1}`} className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={80} height={80} /></DialogTrigger><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Ảnh từ {review.profiles?.full_name || 'Người dùng'}</DialogTitle></DialogHeader><Image src={imgUrl} alt={`Ảnh đánh giá ${imgIdx + 1}`} className="w-full max-h-[70vh] object-contain rounded-lg" width={800} height={600} /></DialogContent></Dialog>))}</div>)}</div></div></CardContent></Card>))}</div>) : (<div className="text-center py-8"><MessageSquare className="h-12 w-12 text-vietnam-blue-300 mx-auto mb-4" /><p className="text-vietnam-blue-600">Chưa có đánh giá nào. Hãy là người đầu tiên!</p></div>)}</div>
+                <div><div className="flex justify-between items-center mb-4"><h3 className="text-xl font-semibold text-vietnam-red-600">Đánh giá từ cộng đồng</h3><Select value={reviewSort} onValueChange={setReviewSort}><SelectTrigger className="w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Mới nhất</SelectItem><SelectItem value="oldest">Cũ nhất</SelectItem><SelectItem value="highest">Điểm cao nhất</SelectItem><SelectItem value="lowest">Điểm thấp nhất</SelectItem></SelectContent></Select></div>{sortedReviews.length > 0 ? (<div className="space-y-6">{sortedReviews.map(review => (<Card key={review.id} className="border-vietnam-red-100"><CardContent className="p-6"><div className="flex items-start gap-4"><Avatar className="h-10 w-10"><AvatarImage src={review.profiles?.avatar_url || undefined} /><AvatarFallback className="bg-vietnam-red-100 text-vietnam-red-700">{review.profiles?.full_name?.[0] || 'U'}</AvatarFallback></Avatar><div className="flex-grow"><div className="flex items-center justify-between mb-2"><div><p className="font-semibold text-vietnam-blue-800">{review.profiles?.full_name || 'Người dùng ẩn danh'}</p><div className="flex items-center gap-2 text-sm text-vietnam-blue-600"><div className="flex">{[...Array(5)].map((_, i) => (<Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`} />))}</div><span>·</span><span>{new Date(review.created_at).toLocaleDateString('vi-VN')}</span></div></div><div className="flex gap-1"><Button variant="ghost" size="sm" aria-label="Hữu ích" onClick={() => handleToggleLike(review.id)} className={likedReviews.has(review.id) ? 'text-vietnam-red-600' : ''}><Heart className={`h-4 w-4 ${likedReviews.has(review.id) ? 'fill-vietnam-red-600' : ''}`} /></Button></div></div>{review.comment && (<p className="text-vietnam-blue-700 leading-relaxed">{review.comment}</p>)}{review.image_urls && review.image_urls.length > 0 && (<div className="flex flex-wrap gap-2 mt-3">{review.image_urls.map((imgUrl, imgIdx) => (<Dialog key={imgIdx}><DialogTrigger asChild><Image src={imgUrl} alt={`Ảnh đánh giá ${imgIdx + 1}`} className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:brightness-90 transition-all" width={80} height={80} /></DialogTrigger><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Ảnh từ {review.profiles?.full_name || 'Người dùng'}</DialogTitle></DialogHeader><Image src={imgUrl} alt={`Ảnh đánh giá ${imgIdx + 1}`} className="w-full max-h-[70vh] object-contain rounded-lg" width={800} height={600} /></DialogContent></Dialog>))}</div>)}</div></div></CardContent></Card>))}</div>) : (<div className="text-center py-8"><MessageSquare className="h-12 w-12 text-vietnam-blue-300 mx-auto mb-4" /><p className="text-vietnam-blue-600">Chưa có đánh giá nào. Hãy là người đầu tiên!</p></div>)}</div>
               </TabsContent>
             </Tabs>
           </div>
-          <div className="lg:col-span-1"><div className="sticky top-20 space-y-6"><Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader><CardContent className="space-y-3">{user ? (<Button className="w-full btn-vietnam" onClick={() => { const el = document.getElementById('review-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>) : (<Button asChild className="w-full btn-vietnam"><Link href="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>)}<Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50" onClick={handleToggleSave} disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}><Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />{place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}</Button><Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button></CardContent></Card>{similarPlaces && similarPlaces.length > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader><CardContent className="space-y-4">{similarPlaces.map((similarPlace) => { const imagePath = similarPlace.main_image_url ? getPathFromSupabaseUrl(similarPlace.main_image_url) : null; const optimizedImageUrl = imagePath ? getTransformedImageUrl(imagePath, { width: 100, height: 100 }) : getCategoryArtwork(similarPlace.name); return (<Link key={similarPlace.id} href={`/place/${similarPlace.slug}`} className="block group"><div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors"><Image src={optimizedImageUrl} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" width={100} height={100} /><div className="flex-grow min-w-0"><p className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</p><p className="text-sm text-vietnam-blue-600">{similarPlace.district}</p>{similarPlace.average_rating > 0 && (<div className="flex items-center text-sm"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}</div></div></Link>); })}</CardContent></Card>)}</div></div>
+          <div className="lg:col-span-1"><div className="sticky top-20 space-y-6"><Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Hành động nhanh</CardTitle></CardHeader><CardContent className="space-y-3">{user ? (<Button className="w-full btn-vietnam" onClick={() => { const el = document.getElementById('review-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}><MessageSquare className="h-4 w-4 mr-2" />Viết đánh giá</Button>) : (<Button asChild className="w-full btn-vietnam"><Link href="/login"><MessageSquare className="h-4 w-4 mr-2" />Đăng nhập để đánh giá</Link></Button>)}<Button variant="outline" className="w-full border-vietnam-red-600 text-vietnam-red-600 hover:bg-vietnam-red-50" onClick={handleToggleSave} disabled={saveLocationMutation.isPending || unsaveLocationMutation.isPending}><Bookmark className={`h-4 w-4 mr-2 ${place.isSaved ? 'fill-vietnam-red-600 text-vietnam-red-600' : ''}`} />{place.isSaved ? 'Đã lưu vào sổ tay' : 'Lưu vào sổ tay'}</Button><Button variant="outline" className="w-full border-vietnam-blue-600 text-vietnam-blue-600 hover:bg-vietnam-blue-50" onClick={handleShare}><Share2 className="h-4 w-4 mr-2" />Chia sẻ</Button>{user && (<Popover open={collectionPopoverOpen} onOpenChange={setCollectionPopoverOpen}><PopoverTrigger asChild><Button variant="outline" className="w-full border-vietnam-gold-600 text-vietnam-gold-700 hover:bg-vietnam-gold-50"><FolderPlus className="h-4 w-4 mr-2" />Thêm vào bộ sưu tập</Button></PopoverTrigger><PopoverContent className="w-72 p-3" align="start"><div className="space-y-2"><p className="text-sm font-semibold text-vietnam-blue-800 mb-2">Chọn bộ sưu tập</p>{userCollections && userCollections.length > 0 ? (<div className="max-h-40 overflow-y-auto space-y-1">{userCollections.map(c => (<Button key={c.id} variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => { handleAddToCollection(c.id); setCollectionPopoverOpen(false); }}><Check className="h-3 w-3 mr-2 text-vietnam-red-600 opacity-0" />{c.title}</Button>))}</div>) : (<p className="text-sm text-slate-500">Chưa có bộ sưu tập nào.</p>)}<div className="border-t pt-2 mt-2"><div className="flex gap-2"><Input placeholder="Tên bộ sưu tập mới..." value={newCollectionTitle} onChange={e => setNewCollectionTitle(e.target.value)} className="h-8 text-sm" onKeyDown={e => { if (e.key === 'Enter') handleCreateAndAdd(); }} /><Button size="sm" className="btn-vietnam h-8 px-2" onClick={handleCreateAndAdd} disabled={!newCollectionTitle.trim() || createCollection.isPending}><Plus className="h-4 w-4" /></Button></div></div></div></PopoverContent></Popover>)}</CardContent></Card>{similarPlaces && similarPlaces.length > 0 && (<Card className="border-vietnam-red-200"><CardHeader><CardTitle className="text-vietnam-red-600">Địa điểm tương tự</CardTitle></CardHeader><CardContent className="space-y-4">{similarPlaces.map((similarPlace) => { const imagePath = similarPlace.main_image_url ? getPathFromSupabaseUrl(similarPlace.main_image_url) : null; const optimizedImageUrl = imagePath ? getTransformedImageUrl(imagePath, { width: 100, height: 100 }) : getCategoryArtwork(similarPlace.name); return (<Link key={similarPlace.id} href={`/place/${similarPlace.slug}`} className="block group"><div className="flex gap-3 p-2 rounded-lg hover:bg-vietnam-red-50 transition-colors"><Image src={optimizedImageUrl} alt={similarPlace.name} className="w-16 h-16 object-cover rounded-lg" width={100} height={100} /><div className="flex-grow min-w-0"><p className="font-medium text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors truncate">{similarPlace.name}</p><p className="text-sm text-vietnam-blue-600">{similarPlace.district}</p>{similarPlace.average_rating > 0 && (<div className="flex items-center text-sm"><Star className="h-3 w-3 fill-vietnam-gold-500 text-vietnam-gold-500 mr-1" />{similarPlace.average_rating.toFixed(1)}</div>)}</div></div></Link>); })}</CardContent></Card>)}</div></div>
         </div>
       </div>
     </div>

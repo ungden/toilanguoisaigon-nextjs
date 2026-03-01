@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bookmark, LogOut, Send, MapPin } from "lucide-react";
+import { Menu, User, Bookmark, LogOut, Send, MapPin, MessageSquare, FolderHeart } from "lucide-react";
 import Image from "next/image";
 import { BRAND_ASSETS } from "@/utils/constants";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -69,6 +69,13 @@ export function Header() {
               Gần tôi
             </Link>
             <Link
+              href="/reviews"
+              className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold flex items-center gap-1"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Đánh giá
+            </Link>
+            <Link
               href="/collections"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold"
             >
@@ -121,6 +128,9 @@ export function Header() {
                  <Link href="/nearby" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors flex items-center gap-2">
                    <MapPin className="h-5 w-5" /> Gần tôi
                  </Link>
+                 <Link href="/reviews" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors flex items-center gap-2">
+                   <MessageSquare className="h-5 w-5" /> Đánh giá
+                 </Link>
                  <Link href="/collections" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bộ sưu tập</Link>
                  <Link href="/blog" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Blog</Link>
                  <Link href="/leaderboard" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors">Bảng xếp hạng</Link>
@@ -162,6 +172,12 @@ export function Header() {
                   <Link href="/my-notebook" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Sổ tay của tôi</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/my-collections" className="flex items-center text-vietnam-blue-700 hover:text-vietnam-red-600 hover:bg-vietnam-red-50">
+                    <FolderHeart className="mr-2 h-4 w-4" />
+                    <span>Bộ sưu tập của tôi</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

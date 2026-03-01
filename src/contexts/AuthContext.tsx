@@ -9,6 +9,7 @@ import { AppRole } from '@/types/database';
 export interface Profile {
   id: string;
   full_name: string | null;
+  display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
   xp?: number;

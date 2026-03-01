@@ -11,6 +11,9 @@ interface SubmissionData {
   district: string;
   description?: string;
   notes?: string;
+  google_maps_url?: string;
+  photo_urls?: string[];
+  category_id?: string;
 }
 
 export const useSubmitLocation = () => {
