@@ -9,6 +9,33 @@ export const formatPriceRange = (priceRange: string | null | undefined) => {
   return priceMap[priceRange] || priceRange;
 };
 
+/**
+ * Patterns that indicate AI-generated junk instead of real review summaries.
+ * Returns null if the summary is junk, otherwise returns the original string.
+ */
+const JUNK_REVIEW_PATTERNS = [
+  /không\s*(được\s*)?cung\s*cấp/i,
+  /không\s*có\s*thông\s*tin/i,
+  /chưa\s*có\s*(thông\s*tin|review|đánh\s*giá)/i,
+  /thông\s*tin.*không.*có\s*sẵn/i,
+  /dữ\s*liệu.*không.*cung\s*cấp/i,
+  /không\s*có\s*dữ\s*liệu/i,
+  /không\s*tìm\s*thấy\s*(review|đánh\s*giá)/i,
+  /no\s*review/i,
+  /not\s*(available|provided)/i,
+  /n\/a/i,
+];
+
+export const cleanReviewSummary = (summary: string | null | undefined): string | null => {
+  if (!summary || typeof summary !== 'string') return null;
+  const trimmed = summary.trim();
+  if (trimmed.length < 10) return null;
+  for (const pattern of JUNK_REVIEW_PATTERNS) {
+    if (pattern.test(trimmed)) return null;
+  }
+  return trimmed;
+};
+
 export const formatOpeningHours = (openingHours: unknown) => {
   if (!openingHours || typeof openingHours !== 'object' || Array.isArray(openingHours)) return 'Chưa cập nhật';
   const hours = openingHours as Record<string, string>;

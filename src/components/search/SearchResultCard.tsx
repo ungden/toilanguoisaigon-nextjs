@@ -3,7 +3,7 @@ import { MapPin, Star, Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Location } from "@/types/database";
-import { formatPriceRange } from "@/utils/formatters";
+import { formatPriceRange, cleanReviewSummary } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { getCategoryArtwork } from "@/utils/constants";
 import { Badge } from "@/components/ui/badge";
@@ -59,9 +59,9 @@ export function SearchResultCard({ place }: SearchResultCardProps) {
               </p>
             </div>
             
-            {place.google_review_summary && (
+            {cleanReviewSummary(place.google_review_summary) && (
               <p className="text-sm text-slate-500 italic line-clamp-2 mt-3 leading-relaxed bg-slate-50 p-2 rounded-md border border-slate-100">
-                &quot;{place.google_review_summary}&quot;
+                &quot;{cleanReviewSummary(place.google_review_summary)}&quot;
               </p>
             )}
           </div>

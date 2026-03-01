@@ -44,7 +44,7 @@ import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Location, ReviewWithProfile } from '@/types/database';
-import { formatPriceRange } from "@/utils/formatters";
+import { formatPriceRange, cleanReviewSummary } from "@/utils/formatters";
 import { useEffect, useState } from "react";
 import { showError, showSuccess } from "@/utils/toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -542,7 +542,7 @@ const PlaceDetailPage = () => {
                 <Collapsible><CollapsibleTrigger asChild><div className="flex justify-between items-center p-3 border rounded-lg cursor-pointer hover:bg-muted"><div className="flex items-center"><Clock className="h-5 w-5 mr-3 text-vietnam-red-600" /><div><span className="font-semibold text-vietnam-blue-800">{todayInfo.label} (Hôm nay):</span><span className="ml-2 text-vietnam-blue-700 font-medium">{todayHours}</span></div></div><Button variant="ghost" size="sm" className="p-1"><ChevronsUpDown className="h-4 w-4" /><span className="sr-only">Xem thêm</span></Button></div></CollapsibleTrigger><CollapsibleContent><div className="mt-2 p-4 border rounded-lg space-y-3">{daysOfWeek.map(({ key, label }, index) => { const hours = openingHoursData?.[key] || 'Đóng cửa'; const isToday = todayIndex === index; return (<div key={key} className={`flex justify-between items-center`}><span className={`font-medium ${isToday ? 'text-vietnam-red-700' : 'text-vietnam-blue-800'}`}>{label}</span><span className={`${isToday ? 'text-vietnam-red-600 font-semibold' : 'text-vietnam-blue-600'}`}>{hours}</span></div>);})}</div></CollapsibleContent></Collapsible>
                 <Alert className="border-vietnam-blue-200 bg-vietnam-blue-50"><Info className="h-4 w-4 text-vietnam-blue-600" /><AlertTitle className="font-semibold text-vietnam-blue-800">Dành cho chủ sở hữu</AlertTitle><AlertDescription className="text-vietnam-blue-700">Chủ quán / chủ cơ sở liên hệ chúng tôi để <strong>xác nhận</strong> địa điểm và update số điện thoại.</AlertDescription></Alert>
                 {place.description && (<div><h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Về địa điểm này</h3><div className="prose prose-lg max-w-none text-vietnam-blue-700"><p className="leading-relaxed">{place.description}</p></div></div>)}
-                {(place.google_rating || place.google_review_summary || (place.google_highlights && place.google_highlights.length > 0)) && (
+                {(place.google_rating || cleanReviewSummary(place.google_review_summary) || (place.google_highlights && place.google_highlights.length > 0)) && (
                   <Card className="border-vietnam-gold-200 bg-vietnam-gold-50/50">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-vietnam-red-600 flex items-center text-xl">
@@ -569,8 +569,8 @@ const PlaceDetailPage = () => {
                           )}
                         </div>
                       )}
-                      {place.google_review_summary && (
-                        <p className="text-vietnam-blue-700 leading-relaxed italic">&ldquo;{place.google_review_summary}&rdquo;</p>
+                      {cleanReviewSummary(place.google_review_summary) && (
+                        <p className="text-vietnam-blue-700 leading-relaxed italic">&ldquo;{cleanReviewSummary(place.google_review_summary)}&rdquo;</p>
                       )}
                       {place.google_highlights && place.google_highlights.length > 0 && (
                         <div className="flex flex-wrap gap-2">

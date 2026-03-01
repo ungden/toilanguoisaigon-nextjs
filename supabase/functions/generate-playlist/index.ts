@@ -14,6 +14,25 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const GEMINI_MODEL = "gemini-2.5-flash";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
+// Filter junk AI-generated review summaries
+const JUNK_PATTERNS = [
+  /không\s*(được\s*)?cung\s*cấp/i,
+  /không\s*có\s*thông\s*tin/i,
+  /chưa\s*có\s*(thông\s*tin|review|đánh\s*giá)/i,
+  /không\s*có\s*dữ\s*liệu/i,
+  /không\s*tìm\s*thấy/i,
+  /no\s*review/i,
+  /not\s*(available|provided)/i,
+  /n\/a/i,
+];
+function cleanReview(s: string | null | undefined): string | null {
+  if (!s || typeof s !== "string") return null;
+  const t = s.trim();
+  if (t.length < 10) return null;
+  for (const p of JUNK_PATTERNS) { if (p.test(t)) return null; }
+  return t;
+}
+
 // HCMC coordinates
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -127,7 +146,7 @@ Trả kết quả dưới dạng JSON array:
         "price_range": "$ hoặc $$ hoặc $$$ hoặc $$$$",
         "google_rating": 4.5,
         "google_review_count": 500,
-        "google_review_summary": "tóm tắt ngắn gọn nhận xét nổi bật từ Google reviews (chỉ cho địa điểm mới)",
+        "google_review_summary": "tóm tắt ngắn gọn nhận xét nổi bật từ Google reviews (chỉ cho địa điểm mới, NẾU KHÔNG CÓ review thật thì set null)",
         "google_highlights": ["keyword1", "keyword2"]
       }
     ]
@@ -333,7 +352,7 @@ CHỈ trả về JSON, không markdown code block.`;
               typeof newLoc.data.google_review_count === "number"
                 ? newLoc.data.google_review_count
                 : null,
-            google_review_summary: newLoc.data.google_review_summary || null,
+            google_review_summary: cleanReview(newLoc.data.google_review_summary),
             google_highlights: highlights,
             status: "draft",
             average_rating: 0,

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { slugify } from '@/lib/utils';
+import { cleanReviewSummary } from '@/utils/formatters';
 
 // Types matching the Edge Function response
 export interface MapsImportLocation {
@@ -91,7 +92,7 @@ export const useImportLocations = () => {
         google_place_id: loc.google_place_id,
         google_rating: loc.google_rating,
         google_review_count: loc.google_review_count,
-        google_review_summary: loc.google_review_summary,
+        google_review_summary: cleanReviewSummary(loc.google_review_summary),
         google_highlights: loc.google_highlights,
         status: 'draft' as const,
         average_rating: 0,

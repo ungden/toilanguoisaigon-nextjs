@@ -21,6 +21,25 @@ import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 
+// ─── Junk review filter ──────────────────────────────────────────────────
+const JUNK_PATTERNS = [
+  /không\s*(được\s*)?cung\s*cấp/i,
+  /không\s*có\s*thông\s*tin/i,
+  /chưa\s*có\s*(thông\s*tin|review|đánh\s*giá)/i,
+  /không\s*có\s*dữ\s*liệu/i,
+  /không\s*tìm\s*thấy/i,
+  /no\s*review/i,
+  /not\s*(available|provided)/i,
+  /n\/a/i,
+];
+function cleanReview(s: string | null | undefined): string | null {
+  if (!s || typeof s !== "string") return null;
+  const t = s.trim();
+  if (t.length < 10) return null;
+  for (const p of JUNK_PATTERNS) { if (p.test(t)) return null; }
+  return t;
+}
+
 // ─── Config ──────────────────────────────────────────────────────────────
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -110,7 +129,7 @@ Trả kết quả dưới dạng JSON array. Mỗi phần tử có format:
   "price_range": "$" hoặc "$$" hoặc "$$$" hoặc "$$$$" hoặc null,
   "google_rating": 4.5,
   "google_review_count": 1234,
-  "google_review_summary": "tóm tắt review bằng tiếng Việt",
+  "google_review_summary": "tóm tắt review bằng tiếng Việt (NẾU KHÔNG CÓ review thật thì set null, KHÔNG bịa)",
   "google_highlights": ["keyword1", "keyword2", "keyword3"]
 }
 
@@ -290,8 +309,7 @@ CHỈ trả về JSON array, không thêm markdown code block hay text nào khá
         typeof loc.google_review_count === "number"
           ? loc.google_review_count
           : null,
-      google_review_summary:
-        (loc.google_review_summary as string) || null,
+      google_review_summary: cleanReview(loc.google_review_summary as string),
       google_highlights: highlights,
     };
   });

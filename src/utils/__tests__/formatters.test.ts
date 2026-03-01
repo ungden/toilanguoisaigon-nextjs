@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { formatPriceRange, formatOpeningHours } from '../formatters';
+import { formatPriceRange, formatOpeningHours, cleanReviewSummary } from '../formatters';
 
 describe('formatPriceRange', () => {
   it('returns "Chưa cập nhật" for null/undefined', () => {
@@ -79,5 +79,48 @@ describe('formatOpeningHours', () => {
     const hours = { tuesday: '9:00 - 21:00' };
     // Sunday not found, monday fallback also not found
     expect(formatOpeningHours(hours)).toBe('Chưa cập nhật');
+  });
+});
+
+describe('cleanReviewSummary', () => {
+  it('returns null for null/undefined/empty', () => {
+    expect(cleanReviewSummary(null)).toBeNull();
+    expect(cleanReviewSummary(undefined)).toBeNull();
+    expect(cleanReviewSummary('')).toBeNull();
+  });
+
+  it('returns null for strings shorter than 10 chars', () => {
+    expect(cleanReviewSummary('ngon')).toBeNull();
+    expect(cleanReviewSummary('OK')).toBeNull();
+  });
+
+  it('returns null for junk "không được cung cấp" pattern', () => {
+    expect(cleanReviewSummary('Thông tin tóm tắt review cụ thể không được cung cấp trong dữ liệu Google Maps.')).toBeNull();
+    expect(cleanReviewSummary('Thông tin review không được cung cấp.')).toBeNull();
+  });
+
+  it('returns null for junk "không có thông tin" pattern', () => {
+    expect(cleanReviewSummary('Không có thông tin review cho địa điểm này.')).toBeNull();
+  });
+
+  it('returns null for junk "chưa có review" pattern', () => {
+    expect(cleanReviewSummary('Chưa có review nào trên Google Maps.')).toBeNull();
+    expect(cleanReviewSummary('Chưa có đánh giá nào.')).toBeNull();
+  });
+
+  it('returns null for English junk patterns', () => {
+    expect(cleanReviewSummary('No review data available')).toBeNull();
+    expect(cleanReviewSummary('Not available for this location')).toBeNull();
+    expect(cleanReviewSummary('Not provided in the data')).toBeNull();
+  });
+
+  it('returns the original string for valid review summaries', () => {
+    const valid = 'Phở đậm đà, nước dùng trong veo, thịt bò mềm. Phục vụ nhanh.';
+    expect(cleanReviewSummary(valid)).toBe(valid);
+  });
+
+  it('trims whitespace from valid summaries', () => {
+    const valid = '  Quán ăn ngon, giá rẻ, phục vụ tốt.  ';
+    expect(cleanReviewSummary(valid)).toBe(valid.trim());
   });
 });

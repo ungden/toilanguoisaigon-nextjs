@@ -31,6 +31,25 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+// Filter junk AI-generated review summaries
+const JUNK_PATTERNS = [
+  /không\s*(được\s*)?cung\s*cấp/i,
+  /không\s*có\s*thông\s*tin/i,
+  /chưa\s*có\s*(thông\s*tin|review|đánh\s*giá)/i,
+  /không\s*có\s*dữ\s*liệu/i,
+  /không\s*tìm\s*thấy/i,
+  /no\s*review/i,
+  /not\s*(available|provided)/i,
+  /n\/a/i,
+];
+function cleanReview(s: string | null | undefined): string | null {
+  if (!s || typeof s !== "string") return null;
+  const t = s.trim();
+  if (t.length < 10) return null;
+  for (const p of JUNK_PATTERNS) { if (p.test(t)) return null; }
+  return t;
+}
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
 
@@ -303,7 +322,7 @@ Với mỗi địa điểm, cung cấp đầy đủ:
 - Số điện thoại (nếu có)
 - Giờ mở cửa (nếu có)
 - Mức giá: $ (<50k), $$ (50-150k), $$$ (150-500k), $$$$ (>500k VND/người)
-- Điểm Google Maps, số review, tóm tắt review tiếng Việt, 3-5 keyword nổi bật
+- Điểm Google Maps, số review, tóm tắt review tiếng Việt (NẾU KHÔNG CÓ review thật thì set null, KHÔNG tự bịa), 3-5 keyword nổi bật
 
 Trả kết quả JSON array:
 [{"name":"","address":"","district":"","description":"","phone_number":null,"opening_hours":null,"price_range":"$$","google_rating":4.5,"google_review_count":500,"google_review_summary":"","google_highlights":[]}]
@@ -447,7 +466,7 @@ CHỈ JSON, không markdown.`;
               google_place_id: placeId,
               google_rating: typeof loc.google_rating === "number" ? loc.google_rating : null,
               google_review_count: typeof loc.google_review_count === "number" ? loc.google_review_count : null,
-              google_review_summary: (loc.google_review_summary as string) || null,
+              google_review_summary: cleanReview(loc.google_review_summary as string),
               google_highlights: highlights,
               status: "draft",
               average_rating: typeof loc.google_rating === "number" ? loc.google_rating : 0,

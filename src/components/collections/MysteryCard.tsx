@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { cn } from '@/lib/utils';
 import { getCategoryArtwork, BRAND_ASSETS } from '@/utils/constants';
-import { formatPriceRange } from '@/utils/formatters';
+import { formatPriceRange, cleanReviewSummary } from '@/utils/formatters';
 import { ArrowRight, Star, DollarSign, MapPin, MessageSquare, Sparkles } from 'lucide-react';
 
 interface MysteryCardProps {
@@ -39,12 +39,13 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
     ? location.review_count
     : location?.google_review_count;
 
-  // Get first highlight or review summary snippet
+  // Get first highlight or review summary snippet (filtered for junk)
+  const cleanSummary = cleanReviewSummary(location?.google_review_summary);
   const highlight = location?.google_highlights?.[0]
-    || (location?.google_review_summary
-      ? (location.google_review_summary.length > 60
-        ? location.google_review_summary.slice(0, 60) + '…'
-        : location.google_review_summary)
+    || (cleanSummary
+      ? (cleanSummary.length > 60
+        ? cleanSummary.slice(0, 60) + '…'
+        : cleanSummary)
       : null);
 
   // Category name

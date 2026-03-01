@@ -29,6 +29,25 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMIN
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
 
+// Filter junk AI-generated review summaries
+const JUNK_PATTERNS = [
+  /không\s*(được\s*)?cung\s*cấp/i,
+  /không\s*có\s*thông\s*tin/i,
+  /chưa\s*có\s*(thông\s*tin|review|đánh\s*giá)/i,
+  /không\s*có\s*dữ\s*liệu/i,
+  /không\s*tìm\s*thấy/i,
+  /no\s*review/i,
+  /not\s*(available|provided)/i,
+  /n\/a/i,
+];
+function cleanReview(s: string | null | undefined): string | null {
+  if (!s || typeof s !== "string") return null;
+  const t = s.trim();
+  if (t.length < 10) return null;
+  for (const p of JUNK_PATTERNS) { if (p.test(t)) return null; }
+  return t;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -91,7 +110,7 @@ Trả về JSON object với thông tin từ Google Maps:
   "price_range": "$ hoặc $$ hoặc $$$ hoặc $$$$",
   "google_rating": 4.5,
   "google_review_count": 500,
-  "google_review_summary": "Tóm tắt review tiếng Việt 2-3 câu",
+  "google_review_summary": "Tóm tắt review tiếng Việt 2-3 câu (NẾU KHÔNG CÓ review thật thì set null, KHÔNG bịa)",
   "google_highlights": ["keyword1", "keyword2", "keyword3"],
   "description": "Mô tả hấp dẫn 2-3 câu tiếng Việt nếu chưa có"
 }
@@ -169,8 +188,8 @@ CHỈ JSON, không markdown.`;
           `[ENRICHED]`,
           `Google: ${enrichData.google_rating || "?"}/5 (${enrichData.google_review_count || 0} reviews)`,
           `Giá: ${enrichData.price_range || "?"}`,
-          enrichData.google_review_summary
-            ? `Review: ${enrichData.google_review_summary}`
+          cleanReview(enrichData.google_review_summary as string)
+            ? `Review: ${cleanReview(enrichData.google_review_summary as string)}`
             : null,
           enrichData.google_highlights
             ? `Nổi bật: ${(enrichData.google_highlights as string[]).join(", ")}`

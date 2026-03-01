@@ -15,7 +15,7 @@ import { useLocations } from "@/hooks/data/useLocations";
 import { usePosts } from "@/hooks/data/usePosts";
 import { useStats } from "@/hooks/data/useStats";
 import { showError } from "@/utils/toast";
-import { formatPriceRange } from "@/utils/formatters";
+import { formatPriceRange, cleanReviewSummary } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
 import { FALLBACK_IMAGES, FEATURED_COLLECTIONS, getCategoryArtwork } from "@/utils/constants";
@@ -365,9 +365,9 @@ const Index = () => {
                           <span className="truncate">{place.address}</span>
                         </div>
                         
-                        {place.google_review_summary && (
+                        {cleanReviewSummary(place.google_review_summary) && (
                           <p className="text-sm text-slate-500 italic line-clamp-2 mt-2 leading-relaxed bg-slate-50 p-2 rounded-md border border-slate-100">
-                            &quot;{place.google_review_summary}&quot;
+                            &quot;{cleanReviewSummary(place.google_review_summary)}&quot;
                           </p>
                         )}
                       </div>
