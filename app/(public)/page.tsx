@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useCollections } from "@/hooks/data/useCollections";
 import { useFeaturedLocations } from "@/hooks/data/useFeaturedLocations";
+import { useTrendingLocations } from "@/hooks/data/useTrendingLocations";
 import { usePosts } from "@/hooks/data/usePosts";
 import { useRecentReviews } from "@/hooks/data/useRecentReviews";
 import { useStats } from "@/hooks/data/useStats";
@@ -21,11 +22,14 @@ import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { MysteryLocationCards } from "@/components/collections/MysteryLocationCards";
 import { FALLBACK_IMAGES, FEATURED_COLLECTIONS, getCategoryArtwork } from "@/utils/constants";
 import { DailyCheckin } from "@/components/gamification/DailyCheckin";
+import { getLocationBadges } from "@/utils/badges";
+import { Flame } from "lucide-react";
 
 const Index = () => {
   const router = useRouter();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useFeaturedLocations(8);
+  const { data: trendingPlaces, isLoading: isLoadingTrending } = useTrendingLocations(8);
   const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
   const { data: stats } = useStats();
   const { data: recentReviews } = useRecentReviews(6);
@@ -58,9 +62,14 @@ const Index = () => {
     
     priorityItems.sort((a, b) => featuredTitles.indexOf(a.title) - featuredTitles.indexOf(b.title));
 
-    const allSorted = [...priorityItems, ...otherItems];
-    return allSorted.slice(0, 8);
+    // Shuffle the non-pinned collections for variety on each visit
+    const shuffled = [...otherItems];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
 
+    return [...priorityItems, ...shuffled].slice(0, 8);
   }, [collections, featuredTitles]);
 
   useEffect(() => {
@@ -314,6 +323,7 @@ const Index = () => {
               const optimizedImageUrl = imagePath 
                 ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
                 : getCategoryArtwork(place.name);
+              const badges = getLocationBadges(place);
               
               return (
                 <Link href={`/place/${place.slug}`} key={place.id} className="block group">
@@ -328,12 +338,11 @@ const Index = () => {
                         loading="lazy"
                       />
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
-                        {place.is_featured && (
-                          <Badge className="bg-vietnam-gold-500 text-white text-xs shadow-md border-none px-2 py-1">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Nổi bật
+                        {badges.map((b) => (
+                          <Badge key={b.type} variant="outline" className={`${b.className} text-xs shadow-md px-2 py-1 font-semibold`}>
+                            {b.label}
                           </Badge>
-                        )}
+                        ))}
                         <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
                           {place.district}
                         </Badge>
@@ -421,6 +430,101 @@ const Index = () => {
           </Button>
         </div>
       </section>
+
+      {/* Trending Section */}
+      {(isLoadingTrending || (trendingPlaces && trendingPlaces.length > 0)) && (
+        <section className="bg-gradient-to-b from-orange-50 to-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-200">
+                <Flame className="h-4 w-4 mr-1" />
+                Đang hot
+              </Badge>
+              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Xu hướng hôm nay</h2>
+              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
+                Những địa điểm đang được quan tâm nhiều nhất gần đây
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {isLoadingTrending ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="aspect-[4/3] w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardContent>
+                  </Card>
+                ))
+              ) : trendingPlaces && trendingPlaces.length > 0 ? (
+                trendingPlaces.slice(0, 8).map((place) => {
+                  const imagePath = place.main_image_url ? getPathFromSupabaseUrl(place.main_image_url) : null;
+                  const optimizedImageUrl = imagePath
+                    ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
+                    : getCategoryArtwork(place.name);
+                  const badges = getLocationBadges(place);
+
+                  return (
+                    <Link href={`/place/${place.slug}`} key={place.id} className="block group">
+                      <Card className="overflow-hidden card-hover border-orange-200 h-full bg-white">
+                        <div className="relative overflow-hidden aspect-[4/3] w-full">
+                          <Image
+                            src={optimizedImageUrl}
+                            alt={place.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                          <div className="absolute top-3 left-3 flex flex-col gap-2">
+                            {badges.map((b) => (
+                              <Badge key={b.type} variant="outline" className={`${b.className} text-xs shadow-md px-2 py-1 font-semibold`}>
+                                {b.label}
+                              </Badge>
+                            ))}
+                            <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
+                              {place.district}
+                            </Badge>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                            <div className="flex items-center text-white gap-2">
+                              <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
+                                <Star className="h-3.5 w-3.5 fill-white mr-1 text-white" />
+                                {place.average_rating > 0 ? place.average_rating.toFixed(1) : 'Mới'}
+                              </div>
+                              {place.review_count > 0 && (
+                                <span className="text-xs text-white/90 font-medium drop-shadow-md">
+                                  ({place.review_count} đánh giá)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-1 line-clamp-1">
+                            {place.name}
+                          </h3>
+                          <div className="flex items-center text-sm text-vietnam-blue-600">
+                            <MapPin className="h-4 w-4 mr-1.5 flex-shrink-0 text-vietnam-red-500" />
+                            <span className="truncate">{place.address}</span>
+                          </div>
+                          {place.price_range && (
+                            <div className="mt-3 pt-2 border-t border-slate-100">
+                              <span className="text-vietnam-gold-600 font-medium px-2 py-1 bg-vietnam-gold-50 rounded-md text-xs">
+                                {formatPriceRange(place.price_range)}
+                              </span>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })
+              ) : null}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Recent Reviews Section */}
       {recentReviews && recentReviews.length > 0 && (

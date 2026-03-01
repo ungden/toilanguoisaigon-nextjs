@@ -13,6 +13,7 @@ import { Collection, Location, CollectionCategory, CollectionLocation } from '@/
 import { formatPriceRange, formatOpeningHours } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
+import { getLocationBadges } from "@/utils/badges";
 import Image from "next/image";
 
 interface CollectionWithLocations extends Omit<Collection, 'collection_categories'> {
@@ -153,6 +154,7 @@ const CollectionDetailPage = () => {
             const optimizedImageUrl = imagePath 
               ? getTransformedImageUrl(imagePath, { width: 400, height: 300 }) 
               : getCategoryArtwork(location.name);
+            const badges = getLocationBadges(location);
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id} className="block group">
@@ -167,6 +169,11 @@ const CollectionDetailPage = () => {
                       loading="lazy"
                     />
                     <div className="absolute top-3 left-3 flex flex-col gap-2">
+                      {badges.map((b) => (
+                        <Badge key={b.type} variant="outline" className={`${b.className} text-xs shadow-md px-2 py-1 font-semibold`}>
+                          {b.label}
+                        </Badge>
+                      ))}
                       <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
                         {location.district}
                       </Badge>

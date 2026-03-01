@@ -6,6 +6,7 @@ import { Location } from "@/types/database";
 import { formatPriceRange, cleanReviewSummary } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 import { getCategoryArtwork } from "@/utils/constants";
+import { getLocationBadges } from "@/utils/badges";
 import { Badge } from "@/components/ui/badge";
 
 interface SearchResultCardProps {
@@ -17,6 +18,7 @@ export function SearchResultCard({ place }: SearchResultCardProps) {
   const optimizedImageUrl = imagePath 
     ? getTransformedImageUrl(imagePath, { width: 400, height: 400 }) 
     : getCategoryArtwork(place.name);
+  const badges = getLocationBadges(place);
 
   return (
     <Link href={`/place/${place.slug}`} className="block group">
@@ -35,6 +37,15 @@ export function SearchResultCard({ place }: SearchResultCardProps) {
             sizes="(max-width: 640px) 100vw, 192px"
             loading="lazy"
           />
+          {badges.length > 0 && (
+            <div className="absolute bottom-2 left-2 flex gap-1.5 sm:top-2 sm:bottom-auto sm:right-2 sm:left-auto">
+              {badges.map((b) => (
+                <Badge key={b.type} variant="outline" className={`${b.className} text-[10px] px-1.5 py-0.5 font-semibold shadow-sm`}>
+                  {b.label}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
         <CardContent className="p-4 flex flex-col justify-between flex-grow">
           <div>

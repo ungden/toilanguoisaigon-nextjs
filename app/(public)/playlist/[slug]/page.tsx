@@ -18,6 +18,7 @@ import {
   Heart,
 } from "lucide-react";
 import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
+import { getLocationBadges } from "@/utils/badges";
 import { formatPriceRange } from "@/utils/formatters";
 import { getTransformedImageUrl, getPathFromSupabaseUrl } from "@/utils/image";
 
@@ -148,6 +149,7 @@ export default function PlaylistDetailPage() {
             const optimizedImageUrl = imagePath
               ? getTransformedImageUrl(imagePath, { width: 400, height: 300 })
               : getCategoryArtwork(location.name);
+            const badges = getLocationBadges(location);
 
             return (
               <Link href={`/place/${location.slug}`} key={location.id || index} className="block group">
@@ -165,6 +167,11 @@ export default function PlaylistDetailPage() {
                       <Badge className="bg-vietnam-red-600 text-white font-bold text-xs shadow-md border-none px-2 py-1 w-fit">
                         #{index + 1}
                       </Badge>
+                      {badges.map((b) => (
+                        <Badge key={b.type} variant="outline" className={`${b.className} text-xs shadow-md px-2 py-1 font-semibold w-fit`}>
+                          {b.label}
+                        </Badge>
+                      ))}
                       <Badge className="bg-white/90 backdrop-blur-sm text-vietnam-blue-800 text-[10px] shadow-sm border-none w-fit">
                         {location.district}
                       </Badge>

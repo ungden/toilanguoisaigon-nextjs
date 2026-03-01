@@ -74,6 +74,9 @@ export interface Location {
   google_review_summary: string | null;
   google_highlights: string[] | null;
   review_insights: ReviewInsights | null;
+  // Computed fields (from triggers)
+  save_count: number;
+  latest_review_at: string | null;
   isSaved?: boolean;
   location_categories?: { categories: { name: string } }[];
 }
