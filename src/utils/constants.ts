@@ -34,8 +34,10 @@ interface FeaturedCollection {
  * Order matters – first entry appears first.
  */
 export const FEATURED_COLLECTIONS: readonly FeaturedCollection[] = [
-  { title: 'Check-in Sống Ảo Triệu Like' },
-  { title: 'Vỉa Hè Tinh Hoa' },
+  { title: 'Quán Mới Trên MXH Đang Viral' },
+  { title: 'Ăn Gì Khi Trời Mưa?' },
+  { title: 'Quán Ăn Trong Hẻm Bí Mật' },
+  { title: 'Date Night Hoàn Hảo' },
 ];
 
 /**
