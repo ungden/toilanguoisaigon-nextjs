@@ -120,14 +120,20 @@ async function main() {
     console.log(`[${i + 1}/${locations.length}] ${loc.name} (${loc.district})`);
 
     try {
-      const prompt = `Tìm thông tin chi tiết về địa điểm ẩm thực này ở TP. Hồ Chí Minh trên Google Maps:
+      const prompt = `Tìm thông tin chi tiết về địa điểm ẩm thực/quán này ở TP. Hồ Chí Minh trên Google Maps:
 
 Tên: "${loc.name}"
 Địa chỉ: "${loc.address}"
 Quận: "${loc.district}"
 
-Hãy tìm CHÍNH XÁC địa điểm này trên Google Maps và trả về thông tin thật:
+HƯỚNG DẪN TÌM KIẾM:
+- Tìm trên Google Maps bằng tên chính xác trước
+- Nếu không tìm thấy, thử các biến thể: bỏ dấu tiếng Việt, thêm/bớt "cafe"/"coffee"/"bar"/"restaurant", viết hoa/thường khác nhau
+- Tên có thể là tiếng Anh, tiếng Việt, hoặc tên sáng tạo (ví dụ: "A PLACE cafe", "Lặng Yên Cà Phê", "OKKIO Caffe")
+- Kết hợp tên + địa chỉ + quận để xác định đúng địa điểm
+- Đây là địa điểm thật đang hoạt động ở Sài Gòn, hãy cố gắng tìm
 
+Trả về JSON:
 {
   "found": true,
   "google_rating": 4.5,
@@ -145,7 +151,7 @@ Hãy tìm CHÍNH XÁC địa điểm này trên Google Maps và trả về thôn
 QUAN TRỌNG:
 - google_rating, google_review_count PHẢI lấy từ Google Maps thật, KHÔNG bịa
 - latitude và longitude PHẢI chính xác theo Google Maps
-- Nếu không tìm thấy địa điểm, set "found": false và tất cả fields khác null
+- CHỈ set "found": false nếu THẬT SỰ không tìm thấy địa điểm nào phù hợp sau khi đã thử các biến thể tên
 - CHỈ trả JSON, không markdown`;
 
       const geminiResponse = await fetch(API_URL, {
