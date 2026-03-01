@@ -34,16 +34,19 @@ import {
   Dog,
   Utensils,
   ThumbsUp,
+  ThumbsDown,
   Flag,
   Info,
-  ChevronsUpDown
+  ChevronsUpDown,
+  Quote,
+  Sparkles
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Location, ReviewWithProfile } from '@/types/database';
+import { Location, ReviewWithProfile, ReviewInsights } from '@/types/database';
 import { formatPriceRange, cleanReviewSummary } from "@/utils/formatters";
 import { useEffect, useState } from "react";
 import { showError, showSuccess } from "@/utils/toast";
@@ -584,6 +587,135 @@ const PlaceDetailPage = () => {
                     </CardContent>
                   </Card>
                 )}
+                {/* Review Insights — rich review data from Google Search grounding */}
+                {place.review_insights && (() => {
+                  const ri = place.review_insights as ReviewInsights;
+                  const hasContent = (ri.top_reviews && ri.top_reviews.length > 0) ||
+                    (ri.best_dishes && ri.best_dishes.length > 0) ||
+                    (ri.pros && ri.pros.length > 0) ||
+                    (ri.cons && ri.cons.length > 0) ||
+                    ri.atmosphere || ri.typical_visit;
+                  if (!hasContent) return null;
+                  return (
+                    <Card className="border-vietnam-red-200 bg-vietnam-red-50/30">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-vietnam-red-600 flex items-center text-xl">
+                          <Sparkles className="h-5 w-5 mr-2" />
+                          Điểm nổi bật từ cộng đồng
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-5">
+                        {/* Best dishes */}
+                        {ri.best_dishes && ri.best_dishes.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-vietnam-blue-800 mb-2 flex items-center">
+                              <Utensils className="h-4 w-4 mr-1.5 text-vietnam-red-600" />
+                              Món nên thử
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {ri.best_dishes.map((dish, idx) => (
+                                <Badge key={idx} className="bg-vietnam-red-100 text-vietnam-red-700 border-vietnam-red-200">
+                                  {dish}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pros & Cons */}
+                        {((ri.pros && ri.pros.length > 0) || (ri.cons && ri.cons.length > 0)) && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {ri.pros && ri.pros.length > 0 && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-green-700 mb-2 flex items-center">
+                                  <ThumbsUp className="h-4 w-4 mr-1.5" />
+                                  Ưu điểm
+                                </h4>
+                                <ul className="space-y-1.5">
+                                  {ri.pros.map((pro, idx) => (
+                                    <li key={idx} className="text-sm text-vietnam-blue-700 flex items-start gap-2">
+                                      <span className="text-green-500 mt-0.5 flex-shrink-0">+</span>
+                                      {pro}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {ri.cons && ri.cons.length > 0 && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-red-600 mb-2 flex items-center">
+                                  <ThumbsDown className="h-4 w-4 mr-1.5" />
+                                  Hạn chế
+                                </h4>
+                                <ul className="space-y-1.5">
+                                  {ri.cons.map((con, idx) => (
+                                    <li key={idx} className="text-sm text-vietnam-blue-700 flex items-start gap-2">
+                                      <span className="text-red-400 mt-0.5 flex-shrink-0">−</span>
+                                      {con}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Atmosphere & Typical Visit */}
+                        {(ri.atmosphere || ri.typical_visit) && (
+                          <div className="space-y-2">
+                            {ri.atmosphere && (
+                              <p className="text-sm text-vietnam-blue-700 leading-relaxed">
+                                <span className="font-semibold text-vietnam-blue-800">Không gian: </span>
+                                {ri.atmosphere}
+                              </p>
+                            )}
+                            {ri.typical_visit && (
+                              <p className="text-sm text-vietnam-blue-700 leading-relaxed">
+                                <span className="font-semibold text-vietnam-blue-800">Trải nghiệm: </span>
+                                {ri.typical_visit}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Top reviews */}
+                        {ri.top_reviews && ri.top_reviews.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-vietnam-blue-800 mb-3 flex items-center">
+                              <Quote className="h-4 w-4 mr-1.5 text-vietnam-gold-500" />
+                              Đánh giá tiêu biểu
+                            </h4>
+                            <div className="space-y-3">
+                              {ri.top_reviews.slice(0, 3).map((review, idx) => (
+                                <div key={idx} className="bg-white rounded-lg p-3 border border-vietnam-red-100">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <span className="font-medium text-sm text-vietnam-blue-800">{review.author || 'Ẩn danh'}</span>
+                                    {review.rating && (
+                                      <div className="flex items-center gap-0.5">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-3 w-3 ${i < review.rating! ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`}
+                                          />
+                                        ))}
+                                      </div>
+                                    )}
+                                    {review.time && (
+                                      <span className="text-xs text-slate-400">{review.time}</span>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-vietnam-blue-700 leading-relaxed italic">
+                                    &ldquo;{review.text}&rdquo;
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
                 {tags.length > 0 && (<div><h3 className="text-xl font-semibold mb-4 text-vietnam-red-600">Tiện ích & Đặc điểm</h3><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{tags.map((tag) => {const iconMap: Record<string, React.ComponentType<{ className?: string }>> = { 'wifi': Wifi, 'parking': Car, 'card-payment': CreditCard, 'group': Users, 'kid-friendly': Baby, 'pet-friendly': Dog }; const IconComp = iconMap[tag.slug] || Utensils; return (<div key={tag.slug} className="flex items-center text-vietnam-blue-700"><IconComp className="h-4 w-4 mr-2 text-vietnam-red-600" /><span>{tag.name}</span></div>);})}</div></div>)}
                 <Card className="border-vietnam-red-200">
                   <CardHeader>

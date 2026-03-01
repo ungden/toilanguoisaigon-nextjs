@@ -10,7 +10,8 @@ import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
 import { cn } from '@/lib/utils';
 import { getCategoryArtwork, BRAND_ASSETS } from '@/utils/constants';
 import { formatPriceRange, cleanReviewSummary } from '@/utils/formatters';
-import { ArrowRight, Star, MapPin, MessageSquare, Clock, Tag } from 'lucide-react';
+import { ArrowRight, Star, MapPin, MessageSquare, Clock, Tag, Utensils, ThumbsUp } from 'lucide-react';
+import { ReviewInsights } from '@/types/database';
 
 interface MysteryCardProps {
   location: Location | null;
@@ -116,13 +117,41 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
     ? location.review_count
     : location?.google_review_count;
 
-  // Review summary (filtered for junk)
-  const cleanSummary = cleanReviewSummary(location?.google_review_summary);
+  // Review insights (rich data from Google Search grounding)
+  const insights: ReviewInsights | null = location?.review_insights ?? null;
 
-  // Highlights: up to 3, localized
-  const highlights = (location?.google_highlights || [])
-    .slice(0, 3)
-    .map(localizeHighlight);
+  // Best quote: prefer a real user review from review_insights, then fall back to google_review_summary
+  const bestQuote = (() => {
+    if (insights?.top_reviews && insights.top_reviews.length > 0) {
+      // Pick the longest review text (most informative) up to 150 chars
+      const best = [...insights.top_reviews]
+        .filter(r => r.text && r.text.length > 10)
+        .sort((a, b) => b.text.length - a.text.length)[0];
+      if (best) return best.text.length > 150 ? best.text.slice(0, 147) + '...' : best.text;
+    }
+    // Fallback: atmosphere description
+    if (insights?.atmosphere && insights.atmosphere.length > 10) {
+      return insights.atmosphere.length > 150 ? insights.atmosphere.slice(0, 147) + '...' : insights.atmosphere;
+    }
+    return cleanReviewSummary(location?.google_review_summary);
+  })();
+
+  // Tags: prefer best_dishes, then pros, then google_highlights
+  const displayTags = (() => {
+    if (insights?.best_dishes && insights.best_dishes.length > 0) {
+      return { tags: insights.best_dishes.slice(0, 3), icon: 'dish' as const };
+    }
+    if (insights?.pros && insights.pros.length > 0) {
+      return { tags: insights.pros.slice(0, 3), icon: 'pro' as const };
+    }
+    const googleTags = (location?.google_highlights || [])
+      .slice(0, 3)
+      .map(localizeHighlight);
+    if (googleTags.length > 0) {
+      return { tags: googleTags, icon: 'tag' as const };
+    }
+    return null;
+  })();
 
   // Category name
   const categoryName = location?.location_categories?.[0]?.categories?.name;
@@ -247,30 +276,43 @@ export function MysteryCard({ location, isRevealed, isFlippable, onReveal }: Mys
                   )}
                 </div>
 
-                {/* Highlight tags */}
-                {highlights.length > 0 && (
+                {/* Tags: best dishes / pros / google highlights */}
+                {displayTags && (
                   <div className="flex flex-wrap gap-1">
-                    {highlights.map((h, i) => (
+                    {displayTags.tags.map((t, i) => (
                       <span
                         key={i}
-                        className="inline-flex items-center gap-0.5 text-[10px] bg-vietnam-gold-50 text-vietnam-blue-700 border border-vietnam-gold-200 rounded-full px-2 py-0.5"
+                        className={cn(
+                          "inline-flex items-center gap-0.5 text-[10px] rounded-full px-2 py-0.5",
+                          displayTags.icon === 'dish'
+                            ? "bg-vietnam-red-50 text-vietnam-red-700 border border-vietnam-red-200"
+                            : displayTags.icon === 'pro'
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : "bg-vietnam-gold-50 text-vietnam-blue-700 border border-vietnam-gold-200"
+                        )}
                       >
-                        <Tag className="h-2.5 w-2.5 text-vietnam-gold-500" />
-                        {h}
+                        {displayTags.icon === 'dish' ? (
+                          <Utensils className="h-2.5 w-2.5" />
+                        ) : displayTags.icon === 'pro' ? (
+                          <ThumbsUp className="h-2.5 w-2.5" />
+                        ) : (
+                          <Tag className="h-2.5 w-2.5 text-vietnam-gold-500" />
+                        )}
+                        {t}
                       </span>
                     ))}
                   </div>
                 )}
 
-                {/* Review summary — the main convincing text */}
-                {cleanSummary && (
+                {/* Review quote — real user review or AI summary */}
+                {bestQuote && (
                   <p className="text-xs text-slate-600 leading-relaxed line-clamp-3 italic">
-                    &ldquo;{cleanSummary}&rdquo;
+                    &ldquo;{bestQuote}&rdquo;
                   </p>
                 )}
 
-                {/* Fallback: description if no review summary */}
-                {!cleanSummary && location.description && (
+                {/* Fallback: description if no review content */}
+                {!bestQuote && location.description && (
                   <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
                     {location.description}
                   </p>

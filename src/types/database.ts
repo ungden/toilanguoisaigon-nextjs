@@ -29,6 +29,23 @@ export interface ProfileWithRole extends Profile {
   user_roles: { role: AppRole } | { role: AppRole }[] | null;
 }
 
+export interface ReviewInsight {
+  author: string;
+  rating: number | null;
+  text: string;
+  time: string;
+}
+
+export interface ReviewInsights {
+  top_reviews?: ReviewInsight[];
+  review_themes?: string[];
+  pros?: string[];
+  cons?: string[];
+  best_dishes?: string[];
+  atmosphere?: string;
+  typical_visit?: string;
+}
+
 export interface Location {
   id: string;
   created_at: string;
@@ -54,6 +71,7 @@ export interface Location {
   google_review_count: number | null;
   google_review_summary: string | null; // AI-tổng hợp review từ Google Maps
   google_highlights: string[] | null; // Điểm nổi bật từ reviews (ví dụ: "phở đậm đà", "phục vụ nhanh")
+  review_insights: ReviewInsights | null; // Rich review data from Google Search grounding
   isSaved?: boolean; // Added for client-side tracking
   location_categories?: { categories: { name: string } }[]; // Relational data
 }
