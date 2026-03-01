@@ -193,6 +193,13 @@ export interface Post {
   cover_image_url: string | null;
   author_id: string | null;
   status: string;
+  category: string;
+  tags: string[];
+  meta_title: string | null;
+  meta_description: string | null;
+  reading_time: number;
+  published_at: string | null;
+  related_location_slugs: string[];
   profiles: Pick<Profile, 'full_name' | 'avatar_url'> | null;
 }
 
