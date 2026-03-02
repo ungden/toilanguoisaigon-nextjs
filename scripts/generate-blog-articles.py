@@ -54,7 +54,8 @@ HEADERS_MGMT = {
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
 def slugify(text: str) -> str:
-    """Vietnamese-safe slugify."""
+    """Vietnamese-safe slugify. Handles đ/Đ which NFD doesn't decompose."""
+    text = text.replace("đ", "d").replace("Đ", "D")
     text = unicodedata.normalize("NFD", text)
     text = "".join(c for c in text if unicodedata.category(c) != "Mn")
     text = re.sub(r"[^\w\s-]", "", text.lower())
