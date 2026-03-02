@@ -8,7 +8,7 @@
  *   1. Pick random search queries from a rotating pool
  *   2. Call Gemini + Google Maps Grounding to find locations
  *   3. Deduplicate against existing DB (by slug or google_place_id)
- *   4. Insert new locations as status: "draft"
+ *   4. Insert new locations as status: "published"
  *   5. Auto-categorize (match name keywords → categories)
  *   6. Auto-tag (match attributes → tags)
  *   7. Auto-assign to matching collections
@@ -418,7 +418,7 @@ CHỈ JSON, không markdown.`;
         // Process each location
         for (const loc of locations) {
           const name = (loc.name as string) || "";
-          if (!name) continue;
+          if (!name || name === "Unknown Place") continue;
 
           const locSlug = slugify(name);
 
@@ -468,7 +468,7 @@ CHỈ JSON, không markdown.`;
               google_review_count: typeof loc.google_review_count === "number" ? loc.google_review_count : null,
               google_review_summary: cleanReview(loc.google_review_summary as string),
               google_highlights: highlights,
-              status: "draft",
+              status: "published",
               average_rating: typeof loc.google_rating === "number" ? loc.google_rating : 0,
               review_count: 0,
             })
