@@ -117,6 +117,57 @@ COLLECTIONS = {
         "prompt": STYLE_PREFIX + "A charming pet-friendly cafe in Saigon. A cute dog and cat near a table with coffee and cake. Garden setting with plants. Pet owner relaxing. Warm and playful atmosphere.",
     },
     # Michelin collections removed — data was not authentic
+    # === 10 NEW COLLECTIONS (Phase 5-6) ===
+    "bun-pho-dinh-cao": {
+        "id": 56,
+        "title": "Bún & Phở Đỉnh Cao",
+        "prompt": STYLE_PREFIX + "A steaming bowl of Vietnamese pho with rich golden broth, fresh herbs, and tender beef slices on a rustic Saigon street table. Beside it, a bowl of bun bo Hue with vibrant red chili oil. Morning light, chopsticks resting, a busy alley in the background.",
+    },
+    "ca-phe-sai-gon": {
+        "id": 55,
+        "title": "Cà Phê Sài Gòn",
+        "prompt": STYLE_PREFIX + "A classic Saigon coffee scene: a phin (Vietnamese drip filter) slowly dripping dark coffee into a glass of condensed milk. Old tile floor, vintage wooden chair, a newspaper nearby. A traditional vot (sidewalk) cafe with morning sunlight and motorbikes passing.",
+    },
+    "quan-moi-tren-mxh-dang-viral": {
+        "id": 54,
+        "title": "Quán Mới Trên MXH Đang Viral",
+        "prompt": STYLE_PREFIX + "A trendy modern Saigon restaurant with unique design — neon signs, industrial exposed brick, hanging plants, colorful drinks on the table. Young people taking photos of their food. Vibrant, contemporary, Instagram-worthy atmosphere.",
+    },
+    "buffet-thoa-thich": {
+        "id": 53,
+        "title": "Buffet Thoả Thích",
+        "prompt": STYLE_PREFIX + "An abundant Vietnamese buffet spread: grilled seafood on hot plates, hot pot with bubbling broth, sushi rolls, roasted meats, tropical fruits. A grand dining hall with warm lighting. Festive, generous, celebratory mood.",
+    },
+    "sai-gon-xua-quan-co-tram-nam": {
+        "id": 52,
+        "title": "Sài Gòn Xưa — Quán Cổ Trăm Năm",
+        "prompt": STYLE_PREFIX + "A nostalgic old Saigon food stall from the 1960s-70s era. Faded yellow colonial walls, wooden shutters, a vendor making hu tieu from a vintage cart. Sepia-toned warmth, vintage Vietnamese signs, cyclo parked nearby. Timeless and melancholic beauty.",
+    },
+    "an-gi-khi-troi-mua": {
+        "id": 51,
+        "title": "Ăn Gì Khi Trời Mưa?",
+        "prompt": STYLE_PREFIX + "A cozy rainy day scene in Saigon: rain pouring outside, a person sitting under a tin roof awning eating a steaming hot bowl of bun bo Hue. Warm yellow interior light contrasting with the grey rain. A cup of hot tra da nearby. Comfort food atmosphere.",
+    },
+    "sai-gon-healthy": {
+        "id": 50,
+        "title": "Sài Gòn Healthy",
+        "prompt": STYLE_PREFIX + "A fresh healthy food scene in Saigon: a colorful smoothie bowl with tropical fruits, acai, granola. A salad with avocado and quinoa. Bright modern cafe with plants, natural wood, and green accents. Morning sunshine, clean and vibrant.",
+    },
+    "quan-an-trong-hem-bi-mat": {
+        "id": 49,
+        "title": "Quán Ăn Trong Hẻm Bí Mật",
+        "prompt": STYLE_PREFIX + "A mysterious narrow Saigon alley (hem) leading to a hidden food gem. Dim lanterns hanging above, an old wooden sign, steam and smoke drifting from a tiny kitchen. A few stools and a small table with delicious-looking dishes. Secretive, authentic, adventurous mood.",
+    },
+    "date-night-hoan-hao": {
+        "id": 48,
+        "title": "Date Night Hoàn Hảo",
+        "prompt": STYLE_PREFIX + "A romantic Saigon evening: a beautifully set table for two at an outdoor terrace restaurant. Candles, wine glasses, fairy lights draped overhead. City skyline visible in the background with purple-pink sunset. Intimate and dreamy.",
+    },
+    "an-no-khong-lo-gia": {
+        "id": 47,
+        "title": "Ăn No Không Lo Giá",
+        "prompt": STYLE_PREFIX + "A lively budget-friendly Saigon eatery: a com binh dan (rice and dishes) stall with many colorful trays of food. Workers and students sitting on low stools eating heartily. Prices written on a chalkboard. Busy, generous portions, authentic street atmosphere.",
+    },
 }
 
 

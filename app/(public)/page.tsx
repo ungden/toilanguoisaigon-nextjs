@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, TrendingUp, Users, ArrowRight, AlertCircle, Sparkles, MessageSquare } from "lucide-react";
+import { Search, MapPin, Star, ArrowRight, Sparkles, MessageSquare, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useCollections } from "@/hooks/data/useCollections";
 import { useFeaturedLocations } from "@/hooks/data/useFeaturedLocations";
 import { useTrendingLocations } from "@/hooks/data/useTrendingLocations";
-import { usePosts } from "@/hooks/data/usePosts";
+import { useBlogPosts } from "@/hooks/data/useBlogPosts";
 import { useRecentReviews } from "@/hooks/data/useRecentReviews";
 import { useStats } from "@/hooks/data/useStats";
 import { showError } from "@/utils/toast";
@@ -23,16 +23,27 @@ import { MysteryLocationCards } from "@/components/collections/MysteryLocationCa
 import { FALLBACK_IMAGES, FEATURED_COLLECTIONS, getCategoryArtwork } from "@/utils/constants";
 import { DailyCheckin } from "@/components/gamification/DailyCheckin";
 import { getLocationBadges } from "@/utils/badges";
-import { Flame } from "lucide-react";
+
+const BLOG_CATEGORIES: Record<string, string> = {
+  guide: "Hướng dẫn",
+  listicle: "Danh sách",
+  culture: "Văn hóa",
+  tip: "Mẹo hay",
+  review: "Review",
+};
 
 const Index = () => {
   const router = useRouter();
   const { data: collections, isLoading: isLoadingCollections } = useCollections();
   const { data: newPlaces, isLoading: isLoadingNewPlaces, error: locationsError } = useFeaturedLocations(8);
   const { data: trendingPlaces, isLoading: isLoadingTrending } = useTrendingLocations(8);
-  const { data: posts, isLoading: isLoadingPosts, error: postsError } = usePosts();
+  const { data: blogData, isLoading: isLoadingPosts, error: postsError } = useBlogPosts({ page: 1, pageSize: 7 });
   const { data: stats } = useStats();
   const { data: recentReviews } = useRecentReviews(6);
+
+  const posts = blogData?.posts || [];
+  const featuredPost = posts[0];
+  const sidePosts = posts.slice(1, 7);
 
   // Track collection images that failed to load so we can swap to fallback
   const [failedCollectionImages, setFailedCollectionImages] = useState<Set<string | number>>(new Set());
@@ -95,75 +106,64 @@ const Index = () => {
     }
   };
 
+  const getPostImageUrl = (coverUrl: string | null) => {
+    const imagePath = coverUrl ? getPathFromSupabaseUrl(coverUrl) : null;
+    return imagePath
+      ? getTransformedImageUrl(imagePath, { width: 800, height: 450 })
+      : FALLBACK_IMAGES.collection;
+  };
+
   return (
     <div className="flex flex-col bg-white">
-      {/* Compact Hero Section with Saigon Image */}
-      <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <Image 
-            src={FALLBACK_IMAGES.hero}
-            alt="Sài Gòn skyline" 
-            className="w-full h-full object-cover"
-            fill
-            priority
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div className="relative z-10 container mx-auto px-4 text-center text-white">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
-              Khám phá{" "}
-              <span className="text-vietnam-gold-300">&quot;chất&quot;</span>{" "}
-              Sài Gòn
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
-              Tìm kiếm những địa điểm ẩm thực độc đáo nhất thành phố
-            </p>
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-              <div className="relative">
-                <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-vietnam-blue-600" />
-                    <Input
-                      type="text"
-                      name="query"
-                      placeholder="Tìm kiếm tên quán, món ăn, khu vực..."
-                      className="h-12 text-base pl-12 bg-transparent border-none text-vietnam-blue-800 placeholder:text-vietnam-blue-500 focus:ring-0 focus:outline-none"
-                    />
-                  </div>
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => router.push('/nearby')}
-                    className="h-12 px-6 border-2 border-vietnam-red-600 text-vietnam-red-600 font-semibold rounded-lg hover:bg-vietnam-red-50 transition-all duration-300 flex-shrink-0"
-                  >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Gần tôi
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    size="lg" 
-                    className="h-12 px-6 bg-vietnam-red-600 hover:bg-vietnam-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex-shrink-0"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    Tìm kiếm
-                  </Button>
+      {/* Compact Top Bar: Search + Stats */}
+      <section className="bg-vietnam-blue-600 text-white">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex flex-col md:flex-row items-center gap-3">
+            <form onSubmit={handleSearch} className="flex-1 w-full md:max-w-xl">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-vietnam-blue-400" />
+                  <Input
+                    type="text"
+                    name="query"
+                    placeholder="Tìm quán ăn, món ngon, khu vực..."
+                    className="h-9 text-sm pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20 focus:border-white/40 rounded-lg"
+                  />
                 </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/nearby')}
+                  className="h-9 text-white/90 hover:text-white hover:bg-white/10 text-xs"
+                >
+                  <MapPin className="h-3.5 w-3.5 mr-1" />
+                  Gần tôi
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="h-9 bg-vietnam-red-600 hover:bg-vietnam-red-700 text-white text-xs rounded-lg"
+                >
+                  Tìm
+                </Button>
               </div>
             </form>
-            <div className="flex justify-center gap-8 mt-8 text-sm">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-vietnam-gold-300">{stats ? `${stats.locationCount}+` : '...'}</div>
-                <div className="text-white/80">Địa điểm</div>
+            <div className="flex items-center gap-6 text-xs">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-vietnam-gold-300" />
+                <span className="font-bold text-vietnam-gold-300">{stats ? `${stats.locationCount}+` : '...'}</span>
+                <span className="text-white/70">địa điểm</span>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-vietnam-gold-300">{stats ? `${stats.reviewCount}+` : '...'}</div>
-                <div className="text-white/80">Đánh giá</div>
+              <div className="flex items-center gap-1.5">
+                <MessageSquare className="h-3.5 w-3.5 text-vietnam-gold-300" />
+                <span className="font-bold text-vietnam-gold-300">{stats ? `${stats.reviewCount}+` : '...'}</span>
+                <span className="text-white/70">đánh giá</span>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-vietnam-gold-300">{stats ? `${stats.collectionCount}+` : '...'}</div>
-                <div className="text-white/80">Bộ sưu tập</div>
+              <div className="hidden sm:flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5 text-vietnam-gold-300" />
+                <span className="font-bold text-vietnam-gold-300">{stats ? `${stats.collectionCount}+` : '...'}</span>
+                <span className="text-white/70">bộ sưu tập</span>
               </div>
             </div>
           </div>
@@ -171,48 +171,158 @@ const Index = () => {
       </section>
 
       {/* Daily Check-in Banner */}
-      <section className="container mx-auto px-4 -mt-8 relative z-10">
+      <section className="container mx-auto px-4 mt-4">
         <DailyCheckin />
       </section>
 
-      {/* Mystery Box Section */}
-      <section className="bg-vietnam-blue-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-semibold text-vietnam-red-700 bg-vietnam-red-100 rounded-full mb-4">
-              <Sparkles className="h-4 w-4 mr-2" />
-              <span>Thử Vận May</span>
-            </div>
-            <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Đi Đâu Cũng Được</h2>
-            <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-              Không biết đi đâu? Hãy để chúng tôi chọn giúp bạn một địa điểm ngẫu nhiên!
-            </p>
-          </div>
-          <MysteryLocationCards />
+      {/* NEWS SECTION — Featured Post + Latest Posts */}
+      <section className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-2xl font-bold text-vietnam-blue-800 flex items-center gap-2">
+            <span className="w-1 h-7 bg-vietnam-red-600 rounded-full inline-block"></span>
+            Tin mới nhất
+          </h2>
+          <Link href="/blog" className="text-sm font-semibold text-vietnam-red-600 hover:text-vietnam-red-700 flex items-center gap-1">
+            Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
+
+        {isLoadingPosts ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Skeleton className="aspect-[16/9] w-full rounded-lg" />
+              <Skeleton className="h-8 w-3/4 mt-4" />
+              <Skeleton className="h-4 w-full mt-2" />
+            </div>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="w-24 h-16 rounded-md flex-shrink-0" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-full mb-1" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : featuredPost ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Featured Post — Large */}
+            <div className="lg:col-span-2">
+              <Link href={`/blog/${featuredPost.slug}`} className="block group">
+                <div className="relative overflow-hidden rounded-lg">
+                  <Image
+                    src={getPostImageUrl(featuredPost.cover_image_url)}
+                    alt={featuredPost.title}
+                    className="aspect-[16/9] w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    width={800}
+                    height={450}
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+                    {featuredPost.category && (
+                      <Badge className="bg-vietnam-red-600 text-white text-xs border-none mb-3">
+                        {BLOG_CATEGORIES[featuredPost.category] || featuredPost.category}
+                      </Badge>
+                    )}
+                    <h3 className="text-xl md:text-3xl font-bold text-white leading-tight mb-2 group-hover:text-vietnam-gold-200 transition-colors">
+                      {featuredPost.title}
+                    </h3>
+                    <p className="text-white/80 text-sm md:text-base line-clamp-2 max-w-2xl">
+                      {featuredPost.excerpt}
+                    </p>
+                    <div className="flex items-center gap-4 mt-3 text-white/60 text-xs">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(featuredPost.published_at || featuredPost.created_at).toLocaleDateString('vi-VN')}
+                      </span>
+                      {featuredPost.reading_time > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {featuredPost.reading_time} phút đọc
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            {/* Side Posts — Latest List */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg border border-slate-200 h-full">
+                <div className="px-4 py-3 border-b border-slate-100">
+                  <h3 className="font-bold text-vietnam-blue-800 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-vietnam-gold-500 rounded-full inline-block"></span>
+                    Bài viết mới
+                  </h3>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {sidePosts.map((post) => (
+                    <Link href={`/blog/${post.slug}`} key={post.id} className="flex gap-3 p-3 hover:bg-slate-50 transition-colors group">
+                      <div className="relative w-20 h-14 md:w-24 md:h-16 rounded-md overflow-hidden flex-shrink-0">
+                        <Image
+                          src={getPostImageUrl(post.cover_image_url)}
+                          alt={post.title}
+                          fill
+                          sizes="96px"
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {post.category && (
+                          <span className="text-[10px] font-bold text-vietnam-red-600 uppercase tracking-wide">
+                            {BLOG_CATEGORIES[post.category] || post.category}
+                          </span>
+                        )}
+                        <h4 className="text-sm font-semibold text-vietnam-blue-800 line-clamp-2 leading-tight group-hover:text-vietnam-red-600 transition-colors">
+                          {post.title}
+                        </h4>
+                        <span className="text-[10px] text-slate-400 mt-0.5 inline-block">
+                          {new Date(post.published_at || post.created_at).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="px-4 py-3 border-t border-slate-100">
+                  <Link href="/blog" className="text-xs font-semibold text-vietnam-red-600 hover:text-vietnam-red-700 flex items-center justify-center gap-1">
+                    Xem tất cả bài viết <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-vietnam-blue-600">Chưa có bài viết nào. Hãy quay lại sau!</p>
+          </div>
+        )}
       </section>
 
       {/* Collections Section */}
-      <section className="bg-white py-16">
+      <section className="bg-slate-50 py-12">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-vietnam-blue-100 text-vietnam-blue-700 hover:bg-vietnam-blue-200">
-              <Star className="h-4 w-4 mr-1" />
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-vietnam-blue-800 flex items-center gap-2">
+              <span className="w-1 h-7 bg-vietnam-gold-500 rounded-full inline-block"></span>
               Bộ sưu tập
-            </Badge>
-            <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Danh sách chọn lọc</h2>
-            <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-              Những bộ sưu tập được tuyển chọn theo chủ đề và phong cách
-            </p>
+            </h2>
+            <Link href="/collections" className="text-sm font-semibold text-vietnam-red-600 hover:text-vietnam-red-700 flex items-center gap-1">
+              Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {isLoadingCollections ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden">
                   <Skeleton className="aspect-[4/3] w-full" />
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-full" />
+                  <CardHeader className="p-3">
+                    <Skeleton className="h-5 w-3/4 mb-1" />
+                    <Skeleton className="h-3 w-full" />
                   </CardHeader>
                 </Card>
               ))
@@ -231,45 +341,37 @@ const Index = () => {
 
                 return (
                   <Link href={`/collection/${collection.slug}`} key={collection.id} className="block group">
-                    <Card className="overflow-hidden card-hover border-vietnam-blue-200 h-full flex flex-col bg-white">
+                    <Card className="overflow-hidden card-hover border-slate-200 h-full flex flex-col bg-white">
                       <div className="relative overflow-hidden aspect-[4/3] w-full">
                         <Image 
                           src={finalSrc}
                           alt={collection.title} 
                           fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
                           onError={() => handleCollectionImageError(collection.id)}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
                         {index < 2 && (
-                          <div className="absolute top-3 left-3">
-                            <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg">
-                              <Sparkles className="h-3 w-3 mr-1.5" />
-                              Đặc biệt
+                          <div className="absolute top-2 left-2">
+                            <Badge className="bg-vietnam-gold-500 text-white border-vietnam-gold-600 shadow-lg text-[10px] px-1.5 py-0.5">
+                              <Sparkles className="h-2.5 w-2.5 mr-1" />
+                              Hot
                             </Badge>
                           </div>
                         )}
-                        <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                          <Badge className="bg-white/20 text-white backdrop-blur-md border-white/30 hover:bg-white/30">
-                            Khám phá ngay ➔
-                          </Badge>
-                        </div>
                       </div>
-                      <CardHeader className="bg-white flex-grow relative pb-4">
-                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg mb-1">
+                      <CardHeader className="p-3 bg-white flex-grow pb-3">
+                        <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-sm font-bold leading-tight line-clamp-1">
                           {collection.title}
                         </CardTitle>
                         {locationCount > 0 && (
-                          <div className="text-xs font-semibold text-vietnam-gold-600 mb-2 flex items-center">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            Bao gồm {locationCount} địa điểm
+                          <div className="text-[10px] text-vietnam-blue-500 flex items-center mt-0.5">
+                            <MapPin className="h-2.5 w-2.5 mr-0.5" />
+                            {locationCount} địa điểm
                           </div>
                         )}
-                        <CardDescription className="text-vietnam-blue-600 line-clamp-2 text-sm">
-                          {collection.description}
-                        </CardDescription>
                       </CardHeader>
                     </Card>
                   </Link>
@@ -281,39 +383,29 @@ const Index = () => {
               </div>
             )}
           </div>
-          <div className="mt-8 text-center">
-            <Button asChild variant="outline" className="text-vietnam-blue-600 border-vietnam-blue-600 hover:bg-vietnam-blue-100 hover:text-vietnam-blue-700">
-              <Link href="/collections">
-                Xem tất cả bộ sưu tập
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
         </div>
       </section>
 
-      {/* Featured Locations - Main Focus */}
-      <section className="container mx-auto py-16 px-4">
-        <div className="text-center mb-12">
-          <Badge className="mb-4 bg-vietnam-red-100 text-vietnam-red-700 hover:bg-vietnam-red-200">
-            <TrendingUp className="h-4 w-4 mr-1" />
-            Địa điểm nổi bật
-          </Badge>
-          <h2 className="text-4xl font-bold mb-4 text-vietnam-blue-800">Được yêu thích nhất</h2>
-          <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-            Những địa điểm được cộng đồng đánh giá cao nhất, từ quán vỉa hè đến nhà hàng cao cấp
-          </p>
+      {/* Featured Locations */}
+      <section className="container mx-auto py-12 px-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-vietnam-blue-800 flex items-center gap-2">
+            <span className="w-1 h-7 bg-vietnam-red-600 rounded-full inline-block"></span>
+            Được yêu thích nhất
+          </h2>
+          <Link href="/search" className="text-sm font-semibold text-vietnam-red-600 hover:text-vietnam-red-700 flex items-center gap-1">
+            Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {isLoadingNewPlaces ? (
             Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
                 <Skeleton className="aspect-[4/3] w-full" />
-                <CardContent className="p-4">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2 mb-2" />
-                  <Skeleton className="h-4 w-2/3" />
+                <CardContent className="p-3">
+                  <Skeleton className="h-5 w-3/4 mb-1" />
+                  <Skeleton className="h-3 w-1/2" />
                 </CardContent>
               </Card>
             ))
@@ -327,87 +419,60 @@ const Index = () => {
               
               return (
                 <Link href={`/place/${place.slug}`} key={place.id} className="block group">
-                  <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full bg-white">
+                  <Card className="overflow-hidden card-hover border-slate-200 h-full bg-white">
                     <div className="relative overflow-hidden aspect-[4/3] w-full">
                       <Image 
                         src={optimizedImageUrl} 
                         alt={place.name} 
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
                       />
-                      <div className="absolute top-3 left-3 flex flex-col gap-2">
+                      <div className="absolute top-2 left-2 flex flex-col gap-1.5">
                         {badges.map((b) => (
-                          <Badge key={b.type} variant="outline" className={`${b.className} text-xs shadow-md px-2 py-1 font-semibold`}>
+                          <Badge key={b.type} variant="outline" className={`${b.className} text-[10px] shadow-md px-1.5 py-0.5 font-semibold`}>
                             {b.label}
                           </Badge>
                         ))}
-                        <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
+                        <Badge className="bg-vietnam-red-600 text-white text-[10px] shadow-md border-none px-1.5 py-0.5">
                           {place.district}
                         </Badge>
-                        {place.location_categories?.[0]?.categories?.name && (
-                          <Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-vietnam-blue-800 text-[10px] shadow-sm border-white/50 w-fit">
-                            {place.location_categories[0].categories.name}
-                          </Badge>
-                        )}
                       </div>
                       {place.review_count > 0 && (
-                        <div className="absolute top-3 right-3">
-                          <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md text-white text-xs px-2 py-1 rounded-full border border-white/20">
-                            <MessageSquare className="h-3 w-3" />
+                        <div className="absolute top-2 right-2">
+                          <div className="flex items-center gap-0.5 bg-black/40 backdrop-blur-md text-white text-[10px] px-1.5 py-0.5 rounded-full border border-white/20">
+                            <MessageSquare className="h-2.5 w-2.5" />
                             {place.review_count}
                           </div>
                         </div>
                       )}
-                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                        <div className="flex items-center text-white gap-2">
-                          <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
-                            <Star className="h-3.5 w-3.5 fill-white mr-1 text-white" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="flex items-center text-white gap-1.5">
+                          <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm">
+                            <Star className="h-3 w-3 fill-white mr-0.5 text-white" />
                             {place.average_rating > 0 ? place.average_rating.toFixed(1) : 'Mới'}
                           </div>
-                          {place.review_count > 0 && (
-                            <span className="text-xs text-white/90 font-medium drop-shadow-md">
-                              ({place.review_count} đánh giá)
+                          {place.price_range && (
+                            <span className="text-[10px] text-white/80 font-medium">
+                              {formatPriceRange(place.price_range)}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <CardContent className="p-4 flex flex-col flex-grow">
-                      <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-2 line-clamp-1">
+                    <CardContent className="p-3">
+                      <h3 className="font-bold text-sm text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors line-clamp-1">
                         {place.name}
                       </h3>
-                      
-                      <div className="space-y-2 text-sm text-vietnam-blue-600 flex-grow">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0 text-vietnam-red-500" />
-                          <span className="truncate">{place.address}</span>
-                        </div>
-                        
-                        {cleanReviewSummary(place.google_review_summary) && (
-                          <p className="text-sm text-slate-500 italic line-clamp-2 mt-2 leading-relaxed bg-slate-50 p-2 rounded-md border border-slate-100">
-                            &quot;{cleanReviewSummary(place.google_review_summary)}&quot;
-                          </p>
-                        )}
+                      <div className="flex items-center text-xs text-vietnam-blue-500 mt-1">
+                        <MapPin className="h-3 w-3 mr-1 flex-shrink-0 text-vietnam-red-400" />
+                        <span className="truncate">{place.address}</span>
                       </div>
-                      
-                      {place.price_range && (
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-                          <span className="text-vietnam-gold-600 font-medium px-2 py-1 bg-vietnam-gold-50 rounded-md text-xs">
-                            {formatPriceRange(place.price_range)}
-                          </span>
-                          <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
-                            Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
-                          </span>
-                        </div>
-                      )}
-                      {!place.price_range && (
-                         <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100">
-                            <span className="text-xs text-vietnam-blue-600 font-medium group-hover:text-vietnam-red-600 flex items-center transition-colors">
-                              Xem chi tiết <ArrowRight className="ml-1 h-3 w-3" />
-                            </span>
-                         </div>
+                      {cleanReviewSummary(place.google_review_summary) && (
+                        <p className="text-[11px] text-slate-400 italic line-clamp-1 mt-1.5">
+                          &quot;{cleanReviewSummary(place.google_review_summary)}&quot;
+                        </p>
                       )}
                     </CardContent>
                   </Card>
@@ -420,39 +485,26 @@ const Index = () => {
             </div>
           )}
         </div>
-
-        <div className="mt-12 text-center">
-          <Button asChild size="lg" className="btn-vietnam">
-            <Link href="/search">
-              Xem tất cả địa điểm
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
       </section>
 
       {/* Trending Section */}
       {(isLoadingTrending || (trendingPlaces && trendingPlaces.length > 0)) && (
-        <section className="bg-gradient-to-b from-orange-50 to-white py-16">
+        <section className="bg-gradient-to-b from-orange-50 to-white py-12">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-200">
-                <Flame className="h-4 w-4 mr-1" />
-                Đang hot
-              </Badge>
-              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Xu hướng hôm nay</h2>
-              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-                Những địa điểm đang được quan tâm nhiều nhất gần đây
-              </p>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-vietnam-blue-800 flex items-center gap-2">
+                <span className="w-1 h-7 bg-orange-500 rounded-full inline-block"></span>
+                Xu hướng hôm nay
+              </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {isLoadingTrending ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
                     <Skeleton className="aspect-[4/3] w-full" />
-                    <CardContent className="p-4">
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-1/2" />
+                    <CardContent className="p-3">
+                      <Skeleton className="h-5 w-3/4 mb-1" />
+                      <Skeleton className="h-3 w-1/2" />
                     </CardContent>
                   </Card>
                 ))
@@ -472,49 +524,42 @@ const Index = () => {
                             src={optimizedImageUrl}
                             alt={place.name}
                             fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                             loading="lazy"
                           />
-                          <div className="absolute top-3 left-3 flex flex-col gap-2">
+                          <div className="absolute top-2 left-2 flex flex-col gap-1.5">
                             {badges.map((b) => (
-                              <Badge key={b.type} variant="outline" className={`${b.className} text-xs shadow-md px-2 py-1 font-semibold`}>
+                              <Badge key={b.type} variant="outline" className={`${b.className} text-[10px] shadow-md px-1.5 py-0.5 font-semibold`}>
                                 {b.label}
                               </Badge>
                             ))}
-                            <Badge className="bg-vietnam-red-600 text-white text-xs shadow-md border-none px-2 py-1">
+                            <Badge className="bg-vietnam-red-600 text-white text-[10px] shadow-md border-none px-1.5 py-0.5">
                               {place.district}
                             </Badge>
                           </div>
-                          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                            <div className="flex items-center text-white gap-2">
-                              <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold shadow-sm">
-                                <Star className="h-3.5 w-3.5 fill-white mr-1 text-white" />
+                          <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                            <div className="flex items-center text-white gap-1.5">
+                              <div className="flex items-center bg-vietnam-gold-500/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm">
+                                <Star className="h-3 w-3 fill-white mr-0.5 text-white" />
                                 {place.average_rating > 0 ? place.average_rating.toFixed(1) : 'Mới'}
                               </div>
-                              {place.review_count > 0 && (
-                                <span className="text-xs text-white/90 font-medium drop-shadow-md">
-                                  ({place.review_count} đánh giá)
+                              {place.price_range && (
+                                <span className="text-[10px] text-white/80 font-medium">
+                                  {formatPriceRange(place.price_range)}
                                 </span>
                               )}
                             </div>
                           </div>
                         </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-bold text-lg text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors mb-1 line-clamp-1">
+                        <CardContent className="p-3">
+                          <h3 className="font-bold text-sm text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors line-clamp-1">
                             {place.name}
                           </h3>
-                          <div className="flex items-center text-sm text-vietnam-blue-600">
-                            <MapPin className="h-4 w-4 mr-1.5 flex-shrink-0 text-vietnam-red-500" />
+                          <div className="flex items-center text-xs text-vietnam-blue-500 mt-1">
+                            <MapPin className="h-3 w-3 mr-1 flex-shrink-0 text-vietnam-red-400" />
                             <span className="truncate">{place.address}</span>
                           </div>
-                          {place.price_range && (
-                            <div className="mt-3 pt-2 border-t border-slate-100">
-                              <span className="text-vietnam-gold-600 font-medium px-2 py-1 bg-vietnam-gold-50 rounded-md text-xs">
-                                {formatPriceRange(place.price_range)}
-                              </span>
-                            </div>
-                          )}
                         </CardContent>
                       </Card>
                     </Link>
@@ -526,155 +571,78 @@ const Index = () => {
         </section>
       )}
 
+      {/* Mystery Box Section */}
+      <section className="bg-vietnam-blue-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-vietnam-blue-800 flex items-center gap-2">
+              <span className="w-1 h-7 bg-vietnam-blue-600 rounded-full inline-block"></span>
+              Đi Đâu Cũng Được
+            </h2>
+          </div>
+          <p className="text-sm text-vietnam-blue-600 mb-6">
+            Không biết đi đâu? Hãy để chúng tôi chọn giúp bạn một địa điểm ngẫu nhiên!
+          </p>
+          <MysteryLocationCards />
+        </div>
+      </section>
+
       {/* Recent Reviews Section */}
       {recentReviews && recentReviews.length > 0 && (
-        <section className="bg-vietnam-blue-50 py-16">
+        <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-vietnam-red-100 text-vietnam-red-700 hover:bg-vietnam-red-200">
-                <MessageSquare className="h-4 w-4 mr-1" />
-                Đánh giá mới nhất
-              </Badge>
-              <h2 className="text-3xl font-bold mb-4 text-vietnam-blue-800">Cộng đồng nói gì?</h2>
-              <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-                Đánh giá thật từ những người đã trải nghiệm
-              </p>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-vietnam-blue-800 flex items-center gap-2">
+                <span className="w-1 h-7 bg-vietnam-gold-500 rounded-full inline-block"></span>
+                Cộng đồng nói gì?
+              </h2>
+              <Link href="/reviews" className="text-sm font-semibold text-vietnam-red-600 hover:text-vietnam-red-700 flex items-center gap-1">
+                Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {recentReviews.map((review) => (
                 <Link href={`/place/${review.locations?.slug}`} key={review.id} className="block group">
-                  <Card className="h-full border-vietnam-blue-200 hover:border-vietnam-red-300 hover:shadow-md transition-all bg-white">
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-full bg-vietnam-red-100 flex items-center justify-center text-vietnam-red-700 font-bold text-sm flex-shrink-0">
+                  <Card className="h-full border-slate-200 hover:border-vietnam-red-300 hover:shadow-md transition-all bg-white">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="h-8 w-8 rounded-full bg-vietnam-red-100 flex items-center justify-center text-vietnam-red-700 font-bold text-xs flex-shrink-0">
                           {review.profiles?.full_name?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-vietnam-blue-800 truncate">
+                          <p className="font-semibold text-xs text-vietnam-blue-800 truncate">
                             {review.profiles?.full_name || 'Ẩn danh'}
                           </p>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`h-3 w-3 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`}
+                                className={`h-2.5 w-2.5 ${i < review.rating ? 'fill-vietnam-gold-500 text-vietnam-gold-500' : 'fill-gray-200 text-gray-200'}`}
                               />
                             ))}
                           </div>
                         </div>
-                        <span className="text-xs text-slate-400 flex-shrink-0">
+                        <span className="text-[10px] text-slate-400 flex-shrink-0">
                           {new Date(review.created_at).toLocaleDateString('vi-VN')}
                         </span>
                       </div>
                       {review.comment && (
-                        <p className="text-sm text-vietnam-blue-700 leading-relaxed line-clamp-3 mb-3">
+                        <p className="text-xs text-vietnam-blue-700 leading-relaxed line-clamp-2 mb-2">
                           {review.comment}
                         </p>
                       )}
-                      <div className="flex items-center text-xs text-vietnam-red-600 font-medium group-hover:text-vietnam-red-700">
-                        <MapPin className="h-3 w-3 mr-1" />
+                      <div className="flex items-center text-[10px] text-vietnam-red-600 font-medium group-hover:text-vietnam-red-700">
+                        <MapPin className="h-2.5 w-2.5 mr-0.5" />
                         {review.locations?.name || 'Địa điểm'}
-                        <ArrowRight className="ml-auto h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
             </div>
-            <div className="mt-8 text-center">
-              <Button asChild variant="outline" className="text-vietnam-red-600 border-vietnam-red-600 hover:bg-vietnam-red-50 hover:text-vietnam-red-700">
-                <Link href="/reviews">
-                  Xem tất cả đánh giá
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
           </div>
         </section>
       )}
-
-      {/* Blog Section - Compact */}
-      <section className="container mx-auto py-16 px-4">
-        <div className="text-center mb-12">
-          <Badge className="mb-4 bg-vietnam-gold-100 text-vietnam-gold-700 hover:bg-vietnam-gold-200">
-            <Users className="h-4 w-4 mr-1" />
-            Blog & Review
-          </Badge>
-          <h2 className="text-3xl font-bold mb-4 text-vietnam-gold-600">Câu chuyện ẩm thực</h2>
-          <p className="text-lg text-vietnam-blue-600 max-w-2xl mx-auto">
-            Khám phá Sài Gòn qua những câu chuyện và review chuyên sâu
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {isLoadingPosts ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="aspect-[16/9] w-full" />
-                <CardHeader>
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-full" />
-                </CardHeader>
-              </Card>
-            ))
-          ) : postsError ? (
-            <div className="col-span-3 text-center py-8">
-              <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-              <p className="text-red-600 font-semibold mb-2">Có lỗi khi tải bài viết</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => window.location.reload()}
-              >
-                Thử lại
-              </Button>
-            </div>
-          ) : posts && posts.length > 0 ? (
-            posts.slice(0, 3).map((post) => {
-              const imagePath = post.cover_image_url ? getPathFromSupabaseUrl(post.cover_image_url) : null;
-              const optimizedImageUrl = imagePath 
-                ? getTransformedImageUrl(imagePath, { width: 500, height: 281 }) 
-                : FALLBACK_IMAGES.collection;
-
-              return (
-                <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
-                  <Card className="overflow-hidden card-hover border-vietnam-gold-200 h-full flex flex-col bg-white">
-                    <div className="relative overflow-hidden">
-                      <Image 
-                        src={optimizedImageUrl} 
-                        alt={post.title} 
-                        className="aspect-[16/9] w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        width={500}
-                        height={281}
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardHeader className="bg-white flex-grow">
-                      <CardTitle className="text-vietnam-blue-800 group-hover:text-vietnam-red-600 transition-colors text-lg line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      <CardDescription className="text-vietnam-blue-600 text-sm line-clamp-2">
-                        {post.excerpt}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              )
-            })
-          ) : (
-            <div className="col-span-3 text-center py-8">
-              <p className="text-vietnam-blue-600">Chưa có bài viết nào. Hãy quay lại sau!</p>
-            </div>
-          )}
-        </div>
-        <div className="mt-8 text-center">
-          <Button asChild variant="outline" className="text-vietnam-gold-600 border-vietnam-gold-600 hover:bg-vietnam-gold-50 hover:text-vietnam-gold-700">
-            <Link href="/blog">
-              Xem tất cả bài viết
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
     </div>
   );
 };
