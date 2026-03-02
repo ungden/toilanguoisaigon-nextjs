@@ -63,14 +63,21 @@ def slugify(text: str) -> str:
 
 
 def run_sql(sql: str):
-    """Execute SQL via Supabase Management API."""
+    """Execute SQL via Supabase Management API with retry."""
     if not MGMT_TOKEN:
         return None
-    resp = requests.post(MGMT_API_URL, headers=HEADERS_MGMT, json={"query": sql})
-    if resp.status_code not in (200, 201):
-        print(f"  SQL ERROR ({resp.status_code}): {resp.text[:500]}")
-        return None
-    return resp.json()
+    for attempt in range(3):
+        try:
+            resp = requests.post(MGMT_API_URL, headers=HEADERS_MGMT, json={"query": sql}, timeout=30)
+            if resp.status_code not in (200, 201):
+                print(f"  SQL ERROR ({resp.status_code}): {resp.text[:500]}")
+                return None
+            return resp.json()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            wait = 10 * (attempt + 1)
+            print(f"  SQL connection error (attempt {attempt+1}/3), retrying in {wait}s...")
+            time.sleep(wait)
+    return None
 
 
 def rest_get(table: str, params: dict = None):
@@ -92,7 +99,7 @@ def rest_post(table: str, data):
 
 
 def call_gemini(prompt: str, max_tokens: int = 8192, temperature: float = 0.8) -> Optional[str]:
-    """Call Gemini API and return text response."""
+    """Call Gemini API and return text response. Uses 300s timeout for thinking models."""
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -100,12 +107,17 @@ def call_gemini(prompt: str, max_tokens: int = 8192, temperature: float = 0.8) -
             "maxOutputTokens": max_tokens,
         },
     }
-    for attempt in range(3):
+    for attempt in range(5):
         try:
-            resp = requests.post(GEMINI_URL, json=body, timeout=120)
+            resp = requests.post(GEMINI_URL, json=body, timeout=300)
             if resp.status_code == 429:
                 wait = 30 * (attempt + 1)
                 print(f"  Rate limited, waiting {wait}s...")
+                time.sleep(wait)
+                continue
+            if resp.status_code in (500, 503):
+                wait = 15 * (attempt + 1)
+                print(f"  Server error ({resp.status_code}), retrying in {wait}s...")
                 time.sleep(wait)
                 continue
             if resp.status_code != 200:
@@ -114,9 +126,17 @@ def call_gemini(prompt: str, max_tokens: int = 8192, temperature: float = 0.8) -
             data = resp.json()
             text = data["candidates"][0]["content"]["parts"][0]["text"]
             return text.strip()
+        except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout):
+            wait = 10 * (attempt + 1)
+            print(f"  Timeout (attempt {attempt+1}/5), retrying in {wait}s...")
+            time.sleep(wait)
+        except (requests.exceptions.ConnectionError, ConnectionResetError):
+            wait = 15 * (attempt + 1)
+            print(f"  Connection error (attempt {attempt+1}/5), retrying in {wait}s...")
+            time.sleep(wait)
         except Exception as e:
             print(f"  Gemini exception: {e}")
-            time.sleep(5)
+            time.sleep(10)
     return None
 
 
