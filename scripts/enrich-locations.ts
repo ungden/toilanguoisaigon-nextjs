@@ -76,7 +76,7 @@ async function main() {
   // Find locations missing key data
   const { data: locations, error: fetchError } = await supabase
     .from("locations")
-    .select("id, name, address, district, google_rating, google_review_summary, latitude, longitude, price_range, phone_number, opening_hours, google_place_id, description")
+    .select("id, name, address, district, google_rating, google_review_summary, latitude, longitude, price_range, phone_number, opening_hours, google_place_id, description, review_insights")
     .eq("status", "published")
     .or(
       "google_rating.is.null," +
@@ -296,6 +296,73 @@ QUAN TRỌNG:
 
       enriched++;
       totalFields += fields.length;
+
+      // ─── Step 2: Google Search grounding for rich review data ──────
+      // Only run if we don't have review_insights yet
+      if (!loc.review_insights) {
+        try {
+          await sleep(1000); // Rate limit between steps
+
+          const reviewPrompt = `Tìm địa điểm "${loc.name}" tại ${loc.address || ""}, ${loc.district || "TP.HCM"} trên Google Maps.
+
+Trả về JSON:
+{
+  "top_reviews": [
+    {"author": "tên", "rating": 5, "text": "nội dung review gốc", "time": "2 tháng trước"},
+    ...tối đa 5 reviews
+  ],
+  "review_themes": ["chủ đề phổ biến 1", "chủ đề 2", ...],
+  "pros": ["điểm mạnh 1", "điểm mạnh 2", ...],
+  "cons": ["điểm yếu 1", "điểm yếu 2", ...],
+  "best_dishes": ["món nổi bật 1", "món 2", ...],
+  "atmosphere": "mô tả không khí quán bằng tiếng Việt",
+  "typical_visit": "mô tả trải nghiệm 1 lần ghé quán bằng tiếng Việt"
+}
+
+QUAN TRỌNG:
+- top_reviews: lấy TỐI ĐA 5 review THẬT, giữ nguyên ngôn ngữ gốc hoặc dịch sang tiếng Việt
+- review_themes, pros, cons: tổng hợp từ reviews thật, KHÔNG bịa
+- best_dishes: món ăn/đồ uống được khen nhiều nhất trong reviews
+- atmosphere, typical_visit: viết bằng tiếng Việt, dựa trên reviews thật
+- CHỈ trả JSON, không markdown`;
+
+          const reviewResponse = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: reviewPrompt }] }],
+              tools: [{ googleSearch: {} }],
+              generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
+            }),
+          });
+
+          if (reviewResponse.ok) {
+            const reviewData = await reviewResponse.json();
+            const reviewParts = reviewData.candidates?.[0]?.content?.parts || [];
+            const reviewText = reviewParts
+              .filter((p: { text?: string }) => p.text)
+              .map((p: { text: string }) => p.text)
+              .join("");
+            const reviewJsonMatch = reviewText.match(/\{[\s\S]*\}/);
+            if (reviewJsonMatch) {
+              const insights = JSON.parse(reviewJsonMatch[0]);
+              // Validate structure
+              if (insights.top_reviews || insights.review_themes || insights.pros) {
+                if (!dryRun) {
+                  await supabase.from("locations").update({ review_insights: insights }).eq("id", loc.id);
+                }
+                const reviewCount = (insights.top_reviews || []).length;
+                const themeCount = (insights.review_themes || []).length;
+                logOk(`  + review_insights: ${reviewCount} reviews, ${themeCount} themes, ${(insights.pros || []).length} pros, ${(insights.cons || []).length} cons`);
+                totalFields++;
+              }
+            }
+          }
+        } catch (reviewErr) {
+          // Non-fatal: review insights are a bonus
+          logWarn(`  review_insights failed: ${(reviewErr as Error).message.substring(0, 80)}`);
+        }
+      }
 
       // Rate limit
       if (i < locations.length - 1) {

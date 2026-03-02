@@ -48,7 +48,6 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.ico",
   },
-  manifest: "/site.webmanifest",
   alternates: {
     canonical: "https://www.toilanguoisaigon.com",
   },
