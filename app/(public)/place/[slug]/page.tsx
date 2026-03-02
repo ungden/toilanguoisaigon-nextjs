@@ -581,8 +581,8 @@ const PlaceDetailPage = () => {
             </div>
             {(categories.length > 0 || tags.length > 0) && (<div className="mb-6"><div className="flex flex-wrap gap-2">{categories.map((category) => (<Badge key={category.slug} variant="secondary" className="bg-vietnam-blue-100 text-vietnam-blue-700"><Utensils className="h-3 w-3 mr-1" />{category.name}</Badge>))}{tags.map((tag) => (<Badge key={tag.slug} variant="outline" className="border-vietnam-red-300 text-vietnam-red-600">#{tag.name}</Badge>))}</div></div>)}
             <Separator className="my-6" />
-            <Tabs defaultValue="reviews" className="w-full">
-              <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="reviews">Đánh giá ({totalReviews})</TabsTrigger><TabsTrigger value="overview">Tổng quan</TabsTrigger></TabsList>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="overview">Tổng quan</TabsTrigger><TabsTrigger value="reviews">Đánh giá ({totalReviews})</TabsTrigger></TabsList>
               <TabsContent value="overview" className="space-y-6 pt-6">
                 <div className="space-y-4 text-lg">
                   <div className="flex items-center justify-between">
