@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 # Validate environment variables
-required_vars = ["GEMINI_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_PROJECT_REF"]
+required_vars = ["GEMINI_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
 missing_vars = [var for var in required_vars if not os.environ.get(var)]
 if missing_vars:
     print(f"Error: Missing required environment variables: {', '.join(missing_vars)}")
@@ -16,7 +16,6 @@ if missing_vars:
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-PROJECT_REF = os.environ["SUPABASE_PROJECT_REF"]
 
 def generate_image(prompt):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={GEMINI_API_KEY}"
