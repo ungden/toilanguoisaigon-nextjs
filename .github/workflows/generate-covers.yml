@@ -1,12 +1,6 @@
 name: Generate Collection Covers
 
 on:
-  schedule:
-    # Run daily at 6:15 AM UTC (1:15 PM Vietnam time)
-    # This gives the Supabase daily-cron (which runs at 6:00 AM UTC) 
-    # time to finish creating new collections first.
-    - cron: '15 6 * * *'
-  
   # Allow manual trigger from the GitHub Actions tab
   workflow_dispatch:
 

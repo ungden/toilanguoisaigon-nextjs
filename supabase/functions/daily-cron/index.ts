@@ -6,6 +6,7 @@
  *   2. Enrich pending community submissions (enrich-submission)
  *   3. Enrich published locations missing data (enrich-locations)
  *   4. Generate AI collections (generate-playlist)
+ *   5. Generate covers for collections missing cover_image_url (generate-collection-covers)
  *
  * Setup in Supabase SQL Editor:
  *   -- Enable extensions (one-time)
@@ -106,7 +107,7 @@ async function runTask(name: string, functionName: string, body: unknown): Promi
   }
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -120,12 +121,13 @@ serve(async (req) => {
     const today = new Date().toISOString();
     console.log(`[Daily Cron] Starting at ${today}`);
 
-    const body = await req.json().catch(() => ({}));
+    const body: any = await req.json().catch(() => ({}));
     // Allow skipping tasks via request body
     const skipCrawl = body.skip_crawl === true;
     const skipEnrich = body.skip_enrich === true;
     const skipEnrichLocations = body.skip_enrich_locations === true;
     const skipPlaylist = body.skip_playlist === true;
+    const skipCollectionCovers = body.skip_collection_covers === true;
 
     const results: TaskResult[] = [];
 
@@ -167,6 +169,16 @@ serve(async (req) => {
         { count: 3, auto_publish: true }
       );
       results.push(playlistResult);
+    }
+
+    // Task 5: Generate covers for collections missing images
+    if (!skipCollectionCovers) {
+      const coverResult = await runTask(
+        "Tạo ảnh cover bộ sưu tập",
+        "generate-collection-covers",
+        { limit: 5 }
+      );
+      results.push(coverResult);
     }
 
     const totalDuration = Date.now() - startTime;
