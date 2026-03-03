@@ -7,7 +7,7 @@ import L from 'leaflet';
 import { NearbyLocation } from '@/hooks/data/useNearbyLocations';
 import Link from 'next/link';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
-import { FALLBACK_IMAGES } from '@/utils/constants';
+import { getCategoryArtwork } from '@/utils/constants';
 import { formatDistance } from '@/utils/geo';
 import { Star, MapPin } from 'lucide-react';
 import { Badge } from '../ui/badge';
@@ -102,9 +102,9 @@ export default function NearbyMap({ userLocation, locations }: NearbyMapProps) {
 
         {locations.map((loc) => {
           const imagePath = loc.main_image_url ? getPathFromSupabaseUrl(loc.main_image_url) : null;
-          const imageUrl = imagePath 
-            ? getTransformedImageUrl(imagePath, { width: 150, height: 100 }) 
-            : FALLBACK_IMAGES.location;
+          const imageUrl = imagePath
+            ? getTransformedImageUrl(imagePath, { width: 150, height: 100 })
+            : getCategoryArtwork(loc.name);
 
           return (
             <Marker 

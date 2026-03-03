@@ -12,7 +12,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { sanitizeHtml } from "@/utils/sanitize";
-import { FALLBACK_IMAGES } from "@/utils/constants";
+import { FALLBACK_IMAGES, getCategoryArtwork } from "@/utils/constants";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -157,7 +157,7 @@ const PostDetailPage = () => {
                     <Card className="overflow-hidden card-hover border-vietnam-red-200 h-full">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image
-                          src={loc.main_image_url || FALLBACK_IMAGES.location}
+                          src={loc.main_image_url || getCategoryArtwork(loc.name)}
                           alt={loc.name}
                           fill
                           sizes="(max-width: 640px) 100vw, 25vw"

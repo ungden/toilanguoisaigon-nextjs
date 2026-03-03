@@ -11,7 +11,7 @@ import { MapPin, Navigation, Star, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getPathFromSupabaseUrl, getTransformedImageUrl } from '@/utils/image';
-import { FALLBACK_IMAGES } from '@/utils/constants';
+import { getCategoryArtwork } from '@/utils/constants';
 import { formatDistance } from '@/utils/geo';
 
 // Dynamic import map to prevent SSR issues with Leaflet
@@ -213,9 +213,9 @@ export default function NearbyPage() {
 
               {userLocation && !isLoading && locations && locations.map((loc) => {
                 const imagePath = loc.main_image_url ? getPathFromSupabaseUrl(loc.main_image_url) : null;
-                const imageUrl = imagePath 
-                  ? getTransformedImageUrl(imagePath, { width: 200, height: 200 }) 
-                  : FALLBACK_IMAGES.location;
+                const imageUrl = imagePath
+                  ? getTransformedImageUrl(imagePath, { width: 200, height: 200 })
+                  : getCategoryArtwork(loc.name);
 
                 return (
                   <Link href={`/place/${loc.slug}`} key={loc.id} className="block group">
