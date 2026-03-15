@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRemoveFromCollection } from "@/hooks/data/useUserCollections";
+import { useRemoveFromCollection, useUpdateUserCollectionVisibility } from "@/hooks/data/useUserCollections";
 import { UserCollectionWithLocations, Location } from "@/types/database";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,7 @@ export default function CollectionDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const removeFromCollection = useRemoveFromCollection();
+  const updateVisibility = useUpdateUserCollectionVisibility();
 
   const {
     data: collection,
@@ -112,30 +113,33 @@ export default function CollectionDetailPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-2 flex-wrap">
           <h1 className="text-3xl font-bold text-vietnam-blue-800">
             {collection.title}
           </h1>
-          <Badge
+          <Button
             variant="outline"
-            className={
+            size="sm"
+            onClick={() => updateVisibility.mutate({ collectionId: collection.id, isPublic: !collection.is_public })}
+            disabled={updateVisibility.isPending}
+            className={`h-7 px-2 text-xs font-semibold rounded-full ${
               collection.is_public
-                ? "border-green-300 text-green-700"
-                : "border-slate-300 text-slate-600"
-            }
+                ? "bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
+                : "bg-slate-50 border-slate-300 text-slate-600 hover:bg-slate-100"
+            }`}
           >
             {collection.is_public ? (
               <>
-                <Globe className="h-3 w-3 mr-1" />
+                <Globe className="h-3.5 w-3.5 mr-1.5" />
                 Công khai
               </>
             ) : (
               <>
-                <Lock className="h-3 w-3 mr-1" />
+                <Lock className="h-3.5 w-3.5 mr-1.5" />
                 Riêng tư
               </>
             )}
-          </Badge>
+          </Button>
         </div>
         {collection.description && (
           <p className="text-vietnam-blue-600">{collection.description}</p>

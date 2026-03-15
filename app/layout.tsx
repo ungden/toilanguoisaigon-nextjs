@@ -1,10 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/providers";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { FALLBACK_IMAGES } from "@/utils/constants";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#dc2626", // vietnam-red-600
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {

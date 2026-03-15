@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bookmark, LogOut, Send, MapPin, MessageSquare, FolderHeart } from "lucide-react";
+import { Menu, User, Bookmark, LogOut, Send, MapPin, MessageSquare, FolderHeart, Dices } from "lucide-react";
 import Image from "next/image";
 import { BRAND_ASSETS } from "@/utils/constants";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -61,6 +61,13 @@ export function Header() {
             </div>
           </Link>
           <nav className="flex items-center space-x-8 text-sm font-medium">
+            <Link
+              href="/random"
+              className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold flex items-center gap-1"
+            >
+              <Dices className="h-4 w-4" />
+              Ăn gì?
+            </Link>
             <Link
               href="/nearby"
               className="text-vietnam-blue-700 hover:text-vietnam-red-600 transition-colors duration-200 font-semibold flex items-center gap-1"
@@ -125,6 +132,9 @@ export function Header() {
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-4">
+                 <Link href="/random" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors flex items-center gap-2">
+                   <Dices className="h-5 w-5" /> Ăn gì hôm nay?
+                 </Link>
                  <Link href="/nearby" className="text-vietnam-blue-700 hover:text-vietnam-red-600 font-semibold transition-colors flex items-center gap-2">
                    <MapPin className="h-5 w-5" /> Gần tôi
                  </Link>

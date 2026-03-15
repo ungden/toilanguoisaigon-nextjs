@@ -7,6 +7,8 @@
  *   3. Enrich published locations missing data (enrich-locations)
  *   4. Generate AI collections (generate-playlist)
  *   5. Generate covers for collections missing cover_image_url (generate-collection-covers)
+ *   6. Generate SEO blog posts (generate-blog-posts)
+ *   7. Generate covers for blog posts missing cover_image_url (generate-blog-covers)
  *
  * Setup in Supabase SQL Editor:
  *   -- Enable extensions (one-time)
@@ -128,6 +130,8 @@ serve(async (req: Request) => {
     const skipEnrichLocations = body.skip_enrich_locations === true;
     const skipPlaylist = body.skip_playlist === true;
     const skipCollectionCovers = body.skip_collection_covers === true;
+    const skipBlogPosts = body.skip_blog_posts === true;
+    const skipBlogCovers = body.skip_blog_covers === true;
 
     const results: TaskResult[] = [];
 
@@ -161,14 +165,21 @@ serve(async (req: Request) => {
       results.push(enrichLocResult);
     }
 
-    // Task 4: Generate AI collections
+    // Task 4: Generate AI collections (one at a time for reliability)
     if (!skipPlaylist) {
-      const playlistResult = await runTask(
-        "Tạo bộ sưu tập AI",
-        "generate-playlist",
-        { count: 3, auto_publish: true }
-      );
-      results.push(playlistResult);
+      const playlistCount = 3;
+      for (let i = 1; i <= playlistCount; i++) {
+        const playlistResult = await runTask(
+          `Tạo bộ sưu tập AI (${i}/${playlistCount})`,
+          "generate-playlist",
+          { count: 1, auto_publish: true }
+        );
+        results.push(playlistResult);
+        // Small delay between requests to avoid rate limits
+        if (i < playlistCount) {
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
     }
 
     // Task 5: Generate covers for collections missing images
@@ -179,6 +190,26 @@ serve(async (req: Request) => {
         { limit: 5 }
       );
       results.push(coverResult);
+    }
+
+    // Task 6: Generate SEO blog posts (2 per day)
+    if (!skipBlogPosts) {
+      const blogResult = await runTask(
+        "Tạo bài blog SEO",
+        "generate-blog-posts",
+        { count: 2 }
+      );
+      results.push(blogResult);
+    }
+
+    // Task 7: Generate covers for blog posts missing images
+    if (!skipBlogCovers) {
+      const blogCoverResult = await runTask(
+        "Tạo ảnh cover bài blog",
+        "generate-blog-covers",
+        { limit: 3 }
+      );
+      results.push(blogCoverResult);
     }
 
     const totalDuration = Date.now() - startTime;

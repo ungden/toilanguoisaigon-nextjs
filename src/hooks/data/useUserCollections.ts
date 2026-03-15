@@ -129,6 +129,31 @@ export const useRemoveFromCollection = () => {
   });
 };
 
+// Update collection visibility
+export const useUpdateUserCollectionVisibility = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ collectionId, isPublic }: { collectionId: string; isPublic: boolean }) => {
+      const { error } = await supabase
+        .from('user_collections')
+        .update({ is_public: isPublic })
+        .eq('id', collectionId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      showSuccess(`Đã chuyển bộ sưu tập sang chế độ ${variables.isPublic ? 'Công khai' : 'Riêng tư'}.`);
+      queryClient.invalidateQueries({ queryKey: ['user-collections'] });
+      queryClient.invalidateQueries({ queryKey: ['user-collection-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['public-user-collections'] });
+    },
+    onError: () => {
+      showError('Không thể cập nhật trạng thái bộ sưu tập.');
+    },
+  });
+};
+
 // Delete a collection
 export const useDeleteUserCollection = () => {
   const queryClient = useQueryClient();
